@@ -19,7 +19,7 @@ To deploy the Registry, please refer to the following documents:
 
 <h3>Disclaimer</h3>
 
-The XML-based schemas provided with the Materials Resource Registry are examples of schemas that may be written to represent different aspects of materials data and to demonstrate some of the features that may be used within an XML schema. The schemas do not represent “standard” metadata representations and are specifically release as “as is,” and as such NIST makes no warrant of any kind on the correctness or accuracy of the content of the schemas, nor the fitness of the schemas for any purpose and accepts any liability or responsibility for the consequences of the schemas use or misuse by anyone. 
+The XML-based schemas provided with the Materials Resource Registry are examples of schemas that may be written to represent different aspects of materials data and to demonstrate some of the features that may be used within an XML schema. The schemas do not represent “standard” metadata representations and are specifically release as “as is,” and as such the National Institute of Standards and Technology (NIST) makes no warrant of any kind on the correctness or accuracy of the content of the schemas, nor the fitness of the schemas for any purpose and accepts any liability or responsibility for the consequences of the schemas use or misuse by anyone. 
 
 <h3>Installers</h3>
 
