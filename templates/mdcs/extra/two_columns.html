@@ -1,0 +1,43 @@
+{% extends 'mdcs/base/default.html' %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: base.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block container %}
+{% block popups %}{% endblock %}
+<div class="content" id="content-two-columns">
+    <div id="main-wrapper">
+        <div id="main">
+            <div class="post">
+                <div class="post-title">{% block title %}{% endblock %}</div>
+                <div class="post-body">
+                    <p class="large">{% block description %}{% endblock %}</p>
+                </div>
+            </div>
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <div id="sidebar-wrapper">
+        <div id="sidebar">
+        {% block sidebar %}{% endblock %}
+        </div>
+    </div>
+    <div class="clearer">&nbsp;</div>
+</div>
+{% endblock %}

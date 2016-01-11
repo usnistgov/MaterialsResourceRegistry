@@ -1,0 +1,52 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: refresh_repository.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}<h1>Refresh Instance Token</h1>{% endblock %}
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab4' %}{% endblock %}
+
+{% block content %}
+<p>
+    Use the following form to refresh the token of the selected instance.
+</p>
+
+<div>
+<form action="/admin/repositories/refresh-repository/" method="post">
+ 	{% csrf_token %}
+    {{ form }}
+    <br/>
+    <div id="instance_error" style="font-weight: bold;">
+    {{action_result}}
+    </div>
+    <input type="submit" class="btn" name="action" value="Refresh"/>
+</form>
+</div>
+{% endblock %}
+
+{% block extra %}
+<script src="{% static 'inc/controllers/js/fed_of_queries.js' %}"></script>
+{% endblock %}

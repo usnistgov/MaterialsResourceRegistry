@@ -1,0 +1,150 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load dictionary_extras %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: website.html
+# Application: templates/admin
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/mdcs/style.add.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exporters.css' %}" media="screen" />
+{% endblock %}
+
+{% block title %}
+<h1>Result XSLT Manager</h1>
+<p>
+Select results XSLT you want to associate with the template.
+</p>
+{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab1' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/template.html' with active_tab='tab1' %}{% endblock %}
+
+{% block content%}
+<div id="dialog-exporters" title="Manage Exporter">
+	<table class="data-table">
+		<tr>
+			<th>Result view</th>
+			<th>Customized</th>
+		</tr>
+  		<tr class="{{ rowcolors }}">
+			<td><b>List</b></td>
+			<td id="ButtonSetShort">
+				{% if templateShort %}
+					<input id="Short" class="cmn-toggle cmn-toggle-round" type="checkbox" name="XSLTShort" checked onclick="deselectXSLT();">
+				{% else %}
+					<input id="Short" class="cmn-toggle cmn-toggle-round" type="checkbox" name="XSLTShort" onclick="deselectXSLT();">
+				{% endif %}
+  				<label for="Short"></label>
+			</td>
+		</tr>
+		<tr id="xslts_short" class="{{ rowcolors }}">
+			<td></td>
+			<td>
+				<table class="data-table">
+				<tr>
+					<th>XSLT name</th>
+					<th></th>
+			  	</tr>
+				{% for xslt in xsltFiles %}
+				{% cycle 'even' '' as rowcolorsXSLT silent %}
+				{% with key=xslt.id %}
+					<tr class="{{ rowcolorsXSLT }}">
+						<td>{{xslt.name}}</td>
+						<td id="ButtonSet{{xslt.id}}">
+							{% if templateShort  == xslt  %}
+							<input id="{{xslt.id}}" xsltId="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="short_xslt" type="radio" checked />
+							{% else  %}
+							<input id="{{xslt.id}}" xsltId="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="short_xslt" type="radio" />
+							{% endif %}
+							<label for="{{xslt.id}}"></label>
+						</td>
+					</tr>
+				{% endwith %}
+				{% endfor %}
+				</table>
+			</td>
+		</tr>
+
+
+  		<tr class="{{ rowcolors }}">
+			<td exporterID="{{exporter.id}}"><b>Detailed</b></td>
+			<td id="ButtonSetDetailed">
+				{% if templateDetailed %}
+					<input id="Detailed" class="cmn-toggle cmn-toggle-round" type="checkbox" name="XSLTDetailed" checked onclick="deselectXSLT();">
+				{% else %}
+					<input id="Detailed" class="cmn-toggle cmn-toggle-round" type="checkbox" name="XSLTDetailed" onclick="deselectXSLT();">
+				{% endif %}
+  				<label for="Detailed"></label>
+			</td>
+		</tr>
+		<tr id="xslts_detailed" class="{{ rowcolors }}">
+			<td></td>
+			<td>
+				<table class="data-table">
+				<tr>
+					<th>XSLT name</th>
+					<th></th>
+			  	</tr>
+				{% for xslt in xsltFiles %}
+				{% cycle 'even' '' as rowcolorsXSLT silent %}
+				{% with key=xslt.id %}
+					<tr class="{{ rowcolorsXSLT }}">
+						<td>{{xslt.name}}</td>
+						<td id="ButtonSet{{xslt.id}}_">
+							{% if templateDetailed  == xslt  %}
+							<input id="{{xslt.id}}_" xsltId="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="detailed_xslt" type="radio" checked />
+							{% else  %}
+							<input id="{{xslt.id}}_" xsltId="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="detailed_xslt" type="radio" />
+							{% endif %}
+							<label for="{{xslt.id}}_"></label>
+						</td>
+					</tr>
+				{% endwith %}
+				{% endfor %}
+				</table>
+			</td>
+		</tr>
+
+	</table>
+</div>
+<div class="btn-group pull-right">
+    <button class="btn save template" onclick="saveTemplate()"><i class="icon-hdd"></i> Save Template</button>		    
+</div>
+<div class="clearer">&nbsp;</div>
+{% autoescape off %}
+{% endautoescape %}
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-save" title="Template" style="display:none;">
+	<p>
+		Template saved with success!
+	</p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/result_xslt_mgr.js' %}"></script>
+<script>
+Init();
+</script>
+{% endblock %}

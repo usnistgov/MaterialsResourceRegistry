@@ -1,0 +1,48 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: request_new_account.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3><span>Request New Account</span></h3>{% endblock %}
+{% block menu %}{% include 'nmrr/menus/main.html' with active_tab='request' %}{% endblock %}
+
+{% block content%}
+<div id="main" style="margin-left:20px;">
+Use the following form to request an user account on the {{CUSTOM_TITLE}} Curation System.
+	<div>
+		<br/>
+		<form action="/request-new-account" method="post" onsubmit="return validateRequest()">
+		 	{% csrf_token %}
+		    {{ form }}
+		    <br/>
+		    <div id="request_error" style="font-weight: bold;">
+		    {{action_result}}
+		    </div>
+		    <input type="submit" class="btn" value="Make a Request"/>
+		</form>
+	</div>
+<div class="clearer">&nbsp;</div>
+</div>
+{% endblock %}
+
+{% block extra %}
+<script src="{% static 'inc/controllers/js/user_account_req.js' %}"></script>
+{% endblock %}

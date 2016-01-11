@@ -1,0 +1,19 @@
+{% load render_extras %}
+{% load auth_extras %}
+
+{% with canEdit=request.user|has_perm:'curate.curate_edit_document' canDelete=request.user|has_perm:'curate.curate_delete_document' %}
+
+{% if custom_xslt %}
+    {% render_as_template xml %}
+{% else %}
+    <div id="{{id}}" name="result">
+    <div class='xmlResult' readonly='true'>
+    	{% autoescape off %}
+    	{{xml}}
+    	{% endautoescape %}
+    </div>
+</div>
+{% endif %}
+
+{% endwith %}
+

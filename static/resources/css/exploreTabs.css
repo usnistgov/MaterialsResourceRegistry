@@ -1,0 +1,61 @@
+/*
+################################################################################
+#
+# File Name: exploreTabs.css
+# Purpose:   Displays tabs for Query By Example / SPARQL Queries
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+#explore-tabs{
+  position: relative;   
+  min-height: 250px;
+  clear: both;
+  margin: 25px 0;
+}
+#explore-tabs .tab {
+  float: left;
+}
+#explore-tabs .tab label {
+  background: #eee; 
+  padding: 2px; 
+  border: 1px solid #ccc; 
+  margin-left: -1px; 
+  left: 1px;  
+  height:23px; 
+  font-size: 11px;
+  width:104px;
+  position: relative;
+  font-weight: normal;
+  text-align: center
+}
+#explore-tabs .tab [type=radio] {
+  display: none;   
+}
+#explore-tabs .tab .content {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  background: #F8F8F4;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+  border: 1px solid #ccc; 
+}
+#explore-tabs .tab [type=radio]:checked ~ label {
+  background: #F8F8F4;
+  border-bottom: 1px solid #F8F8F4; 
+  z-index: 2;
+  font-weight: bold;
+}
+#explore-tabs .tab [type=radio]:checked ~ label ~ .content {
+  z-index: 1;
+}

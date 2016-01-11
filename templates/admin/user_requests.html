@@ -1,0 +1,91 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: user_requests.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}<h1>Account Requests</h1>{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab2' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/user.html' with active_tab='tab2' %}{% endblock %}
+
+{% block content %}
+    {% if requests %}
+        <table class="data-table">
+            <tr>
+                <th>User</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email Address</th>
+                <th>Actions</th>
+            </tr>
+
+            {% for request in requests %}
+                {% cycle 'even' '' as rowcolors silent %}
+                <tr class="{{ rowcolors }}">
+                    <td>{{ request.username }}</td>
+                    <td>{{ request.first_name }}</td>
+                    <td>{{ request.last_name }}</td>
+                    <td>{{ request.email }}</td>
+
+                    <td>
+                        <div class="icon legend long accept request" requestid="{{ request.id }}">Accept</div>
+                        <div class="icon legend long remove request" requestid="{{ request.id }}">Deny</div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        No account requests pending at the moment.
+    {% endif %}
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-error-request" title="Error Request" style="display:none;">  
+  <p>
+  This request can't be accepted. Please check that the user does not already exists.
+  </p>
+</div>
+
+<div id="dialog-denied-request" title="Request Denied" style="display:none;">  
+  <p>
+  Are you sure you want to deny this request?
+  </p>
+</div>
+
+<div id="dialog-accepted-request" title="Request Accepted" style="display:none;">  
+  <p>
+  <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+  User created with success.
+  </p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/user_requests.js' %}"></script>
+<script>
+	loadUserRequestsHandler();
+</script>
+{% endblock %}

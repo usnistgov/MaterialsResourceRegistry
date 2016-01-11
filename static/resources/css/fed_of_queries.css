@@ -1,0 +1,47 @@
+/*
+################################################################################
+#
+# File Name: fed_of_queries.css
+# Purpose:   Css specific to the federation of queries
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+#instance_name
+{
+	width:100px;
+}
+
+#instance_protocol
+{
+	width:80px;
+	padding-bottom: 0px;
+}
+
+#instance_address
+{
+	width:150px;
+}
+
+#instance_port
+{
+	width:80px;
+}
+
+#instance_error
+{
+	color:red;
+}
+
+#edit_instance_error
+{
+	color:red;
+}

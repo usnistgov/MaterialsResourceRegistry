@@ -1,0 +1,28 @@
+<!-- 
+################################################################################
+#
+# File Name: base_site.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+
+{% extends "nmrr/extra/small_intro.html" %}
+{% load i18n %}
+
+{% block title %}<h1>{{ title }}</h1>{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans '{{CUSTOM_TITLE}} Curation Administration' %}</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

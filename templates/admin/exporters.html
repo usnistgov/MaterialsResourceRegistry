@@ -1,0 +1,130 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load dictionary_extras %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: website.html
+# Application: templates/admin
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/mdcs/style.add.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exporters.css' %}" media="screen" />
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}
+<h1>Exporter Manager</h1>
+<p>
+Select exporters you want to associate with the template.
+</p>
+{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab1' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/template.html' with active_tab='tab1' %}{% endblock %}
+
+{% block content%}
+<div id="dialog-exporters" title="Manage Exporter">
+	<table class="data-table">
+		<tr>
+			<th>Exporter name</th>
+			<th></th>
+		</tr>
+		{% for exporter in exporters %}
+		{% cycle 'even' '' as rowcolors silent %}
+		{% with key=exporter.id %}
+		{% if  exporter.name == 'XSLT' %}
+  		<tr class="{{ rowcolors }}">
+			<td exporterID="{{exporter.id}}"><b>{{exporter.name}}</b></td>
+			<td id="ButtonSet{{exporter.id}}">
+				{% if useExporter|access:key  == True %}
+					<input id="{{exporter.id}}" class="cmn-toggle cmn-toggle-round" type="checkbox" name="XSLTExporter" checked onclick="deselectXSLT();">
+				{% else %}
+					<input id="{{exporter.id}}" class="cmn-toggle cmn-toggle-round" type="checkbox" name="XSLTExporter" onclick="deselectXSLT();">
+				{% endif %}
+  				<label for="{{exporter.id}}"></label>
+			</td>
+		</tr>
+		<tr id="xslts" class="{{ rowcolors }}">
+			<td></td>
+			<td>
+				<table class="data-table">
+				<tr>
+					<th>XSLT name</th>
+					<th></th>
+			  	</tr>
+				{% for xslt in xsltFiles %}
+				{% cycle 'even' '' as rowcolorsXSLT silent %}
+				{% with key=xslt.id %}
+					<tr class="{{ rowcolorsXSLT }}">
+						<td>{{xslt.name}}</td>
+						<td id="ButtonSet{{xslt.id}}">{% if xslt.available_for_all == True %}
+							<input id="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="xslt" type="checkbox" disabled="True" checked/>
+							{% elif useXsltFiles|access:key  == True  %}
+							<input id="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="xslt" type="checkbox" checked />
+							{% else  %}
+							<input id="{{xslt.id}}" class="cmn-toggle cmn-toggle-round2" name="xslt" type="checkbox" />
+							{% endif %}
+							<label for="{{xslt.id}}"></label>
+						</td>
+					</tr>
+				{% endwith %}
+				{% endfor %}
+				</table>
+			</td>
+		</tr>
+		{% else %}
+		<tr class="{{ rowcolors }}">
+			<td exporterID="{{exporter.id}}"><b>{{exporter.name}}</b></td>
+			<td id="ButtonSet{{exporter.id}}">
+				{% if useExporter|access:key  == True %}
+					<input id="{{exporter.id}}" class="cmn-toggle cmn-toggle-round" name="Exporter" type="checkbox" checked>
+				{% else %}
+					<input id="{{exporter.id}}" class="cmn-toggle cmn-toggle-round" name="Exporter" type="checkbox" >
+				{% endif %}
+  				<label for="{{exporter.id}}"></label>
+			</td>
+		</tr>
+		{% endif %}
+		{% endwith %}
+		{% endfor %}
+	</table>
+</div>
+<div class="btn-group pull-right">
+    <button class="btn save template" onclick="saveTemplate()"><i class="icon-hdd"></i> Save Template</button>		    
+</div>
+<div class="clearer">&nbsp;</div>
+{% autoescape off %}
+{% endautoescape %}
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-save" title="Template" style="display:none;">
+	<p>
+		Template saved with success!
+	</p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/exporter_mgr.js' %}"></script>
+<script>
+Init();
+</script>
+{% endblock %}

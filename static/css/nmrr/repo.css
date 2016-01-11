@@ -1,0 +1,23 @@
+ul, ol {
+    list-style: none;
+    /*margin: 0;
+    padding: 0;*/
+}
+
+ul>li#element0 {
+    font-size: 2em;
+}
+
+ul>li#element0>ul {
+    font-size: 0.5em;
+}
+
+ul>li#element0>ul>li.element {
+    font-size: 1.25em;
+    border-style: solid;
+    border-bottom: 1px solid #ccc;
+}
+
+ul>li#element0>ul>li.element>ul {
+    font-size: 0.8em;
+}

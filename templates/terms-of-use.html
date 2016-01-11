@@ -1,0 +1,37 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: terms-of-use.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3><span>Terms of Use</span></h3>{% endblock %}
+{% block menu %}{% include 'nmrr/menus/main.html' with active_tab='terms' %}{% endblock %}
+
+{% block content%}
+<div class="left" style="width: 830px">
+	<br/>
+	{% if terms %}
+	    {{ terms.content | safe}}
+	{% else %}
+	    <a href="/contact">Contact the administrator</a>
+	{% endif %}
+</div>
+<div class="clearer">&nbsp;</div>
+{% endblock %}

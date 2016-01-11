@@ -1,0 +1,53 @@
+{% load staticfiles %}
+
+<li>
+    <div class="l-img">
+        <img width="40" height="40" src="{% static 'resources/img/Orange_Number_1.png' %}"
+             alt="1">
+    </div>
+    {% if step == 's1' %}
+    <div class="r-txt-selected"><a href="/explore/select-template">Select Template</a></div>
+    {% else %}
+    <div class="r-txt"><a href="/explore/select-template">Select Template</a></div>
+    {% endif %}
+</li>
+<li>
+    <div class="l-img">
+        <img width="40" height="40" src="{% static 'resources/img/Orange_Number_2.png' %}"
+             alt="2">
+    </div>
+
+    {% if step == 's1' %}
+    <div class="r-txt">
+        <a onclick="verifyTemplateIsSelected('/explore/customize-template');">Select Fields</a>
+    </div>
+    {% elif step == 's2' %}
+    <div class="r-txt-selected">
+        <a href="/explore/customize-template">Select Fields</a>
+    </div>
+    {% else %}
+    <div class="r-txt">
+        <a href="/explore/customize-template">Select Fields</a>
+    </div>
+    {% endif %}
+</li>
+<li>
+    <div class="l-img">
+        <img width="40" height="40" src="{% static 'resources/img/Orange_Number_3.png' %}"
+             alt="3">
+    </div>
+
+    {% if step == 's1' %}
+    <div class="r-txt">
+        <a onclick="verifyTemplateIsSelected('/explore/perform-search');">Perform Search</a>
+    </div>
+    {% elif step == 's2' %}
+    <div class="r-txt">
+        <a onclick="exploreData();">Perform Search</a>
+    </div>
+    {% else %}
+    <div class="r-txt-selected">
+        <a onclick="exploreData();">Perform Search</a>
+    </div>
+    {% endif %}
+</li>

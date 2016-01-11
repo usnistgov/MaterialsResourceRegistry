@@ -1,0 +1,215 @@
+@charset "utf-8";
+/**
+ * 	CSS to display icons
+ * 	Each image is 20x20px
+ * 
+ * 
+ */
+
+.icon
+{
+	cursor: pointer;
+	
+	width: 16px;
+	height: 16px;
+	margin-left: 2px;
+	margin-right: 2px;
+	
+	vertical-align: text-top;
+	background-image: url('../img/icons.png');
+	background-repeat: no-repeat;
+	
+	display: inline-block;
+	
+}
+
+.icon.disable-selection
+{
+	cursor: default;
+}
+
+.icon.legend
+{
+	text-indent: 20px;
+	margin-right: 60px;
+	white-space: nowrap; /* Prevent extra text to go on the next line */
+}
+
+.icon.legend.long
+{
+	margin-right: 105px;
+}
+
+.icon.legend.extra-long
+{
+	margin-right: 130px;
+}
+
+.icon.next
+{
+	background-position:  -200px -280px;
+}
+
+.icon.previous
+{
+	background-position:  -220px -280px;
+}
+
+.icon.begin
+{
+	background-position:  -160px -280px;
+}
+
+.icon.end
+{
+	background-position:  -180px -280px;
+}
+
+
+.icon.new
+{
+	background-position:  0px -260px;
+}
+
+.icon.blank
+{
+	background-position:  -100px -260px;
+}
+
+.icon.copy
+{
+	background-position:  -220px -460px;
+}
+
+.icon.add
+{
+	background-position:  -20px 0px;
+}
+
+.icon.remove
+{
+	background-position:  -280px -140px;
+}
+
+.icon.delete
+{
+	background-position:  -160px -40px;
+}
+
+.icon.edit
+{
+	background-position:  -60px -260px;
+}
+
+.icon.refresh
+{
+	background-position:  -60px -20px;
+}
+
+.icon.upload
+{
+	background-position:  -160px -20px;
+}
+
+.icon.download
+{
+	background-position:  -120px 0px;
+}
+
+
+.icon.save
+{
+	background-position:  -20px -160px;
+}
+
+.icon.load
+{
+	background-position:  -20px -200px;
+}
+
+.icon.on
+{
+	background-position:  -120px -460px;
+}
+
+.icon.off
+{
+	background-position:  -180px -460px;
+}
+
+.icon.off:hover
+{
+	background-position:  -100px -460px;
+}
+
+.icon.disable
+{
+	background-position:  -200px -460px;
+	color: orange;
+}
+
+.icon.search
+{
+	background-position:  -40px -460px;
+}
+
+.icon.warning 
+{
+	background-position:  -40px -180px;
+}
+
+.icon.encode
+{
+	background-position: -180px -280px;
+}
+
+.icon.retrieve
+{
+	background-position: -260px 0px;
+}
+
+.icon.id
+{
+	background-position: -260px 0px;
+}
+
+.icon.valid
+{
+	background-position: -120px -420px;
+}
+
+.icon.invalid
+{
+	background-position: -120px -140px;
+}
+
+.icon.duplicate
+{
+	background-position: -100px 0px;
+}
+
+.icon.merge
+{
+	background-position: -180px 0px;
+}
+
+.icon.bluelabel
+{
+	background-position: -40px -360px;
+}
+
+.icon.modules
+{
+	background-position: -260px -40px;
+}
+
+.icon.exporters
+{
+	background-position: -180px 0px;
+}
+
+.icon.resultXslt
+{
+	background-position: -80px -180px;
+	border-left: -10000px;
+}

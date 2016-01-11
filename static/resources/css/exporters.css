@@ -1,0 +1,60 @@
+/*
+################################################################################
+#
+# File Name: bucket.css
+# Purpose:   For display of buckets
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+*/
+
+.OnLabel.ui-state-active { background: blue; }
+.OnLabel.ui-state-active span.ui-button-text { color: white; }
+
+.OffLabel.ui-state-active { background: gray; }
+.OffLabel.ui-state-active span.ui-button-text { color: black; }
+
+input.cmn-toggle-round2 + label {
+  padding: 2px;
+  width: 30px;
+  height: 13px;
+  background-color: #dddddd;
+  border-radius: 25px;
+}
+input.cmn-toggle-round2 + label:before,
+input.cmn-toggle-round2 + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round2 + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 13px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round2 + label:after {
+  width: 14px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round2:checked + label:before {
+  background: #0099CC no-repeat url('../img/check.png');
+  background-size:  12px;
+  background-position: 15%;
+}
+input.cmn-toggle-round2:checked + label:after {
+  margin-left: 17px;
+}

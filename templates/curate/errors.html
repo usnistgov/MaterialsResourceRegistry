@@ -1,0 +1,36 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: curate.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
+{% endblock %}
+
+{% block title %}<h3>Error</h3>{% endblock %}
+
+{% block content %}
+{{errors}}
+{% endblock %}
+
+
+
+

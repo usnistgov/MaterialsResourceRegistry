@@ -1,0 +1,73 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: my_profile_change_password.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exploreTabs.css' %}"  media="screen" />
+{% endblock %}
+
+{% block title %}<h1><span>My Profile - My Forms</span></h1>{% endblock %}
+{% block menu %}{% include 'nmrr/menus/main.html' with active_tab='profile' %}{% endblock %}
+
+{% block content%}
+<span>
+You can review all forms you have created and delete the ones you don't need.
+</span>
+<br/><br/>
+
+<div id="my-forms">
+{% if forms %}
+    <table class="data-table">
+        <tr>
+        	<th>Name</th>
+        	<th>Template</th>
+            <th>Actions</th>
+        </tr>
+        {% for form in forms %}
+            {% cycle 'even' '' as rowcolors silent %}
+            <tr class="{{ rowcolors }}">
+                <td>{{ form.form.name }}</td>
+                <td>{{ form.template_name}}</td>
+                <td>
+                    <div class="icon legend delete" onclick='deleteForm("{{form.form.id}}")'>Delete</div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <br/>
+        There are no forms saved for now.
+    <br/>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-delete-form" title="Delete Form" style="display:none;">
+Are you sure you want to delete this form?
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/curate.js' %}"></script>
+{% endblock %}
+

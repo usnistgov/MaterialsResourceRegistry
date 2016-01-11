@@ -1,0 +1,82 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: manage_modules.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/bucket.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" media="screen" />
+{% endblock %}
+
+{% block title %}
+<h1>Module Manager</h1>
+<p>
+    Click on an element from the following tree to associate it with a module. Elements will then be replaced by the
+    chosen module during the curation process.
+</p>
+{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab3' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/template.html' with active_tab='tab1' %}{% endblock %}
+
+{% block content%}	
+<div class="btn-group pull-right">
+    <button class="btn save template" onclick="saveTemplate()"><i class="icon-hdd"></i> Save Template</button>		    
+</div>
+<div class="clearer">&nbsp;</div>
+{% autoescape off %}	 
+<div>
+{{xsdTree}}
+</div>
+{% endautoescape %}
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-modules" title="Manage Module" style="display:none;">
+	<p>
+		Select the module you want to associate with the selected element.
+	</p>
+	<table class="table table-bordered">
+		<tr>
+			<td><b>Default</b></td>
+			<td>Default behavior</td>
+			<td><button class="btn" onclick="noModule(event)"><i class="icon-plus-sign"></i>Insert</button></td>
+		</tr>
+		{% for module in modules %}	
+		<tr>
+			<td moduleID="{{module.id}}"><b>{{module.name}}</b></td>
+			<td>{{module.url}}</td>
+			<td><button class="btn insert" onclick="insertModule(event)"><i class="icon-plus-sign"></i>Insert</button></td>
+		</tr>
+		{% endfor %}
+	</table>	
+</div>
+<div id="dialog-save" title="Template" style="display:none;">
+	<p>
+		Template saved with success!
+	</p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/module_mgr.js' %}"></script>
+{% endblock %}

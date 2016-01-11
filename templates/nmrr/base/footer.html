@@ -1,0 +1,31 @@
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: footer.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+<footer>
+<div class="footer-bottom">
+<p>
+    &copy; 2014-{% now "Y" %} {{CUSTOM_TITLE}} | <a href="/privacy-policy">Privacy Policy</a> |
+    <a href="/terms-of-use">Terms of Use</a>
+    {% if user.is_staff %}
+     | <a href="/admin">Administration</a>
+    {% endif %}
+</p>
+</div>
+</footer>

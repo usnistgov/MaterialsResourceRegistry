@@ -1,0 +1,273 @@
+{% extends "mdcs/extra/two_columns.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: explore_perform_search.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume Sousa Amaral
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link media="screen" href="{% static 'resources/css/queryForm.css' %}" type="text/css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exploreTabs.css' %}"  media="screen" />
+{% endblock %}
+
+{% block title %}<h1>Perform Search</h1>{% endblock %}
+
+{% block description %}
+    {% if request.session.currentExploreTab == "tab-1" %}
+        <span id="tab1Desc">
+            Click on a field of the Query Builder to add an element to your query. The custom tree defined in Step 2
+            will appear and you will be able to select one of the highlighted elements. Click on plus/minus icons to
+            add/remove criteria. You can save queries to build more complex queries and you will retrieve them on your
+            next connection. When your query is done, please click on Submit Query to get XML documents that match the
+            criterias. <a href="/explore/all_results?id={{template_id}}">Click here to get all documents of selected
+            template.</a> or <a href="/explore/all_versions_results?id={{template_id}}">Click here to get all documents
+            from all versions of selected template.</a>
+        </span>
+        <span id="tab2Desc" class="large" style="display:none;">Enter your query in the field below.</span>
+    {%else%}
+        <span id="tab1Desc" style="display:none;">
+            Click on a field of the Query Builder to add an element to your query. The custom tree defined in Step 2
+            will appear and you will be able to select one of the highlighted elements. Click on plus/minus icons to
+            add/remove criteria. You can save queries to build more complex queries and you will retrieve them on your
+            next connection. When your query is done, please click on Submit Query to get XML documents that match the
+            criterias. <a href="/explore/all_results?id={{template_id}}">Click here to get all documents of selected
+            template.</a> or <a href="/explore/all_versions_results?id={{template_id}}">Click here to get all documents
+            from all versions of selected template.</a>
+        </span>
+        <span id="tab2Desc" class="large">Enter your query in the field below.</span>
+    {%endif%}
+{% endblock %}
+
+{% block menu %}{% include 'mdcs/menus/main.html' with active_tab='tab3' %}{% endblock %}
+
+{% block submenu %}	
+<ul id="subnav-tab-1" class="tabbed">
+	<li><a href="/explore/select-template">Select Template</a></li>
+	<li><a href="/explore/customize-template">Select Fields</a></li>
+	<li class="current_page_item"><a href="/explore/perform-search">Perform Search</a></li>
+</ul>
+<ul id="subnav-tab-2" class="tabbed" style="display: none;">
+  <li><a href="/explore/select-template">Select Template</a></li>
+  <li><div style="cursor:pointer">
+      <a onclick="verifyTemplateIsSelected('/explore/customize-template');">Select Fields</a>
+  </div></li>
+  <li class="current_page_item"><div style="cursor:pointer">
+      <a onclick="verifyTemplateIsSelected('/explore/perform-search');">Perform Search</a>
+  </div></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+    {% if request.session.currentExploreTab == "tab-1" %}
+    <div id="queryBuilder">
+    {% else %}
+    <div id="queryBuilder" style="display: none;">
+    {% endif %}
+
+	<h2>Query Builder</h2>		
+	<div id="queryForm">
+	    <form>
+	        <p id="crit0">
+                <select>
+                    <option value=""></option>
+                    <option value="NOT">NOT</option>
+                </select>
+                <input onclick="showCustomTree('crit0')" readonly="readonly" type="text" class="elementInput"/>
+                <span id="ui0"></span>
+                <span class="icon add" onclick="addField()"></span>
+	        </p>
+			{% if user|has_perm:'explore.explore_save_query' %}
+	        <span class="btn" onclick="saveQuery()">Save Query</span>
+			{%endif%}
+	        <span class="btn" onclick="clearCriterias()">Clear</span>    
+	        <span class="btn" onclick="query()">Submit Query</span>  
+	    </form>                        
+	</div>
+	<hr>
+	{% if user.is_authenticated %}
+	<div id="queries">
+        <h2>Saved Queries</h2>
+        <form>
+			{% if user|has_perm:'explore.explore_delete_query' %}
+            <span class="btn" onclick="clearQueries()" >Delete All</span>
+			{%endif%}
+        </form>
+	    <div id="queriesTable">
+	        <table>
+	            <tr>	                
+	                <th class="th-15px">Add to Builder</th>
+	                <th>Queries</th>
+					{% if user|has_perm:'explore.explore_delete_query' %}
+	                <th class="th-15px">Delete</th>
+					{%endif%}
+	            </tr>
+	            {% if queries %}
+		            {% for query in queries %}
+					  <tr>
+					    <td><span class="icon upload" onclick="addSavedQueryToForm('query{{ query.id }}')"></span></td>
+					    <td>{{ query.displayedQuery|safe }}</td>
+					    {% if user|has_perm:'explore.explore_delete_query' %}
+					    <td><span class="icon invalid" onclick="deleteQuery('query{{ query.id }}')"></span></td>
+						{%endif%}
+					  </tr>									
+					{% endfor %}
+				{% else %}
+					<tr><td colspan='3' style='color:red;'>No Saved Queries for now.</td></tr>
+				{% endif %}            
+	        </table>
+	    </div>            
+	</div>
+	{% endif %}
+</div>
+					 
+{% if request.session.currentExploreTab == "tab-2" %}
+<div id="SPARQLqueryBuilder">
+{% else %}
+<div id="SPARQLqueryBuilder" style="display: none;">
+{% endif %} 						
+	<form>
+		<textarea class="SPARQLTextArea">{}
+{}</textarea>							
+		<span class="btn" onclick="sparqlquery()">Submit Query</span>
+		<span class="btn" onclick="getElementPath()">Get an Element</span>
+	</form>
+</div>					
+{% endblock %}
+	
+{% block sidebar %}
+<div class="box">
+	<div class="box-title">{{CUSTOM_EXPLORE}}</div>
+	<div id="explore-tabs">
+		<div class="tab">
+			{% if request.session.currentExploreTab == "tab-1" %}
+		    <input type="radio" id="tab-1" name="tab-group-1" checked>
+		    {% else %}
+		    <input type="radio" id="tab-1" name="tab-group-1">
+		    {% endif %}
+		    <label for="tab-1" onclick="switchTab('tab-1')">Query by Example</label>
+	
+		    <div class="content">
+		        <div class="box-content">
+				  <ul class="nice-list">
+				    {% include 'explore/menu/menu-items.html' with step='s3' %}
+				  </ul>
+				</div>	
+		    </div> 
+		</div>
+		
+		<div class="tab">		
+	       {% if request.session.currentExploreTab == "tab-2" %}
+	       <input type="radio" id="tab-2" name="tab-group-1" checked>
+	       {% else %}
+	       <input type="radio" id="tab-2" name="tab-group-1" disabled>
+	       {% endif %}
+	       <label for="tab-2" class="unavailable">SPARQL Endpoint</label>
+		
+		    <div class="content">
+	           <div class="box-content">
+				  <ul class="nice-list">
+				    {% include 'explore/menu/menu-items.html' with step='s3' %}
+				  </ul>
+				</div>	
+	       </div> 
+	   </div>		   
+	</div>
+</div>
+
+<div class="box">
+	<div class="box-title">Repositories</div><br/>
+	<div id="fed_of_queries_instances">
+	{% for instance in instances %}
+		{% if instance.name == "Local" %}
+			<input type="checkbox" value="{{ instance.name }}" checked="checked">
+			<span class="instance_name">{{ instance.name }}</span>
+		{% else %}
+			{% if user.is_authenticated %}
+				<input type="checkbox" value="{{ instance.name }}">
+				<span class="instance_name" title="{{instance.protocol}}://{{instance.address}}:{{instance.port}}">
+					{{instance.name}}
+				</span>
+			{% endif %}
+		{% endif %}
+		<br/>
+	{% endfor %}
+	</div>
+	<br/>
+</div>
+{% endblock %} 
+
+{% block popups %}
+<div id="dialog-errors-message" title="Errors" style="display:none;">
+<p></p>
+  <p id="listErrors">
+  </p>
+</div> 
+
+<div id="dialog-customTree" title="Select an Element" style="display:none;">
+	<p>
+	Select the element that you want to insert in the query.
+	</p>
+	<div id="customForm">
+	</div>
+</div>
+
+<div id="dialog-sparqlcustomTree" title="Get the path to an Element" style="display:none;">
+	<p>
+	This window allows to help you to build the query. Select the element that you want to insert in the query and then go to the bottom of the window to copy/paste the path in your query.
+	</p>
+	<div id="sparqlCustomForm">
+	</div>
+	<br/><strong>Element Path :</strong><br/>
+	<input id="sparqlElementPath" type="text"/>
+</div>
+
+<div id="dialog-subElementQuery" title="Subelement Query" style="display:none;">
+	<p>
+	Define the query to find a match inside a subelement.
+	</p>
+	<div id="subElementQueryBuilder">
+	</div>
+</div>
+
+<div id="dialog-DeleteAllQueries" title="Delete All Queries" style="display:none;">
+	<p>
+	Are you sure you want to delete all your saved queries?
+	</p>
+</div>
+
+<div id="dialog-DeleteQuery" title="Delete A Query" style="display:none;">
+	<p>
+	Are you sure you want to delete this saved query?
+	</p>
+</div>
+
+<div id="dialog-Instances" title="No Instance selected" style="display:none;">
+	<p>
+	No instance selected. Please, select one or more instances in the section Repositories.
+	</p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/explore.js' %}"></script>
+<script>
+get_custom_form();
+</script>
+{% endblock %}

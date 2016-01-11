@@ -1,0 +1,87 @@
+{% extends 'commons/root.v1.html' %}
+{% load staticfiles %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: default.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block theme %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/styles.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/dialog.css' %}"/>
+{% endblock %}
+
+{% block body %}
+<div id="container">
+	<!-- Header -->
+    {% if not is_popup %}
+        <header>
+		<div class="width">
+		<h1>
+			<a href="http://www.nist.gov/"><img src="" width="150"></a>
+		</h1>
+		<nav id="main">
+			<!--<ul class="sf-menu dropdown sf-js-enabled sf-shadow">-->
+			{% block menu %}{% endblock %}
+		</nav>
+		</div>
+
+		<div class="clear"></div>
+		</header>
+        {% block intro %}{% endblock %}
+	{% endif %}
+	<!-- END Header -->
+
+	<div class="width">
+        <nav id="nmrr_admin_main_menu">
+        {% block admin_menu %}{% endblock %}
+		</nav>
+    </div>
+	<div class="clear"></div>
+	{% comment %}
+    <div class="width">
+		<nav id="nmrr_admin_user_menu">
+        {% block admin_submenu %}{% endblock %}
+		</nav>
+	</div>
+	<div class="clear"></div>
+	{% endcomment %}
+    <div class="width"> </div>
+    <div class="clear"></div>
+
+	<!-- Content -->
+    <div id="body">
+	    <div class="width">
+            {% block container %}{% endblock %}
+            <div class="clear"></div>
+		</div>
+	</div>
+
+	<!-- END Content -->
+	{% include 'nmrr/base/footer.html' %}
+	{# % include 'nmrr/base/bottom.html' % #}
+</div>
+{% endblock %}
+
+{% block themejs %}
+<!--<script src="http://code.jquery.com/jquery-migrate-1.2.1.js"></script>-->
+<!--<script type="text/javascript" src="{% static 'js/superfish.js' %}"></script>-->
+<script type="text/javascript" src="{% static 'libs/superfish/1.7.6/js/superfish.js' %}"></script>
+<script type="text/javascript" src="{% static 'libs/superfish/1.7.6/js/hoverIntent.js' %}"></script>
+<!--<script type="text/javascript" src="{% static 'js/slider.js' %}"></script>-->
+<script type="text/javascript" src="{% static 'js/custom.js' %}"></script>
+{% endblock %}

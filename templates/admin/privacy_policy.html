@@ -1,0 +1,50 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: user_requests.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h1>Privacy Policy</h1>{% endblock %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+<style>
+textarea {
+	width: 700px;
+}
+</style>
+{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab5' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/website.html' with active_tab='tab1' %}{% endblock %}
+
+
+{% block content %}
+You can use this form to provide privacy policy for the website. You can use HTML syntax and HTML tags to write the text.
+<div>
+<br/>
+<form action="/admin/website/privacy-policy" method="post">
+ 	{% csrf_token %}
+    {{ form }}
+    <br/>
+    <input type="submit" class="btn" value="Save"/>
+</form>
+</div>
+{% endblock %}

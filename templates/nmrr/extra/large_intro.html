@@ -1,0 +1,69 @@
+{% extends 'nmrr/base/default.html' %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: base_featured.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block intro %}
+<div id="intro">
+<div class="width">
+<div class="intro-content">
+
+<h2>{{CUSTOM_TITLE}} <sup><span class="alpha">Alpha</span></sup></h2>
+<p>{{CUSTOM_SUBTITLE}}</p>
+
+<p><a href="/explore" class="button button-slider"><i class="fa"></i>{{CUSTOM_EXPLORE}}</a>
+<a href="/curate" class="button button-reversed button-slider"><i class="fa"></i>{{CUSTOM_CURATE}}</a></p>
+</div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block container %}
+<section id="content" class="two-column with-right-sidebar">
+<article>
+    {% block title %}{% endblock %}
+    {% block content %}{% endblock %}
+</article>
+</section>
+<aside class="sidebar big-sidebar right-sidebar">
+    <ul>
+    <li class="color-bg">
+    <ul class="blocklist">
+    <li><a class="selected" href="/">Home Page</a></li>
+
+    <li><a href="/all-options">Services</a>
+    <ul><li><a href="/explore">{{CUSTOM_EXPLORE}}</a></li>
+    <li><a href="/curate">{{CUSTOM_CURATE}}</a></li></ul>
+    </li>
+
+    {% if user.is_authenticated %}
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/logout" class="sf-with-ul">Logout</a></li>
+    {% else %}
+    <li><a href="/login" class="sf-with-ul">Login</a></li>
+    {% endif %}
+
+    <li><a href="/help">Help</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <!-- <li><a href="/api">API</a></li> --></ul>
+    </li>
+    </ul>
+</aside>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: privacy-policy.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3><span>Privacy Policy</span></h3>{% endblock %}
+{% block menu %}{% include 'nmrr/menus/main.html' with active_tab='privacy' %}{% endblock %}
+
+{% block content%}
+<div class="left" style="width: 830px">
+	<br/>
+	{% if policy %}
+	    {{ policy.content | safe}}
+	{% else %}
+	    <a href="/contact">Contact the administrator</a>
+	{% endif %}
+</div>
+<div class="clearer">&nbsp;</div>
+{% endblock %}

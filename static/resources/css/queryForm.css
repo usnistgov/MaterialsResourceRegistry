@@ -1,0 +1,167 @@
+/*
+################################################################################
+#
+# File Name: queryForm.css
+# Purpose:   Css specific to the query form
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+#queryBuilder
+{	
+	z-index:0; 
+	overflow-y: auto; 
+}
+
+#queryBuilder select
+{
+	width:70px;	
+	font-size: 0.9em;
+	padding-left:0;
+	top:0;
+}
+
+#queryBuilder .elementInput
+{
+	font-size: 0.9em;
+	width:230px;
+	margin-bottom:0;
+}
+
+#queryBuilder input[readonly]
+{
+	cursor:pointer;
+}
+
+#queryBuilder .queryInput
+{
+	font-size: 0.9em;
+	width:472px;
+	margin-bottom:0;
+}
+ 
+#queryBuilder .valueInput
+{
+	font-size: 0.9em;
+	width:150px;
+	margin-bottom:0;
+}
+
+#queryBuilder .selectInput
+{
+	font-size: 0.9em;
+	width:238px;
+	margin-bottom:0;
+} 
+
+#queryBuilder p
+{
+	font-weight: bold;
+}
+
+
+#queriesTable table, 
+#queriesTable th,
+#queriesTable td
+{
+	border:1px solid black;
+	border-collapse:collapse;
+}
+
+#queriesTable th,
+#queriesTable td
+{
+	border:1px solid black;
+	border-collapse:collapse;
+	text-align: center;
+	font-size: 0.9em;
+}
+
+#queriesTable th
+{
+	background-color: #FF9933;
+}
+
+#SPARQLqueryBuilder .SPARQLTextArea
+{
+	width:640px;
+	height:300px;
+	resize:none;
+	cursor:text;
+}
+
+#SPARQLqueryBuilder .btn
+{
+	float: right;
+	margin-bottom: 20px;
+}
+
+#SPARQLFormat
+{
+	width: 70px;
+	float: right;
+	margin-bottom: 20px;
+	margin-top: 0px;
+}
+
+#sparqlCustomForm
+{
+	height: 300px;
+	overflow: auto;
+}
+
+#sparqlElementPath
+{
+	width: 95%;
+}
+
+#sparqlExample
+{
+	width: 95%;	
+	resize: none;
+}
+
+#subElementQueryBuilder select
+{
+	width:70px;	
+	font-size: 0.9em;
+	top:0;
+}
+
+#subElementQueryBuilder .valueInput
+{
+	font-size: 0.9em;
+	width:150px;
+	margin-bottom:0;
+}
+
+#subElementQueryBuilder .selectInput
+{
+	font-size: 0.9em;
+	width:238px;
+	margin-bottom:0;
+} 
+
+#fed_of_queries_instances
+{
+	height: 100px;
+	overflow-y: scroll;
+	overflow-x: auto;
+	background-color: #FFECCF;
+	padding-left: 10px;
+	padding-top: 5px;	
+}
+
+#fed_of_queries_instances .instance_name
+{
+	font-weight: bold;
+	font-size: 12px;
+}

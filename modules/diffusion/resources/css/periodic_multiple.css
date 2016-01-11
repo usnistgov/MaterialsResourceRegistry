@@ -1,0 +1,24 @@
+table.element-list {
+    border-collapse: separate;
+    border: 3px solid white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table.element-list th {
+    background-color: #AECEFF;
+}
+
+table.element-list th, td {
+    text-align: center !important;
+}
+
+table.element-list tr.empty {
+    color: red;
+}
+
+
+table.element-list input {
+    width: 90%;
+    margin-bottom: 0;
+}

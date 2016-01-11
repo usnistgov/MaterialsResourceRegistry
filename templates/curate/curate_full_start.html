@@ -1,0 +1,85 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: curate_enter_data.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+# 		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/repo.css' %}" media="screen" />
+{% endblock %}
+
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
+{% endblock %}
+
+{% block title %}
+<h3>
+{% if template_name == 'organization' %}
+<img width="100" src="/static/img/organization.png">
+Add New Organization
+{% elif template_name == 'datacollection' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Data Collection
+{% elif template_name == 'repository' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Repository
+{% elif template_name == 'projectarchive' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Project Archive
+{% elif template_name == 'database' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Database
+{% elif template_name == 'dataset' %}
+<img width="100" src="/static/img/dataset.png">
+Add New Dataset
+{% elif template_name == 'service' %}
+<img width="100" src="/static/img/service.png">
+Add New Service
+{% elif template_name == 'informational' %}
+<img width="100" src="/static/img/informational.png">
+Add New Informational Site
+{% elif template_name == 'software' %}
+<img width="100" src="/static/img/software.jpg">
+Add New Software
+{% endif %}
+</h3>
+{% endblock %}
+
+{% block content %}
+<div class="clearer">&nbsp;</div>
+<div id="dialog-message" title="Template Loaded">
+    <form id="form_start" action="/curate/start_curate" method="post">
+        {% csrf_token %}
+		{% include 'curate/curate_start.html' %}
+	</form>
+	<br/>
+	<div id="form_start_errors" style="color:red;"></div>
+	<br/>
+	<a class="button start-curate" onclick="load_enter_data('{{template_name}}');">Start</a>
+	<a class="button button-reversed cancel" onclick="window.location='/curate'">Cancel</a>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/curate.js' %}"></script>
+<script>
+    enterKeyPressSubscription();
+</script>
+{% endblock %}

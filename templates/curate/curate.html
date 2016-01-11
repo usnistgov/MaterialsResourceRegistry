@@ -1,0 +1,95 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: curate.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3>Select a Resource type to add</h3>{% endblock %}
+
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
+{% endblock %}
+
+{% block content %}
+
+<table>
+<tr>
+<td align="center">
+<a href="/curate/start_curate?template=organization">
+<img width="100" src="/static/img/organization.png"><br>
+Organization
+</a>
+</td>
+<td align="center">
+<a href="/curate/start_curate?template=datacollection">
+<img width="100" src="/static/img/datacollection.png"><br>
+Data Collection
+</a>
+</td>
+<td align="center">
+<a href="/curate/start_curate?template=dataset">
+<img width="100" src="/static/img/dataset.png"><br>
+Dataset
+</a>
+</td>
+<td align="center">
+<a href="/curate/start_curate?template=service">
+<img width="100" src="/static/img/service.png"><br>
+Service
+</a>
+</td>
+<td align="center">
+<a href="/curate/start_curate?template=informational">
+<img width="100" src="/static/img/informational.png"><br>
+Informational
+</a>
+</td>
+<td align="center">
+<a href="/curate/start_curate?template=software">
+<img width="100" src="/static/img/software.jpg"><br>
+Software
+</a>
+</td>
+</tr>
+<tr>
+<td colspan="7">
+<br><br>
+<a href="/curate/start_curate?template=organization">Organization</a> - 
+a group of people that come together to contribute to or participate in a federated data operation. Organizations can be hierarchical: an organization can contain or sponsor other organizations. Organizations can also aggregate or participate with other organizations in broader collaborations.
+<br><br>
+<a href="/curate/start_curate?template=datacollection">Data Collection</a> - An aggregation of one or more datasets, possibly spanning many research projects or teams. 
+<br><br>
+<ul>
+<li> <a href="/curate/start_curate?template=repository">Repository</a> - A data collection service that specializes in hosting data from many different research teams and projects.
+<li> <a href="/curate/start_curate?template=projectarchive">Project Archive</a> - A large collection of data resulting from a project that produces and publishes data over an extended period of time and made accessible through a common portal or interface. 
+<li> <a href="/curate/start_curate?template=database">Database</a> - A collection of data that is not formally file-based but stored in a database system. Here, a database is not assumed to be relational and can be quite complex in structure.
+</ul>
+<a href="/curate/start_curate?template=dataset">Dataset</a> - 
+a set of data (can be one or more separate files or other digital objects) that is unified by a common set of research goals and/or results. This is intended to be a single publishable unit of scientific output that might be described in a single journal article.
+<br><br>
+<a href="/curate/start_curate?template=service">Service</a> - A set of stand-alone services not associated with a particular collection of data but which can either operate on data or produce data. Such a resource might typically accessed either through a web-based portal, a suite of web services, or both. 
+<br><br>
+<a href="/curate/start_curate?template=informational">Informational</a> - A (web) site that aggregates useful information for research. The information is not generally machine-processable, but rather is intended for consumption by a human (e.g. via a web browser).
+<br><br>
+<a href="/curate/start_curate?template=software">Software</a> - A software tool or library.
+<br><br>
+</td>
+</table>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'mdcs/base/default.html' %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: base_featured.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block container %}
+{% block popups %}{% endblock %}
+<div class="content">
+    <div id="featured-wrapper">
+        <div id="featured">
+            {% block messages %}
+                {% if messages %}
+                    <ul class="messagelist">
+                        {% for message in messages %}
+                        <li style="display:block">
+                            <div class="alert">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                <i class="icon disable-selection"></i> {{message}}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endblock messages %}
+
+            {% block title %}<h1>{{title}}</h1>{% endblock %}
+            <div class="clearer">&nbsp;</div>
+        </div>
+    </div>
+
+    <div id="main">
+        <div id="model_selection">
+            {% block content %}
+                {% block object-tools %}{% endblock %}
+                {{content}}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

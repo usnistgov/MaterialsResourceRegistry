@@ -1,0 +1,48 @@
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: header.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+<div id="header-wrapper">
+	<div id="header-wrapper-2">
+		<div class="center-wrapper">
+			<div id="header">
+				<div id="logo">
+					<h1 id="site-title"><a href="/">{{CUSTOM_TITLE}} <span>Curation System</span></a></h1>
+					<h2 id="site-slogan">
+						{% if user.is_authenticated %}
+	    					Welcome, {{ user.username }}. Thanks for logging in.
+						{% else %}
+	    					{{CUSTOM_SUBTITLE}}
+						{% endif %}
+					</h2>
+				</div>
+				<div id="help-wrapper">
+					<div id="help">
+						{% if user.is_authenticated %}
+    						<a href="/logout">Logout</a>
+						{% else %}
+    						<a href="/login">Login</a>
+						{% endif %}
+						<span class="text-separator">|</span> <a href="/my-profile">My Profile</a>
+						<span class="text-separator">|</span> <a href="/help">Help</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

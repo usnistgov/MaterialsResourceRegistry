@@ -1,0 +1,165 @@
+{% extends "mdcs/extra/two_columns.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: compose.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h1>Start Template</h1>{% endblock %}
+{% block description %}
+Select a new or existing start template from the following table to start composing. Once you make your selection, click
+on "Compose Template" to proceed.  It will automatically load the appropriate template and display it on the next page.
+{% endblock %}
+
+{% block menu %}{% include 'mdcs/menus/main.html' with active_tab='tab4' %}{% endblock %}
+{% block submenu %}
+<ul class="tabbed">
+	<li class="current_page_item"><a href="/compose/select-template">Start Template</a></li>
+	<li><div style="cursor:pointer">
+        <a onclick="verifyTemplateIsSelected('/compose/build-template');">Compose Template</a>
+    </div></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div id="template_selection">
+{% if request.session.currentComposeTemplateID %} 
+
+{% else %}
+    <div class="alert">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="icon warning disable-selection"></i> No template selected. Select one in the table below.
+    </div>
+{% endif %}
+
+<div class="tpl-title">Global Templates</div>
+<table class="table table-bordered">
+    <tr>
+        <th>Template name</th>
+        <th>File name</th>
+        <th class="th-actions">Actions</th>
+    </tr>
+
+    <tr class="{{ rowcolors }}">
+        <td templateID='new'>New Base Template</td>
+        <td>new_base_template.xsd</td>
+        {% if request.session.currentComposeTemplateID == "new" %}
+            <td><span style="color:green;font-weight:bold">Current template</span></td>
+        {% else %}
+            <td>
+                <button class="btn set-compose-template" >
+                    <i class="icon-plus-sign"></i> Select as start template
+                </button>
+            </td>
+        {% endif %}
+    </tr>
+
+    {% for template, isDeleted in templates.items %}
+        {% if isDeleted == False %}
+            {% cycle 'even' '' as rowcolors silent %}
+            <tr class="{{ rowcolors }}">
+                <td templateID='{{template.id}}'>{{ template.title }}</td>
+                <td>{{ template.filename }}</td>
+                {% if request.session.currentComposeTemplateID == template.id|stringformat:"s" %}
+                    <td><span style="color:green;font-weight:bold">Current template</span></td>
+                {% else %}
+                    <td>
+                        <button class="btn set-compose-template">
+                            <i class="icon-plus-sign"></i> Set as current template
+                        </button>
+                    </td>
+                {% endif %}
+                </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+{% if user.is_authenticated %}
+<div class="tpl-title">User Defined Templates</div>
+{% if userTemplates %}
+    <table class="table table-bordered">
+    <tr>
+        <th>Template name</th>
+        <th class="th-actions">Actions</th>
+    </tr>
+    {% for template in userTemplates %}
+        {% cycle 'even' '' as rowcolors silent %}
+        <tr class="{{ rowcolors }}">
+            <td templateID='{{template.id}}'>{{ template.title }}</td>
+            {% if request.session.currentComposeTemplateID == template.id|stringformat:"s" %}
+                <td><span style="color:green;font-weight:bold">Current template</span></td>
+            {% else %}
+                <td><button class="btn set-compose-user-template" >
+                    <i class="icon-plus-sign"></i> Set as current template
+                </button></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+{%else%}
+    {% if user|has_perm:'compose.compose_access' %}
+<div class="unavailable">
+    Create your own templates using the <a href="/compose">Composer</a> and you will be able to use them from this
+    section.
+</div>
+    {% endif %}
+{% endif %}
+{% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div class="box" >
+	<div class="box-title">{{CUSTOM_COMPOSE}}</div>
+	<div class="box-content">
+		{% include 'compose/menu.html' with step='s1' %}
+	</div>
+</div>
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-message" title="Template Loaded" style="display:none;">
+    <p></p>
+    <p>
+        <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+        Template selected successfully.
+    </p>
+    <p>
+        To proceed to the next step, click on step 2: <b>'Compose Template'</b>
+    </p>
+</div>
+
+<div id="dialog-error-message" title="Template Loaded" style="display:none;">
+<p></p>
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+    Please select a template first.
+  </p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/composer.js' %}"></script>
+<script>
+	loadTemplateSelectionControllers();
+</script>
+{% endblock %}
+
+
+

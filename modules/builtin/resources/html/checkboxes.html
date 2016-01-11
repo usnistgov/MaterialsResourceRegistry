@@ -1,0 +1,12 @@
+<div class="mod_checkboxes">
+	{% if label %}
+	<label>{{ label }}</label>
+	{% endif %}
+   	{% autoescape off %}
+	<div class="row">
+        <div class="col">{{ column1 }}</div>
+        <div class="col">{{ column2 }}</div>
+        <div class="col">{{ column3 }}</div>
+    </div>
+	{% endautoescape %}
+</div>

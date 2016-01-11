@@ -1,0 +1,47 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: all-options.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3>Services</h3>{% endblock %}
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
+{% endblock %}
+
+{% block content %}
+The NIST Materials Resource Registry allows for the registration and discovery of materials resources.
+It functions as a centrally located service, making the registered information available for research to the materials community.
+
+<br>
+<br>
+Are you a repository owner? You can begin to register your repostiory in our registry. 
+<br>
+<br>
+<a href="/curate" class="button">Add your Resource</a>		
+<br>
+<br>
+Are you searching for resources? You can begin your search in our registry.
+<br>
+<br>
+<a href="/explore" class="button">Search for Resources</a>
+
+{% endblock %}
+

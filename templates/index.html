@@ -1,0 +1,44 @@
+{% extends "nmrr/extra/large_intro.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: index.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}
+<h2>Find {{CUSTOM_DATA}}</h2>
+{% endblock %}
+
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab1' %}
+{% endblock %}
+
+{% block content %}
+<article>
+	<p>
+        This system allows for the registration of materials resources, bridging the gap between existing resources and
+        the end users. The {{CUSTOM_TITLE}} functions as a centrally located service, making the
+        registered information available for research to the materials community.
+    </p>
+	<p>
+        This is being developed at the National Institute of Standards and Technology and is made available to solicit
+        comments from the Material Science community. Please do not enter any proprietary data into this system.
+    </p>
+</article>
+{% endblock %}

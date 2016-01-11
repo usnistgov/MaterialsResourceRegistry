@@ -1,0 +1,168 @@
+/*
+################################################################################
+#
+# File Name: XMLTree.css
+# Purpose:   Css specific to the display of XML trees
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+ul.tree,
+ul.tree ul {
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+
+ul.tree ul {
+  margin-left:10px; /* indentation */
+  position:relative;
+}
+
+ul.tree ul:before {
+  content:"";
+  display:block;
+  width:0;
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  border-left:1px solid;
+}
+
+ul.tree li {
+  margin:0;
+  padding:0 0px; /* indentation + 2 */
+  font-size:14px;
+  line-height:20px; /* default list item `line-height` */
+  color:#369;
+  position:relative;
+}
+
+ul.tree ul li:before {
+  content:"";
+  display:block;
+  width:10px; /* same with indentation */
+  height:0;
+  border-top:1px solid;
+  position:absolute;
+  top:10px;
+  left:0;
+}
+
+#results ul.tree ul li:last-child:before {
+	background:#F8F8F8; /* same with body background */
+}
+
+#XMLHolder ul.tree ul li:last-child:before {
+	background:white; /* same with body background */
+}
+ul.tree ul li:last-child:before {
+  height:auto;
+  top:10px; /* (line-height/2) */
+  bottom:0;
+}
+
+				
+.element-wrapper {
+	position: relative;
+	left: 1em;
+}
+
+.element {
+}
+
+.newElement {
+	color:green;
+}
+
+.category {
+	font-weight: bold;
+}
+
+.text {
+	color: orange;
+}
+
+.path{
+	display: none;
+}
+
+.name {
+	font-weight: bold;
+	color:white;
+	margin-left: 2px;
+	border: 3px solid #E68A00; 
+	text-align: center; 
+	background: #E68A00;
+	border-radius: 5px;
+}
+
+.type {
+	font-weight: bold;
+	color:white;
+	margin-left: 2px;
+	border: 3px solid #B8B8B8; 
+	text-align: center; 
+	background: #B8B8B8;
+	border-radius: 5px;
+}
+
+.occurs {
+	font-weight: bold;
+	color:white;
+	margin-left: 2px;
+	border: 3px solid #BD4B00; 
+	text-align: center; 
+	background: #BD4B00;
+	border-radius: 5px;
+}
+
+.module {
+	font-weight: bold;
+	color:white;
+	margin-left: 2px;
+	border: 3px solid #00A300; 
+	text-align: center; 
+	background: #00A300;
+	border-radius: 5px;
+}
+
+.preserve {
+	white-space: pre-wrap;
+}
+				
+
+.collapse{
+	cursor: pointer;	
+	width: 14px;
+	height: 12px;
+	margin-left: 2px;
+	margin-right: 2px;
+	background-image: url("../img/collapse.png");
+	background-repeat: no-repeat;	
+	display: inline-block;
+}
+
+.expand{
+	cursor: pointer;	
+	width: 14px;
+	height: 12px;
+	margin-left: 2px;
+	margin-right: 2px;
+	background-image: url("../img/expand.png");
+	background-repeat: no-repeat;	
+	display: inline-block;
+}
+
+.menu{
+	width: 150px;
+}

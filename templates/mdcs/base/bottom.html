@@ -1,0 +1,35 @@
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: bottom.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+<div id="bottom">
+	<div class="center-wrapper">
+		<div class="left">
+			&copy; 2012 - {% now "Y" %} {{CUSTOM_TITLE}} Curation System <span class="text-separator">|</span>
+			<a href="/privacy-policy">Privacy Policy</a> <span class="text-separator">|</span>
+			<a href="/terms-of-use">Terms of Use</a>
+			{% if user.is_staff %}
+			<span class="text-separator">|</span> <a href="/admin">Administration</a>
+			{% endif %}
+		</div>
+		<div class="right">
+			<a href="http://templates.arcsin.se/">Website template</a> by <a href="http://arcsin.se/">Arcsin</a> 
+		</div>
+		<div class="clearer">&nbsp;</div>
+	</div>
+</div>

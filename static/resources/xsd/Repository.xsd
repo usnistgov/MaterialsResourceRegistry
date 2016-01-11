@@ -1,0 +1,1469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+		   
+   <xs:annotation>
+      <xs:documentation>
+        A prototype schema for describing resources for a materials
+        science resource registries. 
+      </xs:documentation>
+      <xs:documentation>
+        This schema is based on VOResource v1.0 
+        (http://www.ivoa.net/xml/VOResource/v1.0) by Plante et al. 2008,
+        VOResource: an XML Encoding Schema for Resource Metadata, v. 1.03
+        (http://www.ivoa.net/documents/latest/VOResource.html).
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:element name="Resource" type="Resource">
+      <xs:annotation>
+       <xs:appinfo>
+         <label/>
+       </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+   
+   <xs:complexType name="Resource">
+      <xs:annotation>
+         <xs:documentation>
+           an identified, described, and discoverable component of the 
+           distributed data environment. 
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+
+         <xs:element name="identity" type="Identity">
+            <xs:annotation>    
+              <xs:appinfo>
+                <label>Identity</label>
+              </xs:appinfo>
+               <xs:documentation>
+                  a collection of metadata that help identify the resource in 
+                  various contexts.  It includes its title and unique 
+                  identifiers.
+               </xs:documentation>
+               <xs:documentation>
+                  Note that the ensemble of metadata contained here do not 
+                  define the identity uniquely and unambiguously; rather, 
+                  any of the given identifier element values (and only 
+                  those values) can do that for the context of that identifier.  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="curation" type="Curation">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Curation</label>
+             </xs:appinfo>
+             <xs:documentation>
+               Information regarding the general curation of the resource
+             </xs:documentation>
+           </xs:annotation>
+         </xs:element>
+
+         <xs:element name="content" type="Content">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Content</label>
+             </xs:appinfo>
+             <xs:documentation>
+               Information regarding the general content of the resource
+             </xs:documentation>
+           </xs:annotation>
+         </xs:element>
+
+         <xs:element name="applicability" type="Applicability"
+                     minOccurs="0" maxOccurs="unbounded">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Applicability</label>
+             </xs:appinfo>
+             <xs:documentation>
+               Information describing the resource's applicability to a 
+               particular domain.
+             </xs:documentation>
+             <xs:documentation>
+               Domain specific metadata gets captured here.  
+             </xs:documentation>
+           </xs:annotation>
+         </xs:element>
+
+         <xs:element name="access" type="Access" minOccurs="0">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Access</label>
+             </xs:appinfo>
+             <xs:documentation>
+               Information describing how to access the resource and its 
+               features and capabilities.  
+             </xs:documentation>
+           </xs:annotation>
+         </xs:element>
+
+      </xs:sequence>
+
+      <xs:attribute name="localid">
+         <xs:annotation>
+           <xs:appinfo>
+             <label>Local ID</label>
+           </xs:appinfo>
+            <xs:documentation>
+              An unambiguous identifier for this resource description as 
+              assigned by its author or its curating registry.  
+            </xs:documentation>
+            <xs:documentation>
+              This attribute is required on export.
+            </xs:documentation>
+         </xs:annotation>
+        <xs:simpleType xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/local-id">
+          <xs:restriction base="xs:string"/>                      
+        </xs:simpleType>
+      </xs:attribute>
+
+      <xs:attribute name="status" use="required">
+         <xs:annotation>
+           <xs:appinfo>
+             <label>Status</label>
+           </xs:appinfo>
+            <xs:documentation>
+              a tag indicating whether this resource is believed to be still
+              actively maintained.
+            </xs:documentation>
+         </xs:annotation>
+         <xs:simpleType xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/status">
+            <xs:restriction base="xs:string">
+               <xs:enumeration value="active">
+                 <xs:annotation>
+                   <xs:documentation>
+                      resource is believed to be currently maintained, and its
+                      description is up to date (default). 
+                   </xs:documentation>
+                 </xs:annotation>
+               </xs:enumeration>
+               <xs:enumeration value="inactive">
+                 <xs:annotation>
+                   <xs:documentation>
+                     resource is apparently not being maintained at the present.
+                   </xs:documentation>
+                 </xs:annotation>
+               </xs:enumeration>
+               <xs:enumeration value="deleted">
+                 <xs:annotation>
+                   <xs:documentation>
+                      resource publisher has explicitly deleted the resource.
+                   </xs:documentation>
+                 </xs:annotation>
+               </xs:enumeration>
+            </xs:restriction>
+         </xs:simpleType>
+      </xs:attribute>
+   </xs:complexType>
+
+   <xs:complexType name="Identity">
+     <xs:annotation>
+       <xs:documentation>
+         a collection of metadata describing the identity of a resource
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+         <xs:element name="title" type="xs:token">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Repository Name</label>
+                <placeholder>Enter your repository's name (ex. Materials Data Curation System)</placeholder>
+                <use>required</use>
+                <tooltip>The full name given to the resource</tooltip>
+              </xs:appinfo>
+               <xs:appinfo>
+                 <dcterm>Title</dcterm>
+               </xs:appinfo>           
+               <xs:documentation>
+                  the full name given to the resource
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="shortName" type="xs:token" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Short Name</label>
+                <placeholder>Enter your repository's short name (ex. MDCS)</placeholder>
+                <use>recommended</use>
+                <tooltip>A short name or abbreviation given to the resource.</tooltip>
+              </xs:appinfo>
+               <xs:documentation>
+                 a short name or abbreviation given to the resource.
+               </xs:documentation>
+               <xs:documentation>
+                 This name will be used where brief annotations for
+                 the resource name are required.  Applications may 
+                 use to refer to this resource in a compact display.  
+                 This is NOT expected to be globally unique; thus, it 
+                 should not be used as an identifier.  
+               </xs:documentation>
+               <xs:documentation>
+                 One word or a few letters is recommended.  No more
+                 than sixteen characters are allowed.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="version" type="xs:token" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Version</label>
+                <placeholder>Enter your repository's version</placeholder>
+              </xs:appinfo>
+               <xs:documentation>
+                 Label a particular release or variation of the resource.
+               </xs:documentation>
+               <xs:documentation>
+                 Different versions of a resource typically share the same
+                 title.  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="identifier" type="xs:anyURI" 
+                     minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Identifier</label>
+                <placeholder>Enter your repository's identifier</placeholder>
+              </xs:appinfo>
+               <xs:appinfo>
+                 <dcterm>Identifier</dcterm>
+               </xs:appinfo>           
+               <xs:documentation>
+                 Unambiguous reference to the resource using a recognized 
+                 identifier system.  
+               </xs:documentation>
+               <xs:documentation>
+                 Multiple identifiers can be given if the resource is 
+                 identified in multiple identifier systems.  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+       
+        <xs:element name="logoURL" type="xs:anyURI" minOccurs="0">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Logo</label>
+               <placeholder>Enter your repository's logo url</placeholder>
+             </xs:appinfo>
+              <xs:documentation>
+                URL pointing to a graphical logo, which may be used to help 
+                identify the information source
+              </xs:documentation>
+           </xs:annotation>
+        </xs:element>
+
+     </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="Curation">
+     <xs:annotation>
+       <xs:documentation>
+         Information regarding the general curation of a resource
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+       <xs:element name="publisher" type="NamePID">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Publisher</label>
+              <use>required</use>
+              <tooltip>Entity (e.g. person or organisation) responsible for making the
+               resource available.</tooltip>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Publisher</dcterm>
+             </xs:appinfo>
+             <xs:documentation>
+               Entity (e.g. person or organisation) responsible for making the 
+               resource available.  
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="creator" type="NamePID"
+         minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Creator</label>
+              <use>required</use>
+              <tooltip>The entity (e.g. person or organization) primarily responsible
+               for creating the content or constitution of the resource.</tooltip>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Creator</dcterm>
+             </xs:appinfo>
+             <xs:documentation>
+               The entity (e.g. person or organization) primarily responsible 
+               for creating the content or constitution of the resource.
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="contributor" type="NamePID" 
+         minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Contributor</label>
+              <use>required</use>
+              <tooltip>Entity responsible for contributions to the content of
+               the resource</tooltip>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Contributor</dcterm>
+             </xs:appinfo>
+             <xs:documentation>
+               Entity responsible for contributions to the content of
+               the resource
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="date" type="RelevantDate" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Date</label>
+              <use>required</use>
+              <tooltip>Date associated with an event in the life cycle of the
+               resource.</tooltip>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Date</dcterm>
+             </xs:appinfo>
+             <xs:documentation>
+               Date associated with an event in the life cycle of the
+               resource.  
+             </xs:documentation>
+             <xs:documentation>
+               This will typically be associated with the creation or 
+               availability (i.e., most recent release or version) of
+               the resource.  Use the role attribute to clarify.  
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="contact" type="Contact" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Contact</label>
+            </xs:appinfo>
+             <xs:documentation>
+               Information that can be used for contacting someone with
+               regard to this resource.
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+     </xs:sequence>
+   </xs:complexType>
+
+  <xs:complexType name="NamePID" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/name-pid">
+     <xs:annotation>
+       <xs:documentation>
+         a name or title that can potentially have an associated identifier.
+       </xs:documentation>
+       <xs:documentation>
+         The string-valued name is intended for display purposes.  The identifier
+         provides unambiguous identification; thus, providing it is recommended
+         when available.  
+       </xs:documentation>
+       <xs:documentation>
+         NMRR Notes:  use only NMRR-internal identifiers here.  
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:simpleContent>
+       <xs:extension base="xs:token"> 
+
+         <xs:attribute name="pid" type="xs:anyURI">
+            <xs:annotation>
+              <xs:documentation>
+                An unambigous identifier for the intended entity having 
+                the name given by this element's value.
+              </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+
+       </xs:extension>       
+     </xs:simpleContent>
+   </xs:complexType>   
+
+  <xs:complexType name="RelevantDate" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/relevant-date">
+     <xs:simpleContent>
+       <xs:extension base="Date"> 
+
+         <xs:attribute name="role" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                A label indicating the role this date plays in the lifecycle
+                of a resource.  
+              </xs:documentation>
+              <xs:documentation>
+                recognized values include "created", "released", and 
+                "established". 
+              </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+
+       </xs:extension>       
+     </xs:simpleContent>
+   </xs:complexType>   
+
+   <xs:simpleType name="Date">
+     <xs:annotation>
+       <xs:documentation>
+         A relaxed format for expressing dates consistent with the Dublin
+         Core Date 
+         (http://dublincore.org/documents/usageguide/elements.shtml#Date)
+         and the W3C Note on data formats (http://www.w3.org/TR/NOTE-datetime).
+       </xs:documentation>
+     </xs:annotation>
+     <xs:restriction base="xs:token">
+       <xs:pattern value="\d{4}(-\d{2}(-\d{2})?)?"/>
+     </xs:restriction>
+   </xs:simpleType>
+
+   <xs:complexType name="Contact">
+     <xs:annotation>
+       <xs:documentation>
+         Information that can be used for contacting someone
+       </xs:documentation>
+     </xs:annotation>
+     <xs:sequence>
+       <xs:element name="name" type="NamePID">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Name</label>
+            </xs:appinfo>
+             <xs:documentation>
+                 the name or title of the contact person.
+             </xs:documentation>
+             <xs:documentation>
+                 This can be a person's name, e.g. "John P. Jones" or
+                 a group, "Archive Support Team".
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="postalAddress" type="xs:token" minOccurs="0">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Postal Address</label>
+            </xs:appinfo>
+             <xs:documentation>the contact mailing address</xs:documentation>
+             <xs:documentation>
+               All components of the mailing address are given in one
+               string, e.g. "3700 San Martin Drive, Baltimore, MD 21218 USA".
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="emailAddress" type="xs:token" minOccurs="0">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Email Address</label>
+            </xs:appinfo>
+             <xs:documentation>the contact email address</xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="phoneNumber" type="xs:token" minOccurs="0">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Phone Number</label>
+            </xs:appinfo>
+             <xs:documentation>the contact telephone number</xs:documentation>
+             <xs:documentation>
+               Complete international dialing codes should be given, e.g.
+               "+1-410-338-1234".
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="timeZone" type="TimeZone" minOccurs="0">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Time Zone</label>
+            </xs:appinfo>
+             <xs:documentation>
+               the time zone where the contact typically operates
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+     </xs:sequence>
+   </xs:complexType>
+
+   <xs:simpleType name="TimeZone">
+     <xs:annotation>
+       <xs:documentation>
+         A format for expressing a time zone.  It corresponds to the TZ 
+         portion of an ISO 8601 Date (e.g. -0500, +0100)
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:restriction base="xs:token">
+       <xs:pattern value="[+-]\d{4}"/>
+     </xs:restriction>
+   </xs:simpleType>
+
+   <xs:complexType name="Content">
+     <xs:annotation>
+       <xs:documentation>
+         Information regarding the general content of a resource
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+       <xs:element name="type" type="NamePID" 
+         minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Type</label>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Type</dcterm>
+             </xs:appinfo>
+             <xs:documentation>
+               Nature or genre of the resource
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="description" type="xs:token" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/description">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Description</label>
+              <placeholder>Enter repository's description</placeholder>
+              <use>required</use>
+              <tooltip>An account of the nature of the resource</tooltip>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Description</dcterm>
+             </xs:appinfo>           
+             <xs:documentation>
+               An account of the nature of the resource
+             </xs:documentation>
+             <xs:documentation>
+               The description may include but is not limited to an abstract, 
+               table of contents, reference to a graphical representation of
+               content or a free-text account of the content.
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="subject" type="xs:token" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Subject</label>
+              <placeholder>Enter a subject(ex. molecular dynamics, metals, force fields)</placeholder>
+              <use>recommended</use>
+              <tooltip>a topic, object type, or other descriptive keywords
+               about the resource.</tooltip>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Subject</dcterm>
+             </xs:appinfo>           
+             <xs:documentation>
+               a topic, object type, or other descriptive keywords 
+               about the resource.  
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="referenceURL" type="xs:anyURI">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Reference URL</label>
+              <placeholder>Enter a reference url</placeholder>
+              <use>required</use>
+              <tooltip>URL pointing to a human-readable document describing this
+                resource.</tooltip>
+            </xs:appinfo>
+             <xs:documentation>
+                URL pointing to a human-readable document describing this 
+                resource.   
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="referenceCitation" type="NamePID" 
+         minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Reference Citation</label>
+              <placeholder>Enter your repository's reference citation</placeholder>
+            </xs:appinfo>
+             <xs:documentation>
+                a bibliographic reference to a literature article that 
+                discusses this resource.
+             </xs:documentation>
+             <xs:documentation>
+                The value is a human-consumable version of the reference, such
+                as a formatted bibliographic representation (e.g. used in 
+                an article bibliography).  The pid attribute gives a persistant 
+                or otherwise unambiguous identifier for the article; a DOI
+                is prefered.  
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+       
+       <xs:element name="primaryAudience" type="Audience" minOccurs="0">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Primary Audience</label>
+              <placeholder>Enter your repository's primary audience</placeholder>
+            </xs:appinfo>
+             <xs:appinfo>
+               <dcterm>Subject</dcterm>
+               <dcterm>Subject.Audience</dcterm>
+             </xs:appinfo>           
+             <xs:documentation>
+                The primary audience this resource is intended for.
+             </xs:documentation>
+             <xs:documentation>
+                While some resources may be useful at some level to multiple 
+                audiences, this value indicates the primary one intended.  
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+     </xs:sequence>
+   </xs:complexType>
+
+   <xs:simpleType name="Audience">
+     <xs:annotation>
+       <xs:documentation>
+         Controlled vocabulary categorizing an intended audience.
+       </xs:documentation>
+     </xs:annotation>
+     
+     <xs:restriction base="xs:token">
+       <xs:enumeration value="research">
+         <xs:annotation>
+           <xs:documentation>
+             intended for academic and commercial researchers
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+       <xs:enumeration value="education">
+         <xs:annotation>
+           <xs:documentation>
+             intended for formal and informal educational settings
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+       <xs:enumeration value="public outreach">
+         <xs:annotation>
+           <xs:documentation>
+             intended for broad public consumption for purposes of news 
+             and awareness
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+     </xs:restriction>
+   </xs:simpleType>
+
+   <xs:complexType name="Applicability">
+     <xs:annotation>
+       <xs:documentation>
+         metadata describing the resource's applicability to a particular
+         domain.
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+       <xs:element name="materialsScience" type="MaterialsScience">
+          <xs:annotation>
+           <xs:appinfo>
+             <label>Materials Science</label>
+           </xs:appinfo>
+          </xs:annotation>
+       </xs:element>
+     </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="Access">
+     <xs:annotation>
+       <xs:documentation>
+         metadata describing how one can access a resource and its featurs
+         and capabilities.
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+
+       <xs:element name="policy" type="Policy">
+         <xs:annotation>
+           <xs:appinfo>
+             <label>Policy</label>
+           </xs:appinfo>
+           <xs:documentation>
+             A description of the policy for accessing a resource.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+
+       <xs:element name="portal" type="Portal"
+                   minOccurs="0" maxOccurs="unbounded">
+         <xs:annotation>
+           <xs:appinfo>
+             <label>Portal</label>
+           </xs:appinfo>
+           <xs:documentation>
+             A description of the access to a resource through a web
+             site, accessible through a web site.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+
+       <!-- FUTURE
+       <xs:element name="serviceSuite" type="ServiceSuite"
+                   minOccurs="0" maxOccurs="unbounded">
+         <xs:annotation>
+           <xs:documentation>
+             A description of the access to a resource through a service
+             or a suite of services
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+
+       <xs:element name="download" type="Download"
+                   minOccurs="0" maxOccurs="unbounded">
+         <xs:annotation>
+           <xs:documentation>
+             A description of mechanisms for directly downloading the
+             resource.
+           </xs:documentation>
+           <xs:documentation>
+             (only for data collections and software classes?)
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+
+       <xs:element name="software" type="Software"
+                   minOccurs="0" maxOccurs="unbounded">
+         <xs:annotation>
+           <xs:documentation>
+             A description of the access to a resource through software,
+             e.g. desktop application, programming library.
+           </xs:documentation>
+         </xs:annotation>
+         </xs:element>
+         -->
+
+     </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="Portal">
+     <xs:annotation>
+       <xs:documentation>
+         metadata describing how one can access a resource
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+       <xs:element name="description" type="xs:token" minOccurs="0" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/description">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Description</label>
+            </xs:appinfo>
+             <xs:documentation>
+               A summary of how this portal provides access to the resource.
+             </xs:documentation>
+             <xs:documentation>
+               Providing a description is recommended if more than one
+               portal is available.
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="title" type="NamePID" minOccurs="0"> 
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Title</label>
+            </xs:appinfo>
+             <xs:documentation>
+               A title for the portal.
+             </xs:documentation>
+             <xs:documentation>
+               Providing a title is recommended if the portal is not 
+               specific to this resource and/or if the portal is
+               described separately as a resource and has an identifier
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>
+
+       <xs:element name="homeURL" type="xs:anyURI">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Home URL</label>
+            </xs:appinfo>
+             <xs:documentation>
+                URL for accessing (via a browser) the home or entrance
+                page to the portal.
+             </xs:documentation>
+          </xs:annotation>
+       </xs:element>       
+     </xs:sequence>
+     
+   </xs:complexType>
+
+   <xs:complexType name="Policy">
+     <xs:annotation>
+       <xs:documentation>
+         metadata describing the policies accessing the resource
+       </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+       <xs:element name="rights" type="Rights"
+                   minOccurs="1" maxOccurs="unbounded">
+         <xs:annotation>
+           <xs:appinfo>
+             <label>Rights</label>
+           </xs:appinfo>
+           <xs:appinfo>
+             <dcterm>Rights</dcterm>
+           </xs:appinfo>           
+           <xs:documentation>
+             Information about the held in and over the resource.
+           </xs:documentation>
+           <xs:documentation>
+             This should be repeated for all Rights values that apply.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+
+       <xs:element name="terms" type="xs:anyURI" minOccurs="0" maxOccurs="1">
+         <xs:annotation>
+           <xs:appinfo>
+             <label>Terms</label>
+           </xs:appinfo>
+           <xs:appinfo>
+             <dcterm>Rights</dcterm>
+           </xs:appinfo>           
+           <xs:documentation>
+             A public URL to a document describing the terms of access
+             for the resource.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+
+     </xs:sequence>
+   </xs:complexType>
+
+   <xs:simpleType name="Rights">
+      <xs:restriction base="xs:token">
+         <xs:enumeration value="public">
+            <xs:annotation>
+               <xs:documentation>
+                  unrestricted, anonymous access is allowed without 
+                  authentication.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="open-login">
+            <xs:annotation>
+               <xs:documentation>
+                  unrestricted access requires a login (or other 
+                  authentication mechanism).  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="proprietary">
+            <xs:annotation>
+               <xs:documentation>
+                  requires authentication and users only have access 
+                  to datasets they have been given rights to.  Generally,
+                  there is no charge to use this resource.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="fee-required">
+            <xs:annotation>
+               <xs:documentation>
+                  requires user to pay a one-time or subscription fee in 
+                  order to access the resource.  On-line resources typically
+                  will require authentication.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+
+
+
+<!--
+  -  Materials Science-specific metadata
+  -->
+
+   <xs:complexType name="MaterialsScience">
+     <xs:annotation>
+       <xs:documentation>
+         Information describing a resource's applicability to Materials Science
+       </xs:documentation>
+     </xs:annotation>
+     
+       <xs:sequence>
+         <xs:element name="materialType" type="MaterialType" 
+           minOccurs="0" maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/materialType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <label>Material Types</label>
+                </xs:appinfo>
+                <xs:documentation>
+                  the category of material studied in the data contained in 
+                  this resource.
+                </xs:documentation>
+                <xs:documentation>
+                  one or more of: metal, semiconductor, ceramic, polymer, 
+                  biomaterial, organic, inorganic, oxide, composite,
+                  nanomaterials, superconductor, other, non-specific
+                </xs:documentation>
+              </xs:annotation>
+          </xs:element>
+         
+         <xs:element name="structuralMorphology" type="StructuralMorphology" 
+           minOccurs="0" maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/structuralMorphology">  
+                 <xs:annotation>
+                   <xs:appinfo>
+                     <label>Morphology/Structures</label>
+                   </xs:appinfo>
+                   <xs:documentation>
+                     the primary or prevalent characteristic of the structure of 
+                     the material of interest to this resource
+                   </xs:documentation>
+                   <xs:documentation>
+                     one or more of: crystalline, amorphous, fluid, 
+                     quasi-periodic, bulk, 2D, 1D, film, nanotube, fiber, 
+                     composite, interfacial, interphase, line defect, 
+                     point defects, non-specific, other
+                   </xs:documentation>
+                 </xs:annotation>
+          </xs:element>
+
+           <xs:element name="propertyClass" type="PropertyClass"
+             minOccurs="0" maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/propertyClass">
+             <xs:annotation>
+               <xs:appinfo>
+                 <label>Material Property Classes</label>
+               </xs:appinfo>
+               <xs:documentation>
+                 a category of property that is sampled by the contained data
+               </xs:documentation>
+               <xs:documentation>
+                 one or more of: optical, mechanical, thermodynamic, structural,
+                 simulated, transport, defect, other, non-specific
+               </xs:documentation>
+             </xs:annotation>
+           </xs:element>
+
+         <xs:element name="experimentalDataAcquisitionMethod" type="ExperimentalDataAcquisitionMethod" minOccurs="0"
+           maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/experimentalDataAcquisitionMethod">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Experimental Data Acquisition Methods</label>
+             </xs:appinfo>
+             <xs:documentation>
+               the experimental or computational technique used to 
+               acquire the data within this resource 
+             </xs:documentation>
+             <xs:documentation>
+               one or more of recommended values:
+               electron microscopy, scattering-diffraction, calorimetry, 
+               load frame testing, atom probe microscopy, spectroscopy, 
+               optical microscopy, impact testing, indentation, dilatometry,
+               density functional theory calculation, 
+               molecular dynamics simulation, numerical simulations, 
+               multiscale simulations, finite element analysis, 
+               computational thermodynamics, statistical mechanics, 
+               dislocation dynamics, phase field calculation, 
+               crystal plasticity calculation, Monte-Carlo simulation, 
+               boundary tracking/level set, non-specific
+               Other values are allowed.
+             </xs:documentation>
+           </xs:annotation>
+         </xs:element>
+
+         <xs:element name="computationalDataAcquisitionMethod" type="ComputationalDataAcquisitionMethod" minOccurs="0"
+           maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/computationalDataAcquisitionMethod">
+           <xs:annotation>
+             <xs:appinfo>
+               <label>Computational Data Acquisition Methods</label>
+             </xs:appinfo>
+             <xs:documentation>
+               the experimental or computational technique used to 
+               acquire the data within this resource 
+             </xs:documentation>
+             <xs:documentation>
+               one or more of recommended values:
+               electron microscopy, scattering-diffraction, calorimetry, 
+               load frame testing, atom probe microscopy, spectroscopy, 
+               optical microscopy, impact testing, indentation, dilatometry,
+               density functional theory calculation, 
+               molecular dynamics simulation, numerical simulations, 
+               multiscale simulations, finite element analysis, 
+               computational thermodynamics, statistical mechanics, 
+               dislocation dynamics, phase field calculation, 
+               crystal plasticity calculation, Monte-Carlo simulation, 
+               boundary tracking/level set, non-specific
+               Other values are allowed.
+             </xs:documentation>
+           </xs:annotation>
+         </xs:element>
+         
+
+           <xs:element name="sampleProcessing" type="SampleProcessing"
+                       minOccurs="0" maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/sampleProcessing">
+             <xs:annotation>
+               <xs:appinfo>
+                 <label>Sample Processing Methods</label>
+               </xs:appinfo>
+               <xs:documentation>
+                 the physical processing or preparation technique applied 
+                 to the material being studied.
+               </xs:documentation>
+               <xs:documentation>
+                 one or more of recommended values:
+                  casting, annealing, vapor deposition, milling, extrusion, 
+                  pressing, exfoliation, melt blending, polymerization, 
+                  curing, evaporation, focused ion beam, non-specific.
+                 Other values are allowed.
+               </xs:documentation>
+             </xs:annotation>
+           </xs:element>
+
+         </xs:sequence>
+   </xs:complexType>
+
+  <xs:simpleType name="MaterialType">
+     <xs:annotation>
+       <xs:documentation>
+         allowed values representing categories of materials.
+       </xs:documentation>
+     </xs:annotation>
+     <xs:restriction base="xs:token">
+       <xs:enumeration value="metal">
+         <xs:annotation>
+           <xs:documentation>
+             an electropositive element or an alloy based on these elements; 
+             a material characterized by a partially filled energy band.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="semiconductor">
+         <xs:annotation>
+           <xs:documentation>
+             a material characterized by slightly filled or slightly empty 
+             energy band; a material with a relatively narrow band gap between 
+             0 and ~2 eV.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="polymer">
+         <xs:annotation>
+           <xs:documentation>
+             material composed of large molecules built up by repetition of 
+             small, simple chemical units.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="biomaterial">
+         <xs:annotation>
+           <xs:documentation>
+             material derived from living organisms or otherwise produced via 
+             biological processes.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="organic">
+         <xs:annotation>
+           <xs:documentation>
+             material comprised of Carbon-based compounds.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="inorganic">
+         <xs:annotation>
+           <xs:documentation>
+             material comprised of compounds exclusive of Carbon 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="oxide">
+         <xs:annotation>
+           <xs:documentation>
+             material comprised of Oxygen-based compounds 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="composite">
+         <xs:annotation>
+           <xs:documentation>
+             material comprised of multiple categories of materials 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="nanomaterials">
+         <xs:annotation>
+           <xs:documentation>
+             material comprised of structural units between 1 and 1000 nm in 
+             size.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="superconductor">
+         <xs:annotation>
+           <xs:documentation>
+             material capable of being an electrical conductor with zero 
+             resistance.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="ceramic">
+         <xs:annotation>
+           <xs:documentation>
+             material capable of being an electrical conductor with zero
+             resistance.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="non-specific">
+         <xs:annotation>
+           <xs:documentation>
+             materials related to (or studied in) this resource are not 
+             specific to any category 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+     </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="StructuralMorphology">
+     <xs:annotation>
+       <xs:documentation>
+         allowed values representing categories of structural morphologies.
+       </xs:documentation>
+     </xs:annotation>
+     <xs:restriction base="xs:token">
+       <xs:enumeration value="crystalline">
+         <xs:annotation>
+           <xs:documentation>
+             having a certain crystal structure, i.e., characterized by both 
+             the short-range and long-range periodic order in the atomic 
+             structure; having a structure of identical units (consisting of 
+             one or more atoms) which are regularly arranged with respect to 
+             each other in space.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="amorphous">
+         <xs:annotation>
+           <xs:documentation>
+             a structure without regular or periodic order; having a structure 
+             characterized by only a short-range order but without a long-range 
+             order in atomic structure.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="fluid">
+         <xs:annotation>
+           <xs:documentation>
+             a material in a liquid or gaseous state.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="quasi-periodic">
+         <xs:annotation>
+           <xs:documentation>
+             a structure that is ordered but not periodic in its units; a 
+             structure characterized by rotational symmetry but not 
+             translational symmetry 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="bulk">
+         <xs:annotation>
+           <xs:documentation>
+             referring to structure representative of a material away from 
+             surfaces and large enough to be volume invariant 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="2D">
+         <xs:annotation>
+           <xs:documentation>
+             having the structure of a sheet, usually being one structural unit 
+             in size in one spatial dimension.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="1D">
+         <xs:annotation>
+           <xs:documentation>
+             having a linear structure, usually being one structural unit in 
+             size in two spatial dimensions.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="film">
+         <xs:annotation>
+           <xs:documentation>
+             structured into a thin layer.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="nanotube">
+         <xs:annotation>
+           <xs:documentation>
+             having the structure of a tube on the nanomaterial scale.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="fiber">
+         <xs:annotation>
+           <xs:documentation>
+             having a filament shape, i.e. one that is long in relation to its 
+             thickness
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="composite">
+         <xs:annotation>
+           <xs:documentation>
+             being comprised of pieces of different structural types.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="interfacial">
+         <xs:annotation>
+           <xs:documentation>
+             featuring two different materials or structures segregated along 
+             a well-defined surface.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="interphase">
+         <xs:annotation>
+           <xs:documentation>
+             the region between two distinct phases.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="line defect">
+         <xs:annotation>
+           <xs:documentation>
+             dislocations; having lattice imperfections in a crystal structure; 
+             having a crystal structure in which lattice components are 
+             displaced from the nominally periodic positions. 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="point defect">
+         <xs:annotation>
+           <xs:documentation>
+             vacancies; having a crystal structure with unoccupied lattice sites.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="non-specific">
+         <xs:annotation>
+           <xs:documentation>
+             materials related to (or studied in) this resource are not 
+             restricted to a specific category of structure or morphology.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+     </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="PropertyClass">
+     <xs:annotation>
+       <xs:documentation>
+         allowed values representing categories of material physical properties
+       </xs:documentation>
+     </xs:annotation>
+     <xs:restriction base="xs:token">
+       <xs:enumeration value="optical">
+         <xs:annotation>
+           <xs:documentation>
+             property describes out a material interacts with electromagnetic 
+             radiation.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="mechanical">
+         <xs:annotation>
+           <xs:documentation>
+             property describes a sample material's response to an external 
+             influence causing plastic deformation or destruction.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="thermodynamic">
+         <xs:annotation>
+           <xs:documentation>
+             property describing a materials response to heat, including the 
+             transfer of heat through the material and thermophysical properties
+             (those that vary with temperature without changing the material's 
+             identity. 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="structural">
+         <xs:annotation>
+           <xs:documentation>
+             properties describing the relative locations of a material's 
+             constituent atoms or molecules. 
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="simulated">
+         <xs:annotation>
+           <xs:documentation>
+             a property or parameter describing a material's state as calculated
+             in a computational simulation.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="transport">
+         <xs:annotation>
+           <xs:documentation>
+             a property describing the transport of mass through a material.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="defect">
+         <xs:annotation>
+           <xs:documentation>
+             a property describing an imperfection in the lattice structure of 
+             a crystal, including dislocations, vacancies, and impurities (i.e. 
+             interstitial atoms); a property describing structural disorder in 
+             a material (i.e. departures from the regular ordered structure of 
+             a crystal).
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+       <xs:enumeration value="non-specific">
+         <xs:annotation>
+           <xs:documentation>
+             resource may address any number of different properties.
+           </xs:documentation>
+         </xs:annotation>
+       </xs:enumeration>
+
+     </xs:restriction>
+   </xs:simpleType>
+
+  <xs:simpleType name="ExperimentalDataAcquisitionMethod">
+    <xs:annotation>
+      <xs:documentation>
+        allowed values representing categories of data acquisition method
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="electron microscopy"/>
+      <xs:enumeration value="scattering-diffraction"/>
+      <xs:enumeration value="calorimetry"/>
+      <xs:enumeration value="load frame testing"/>
+      <xs:enumeration value="atom probe microscopy"/>
+      <xs:enumeration value="spectroscopy"/>
+      <xs:enumeration value="optical microscopy"/>
+      <xs:enumeration value="impact testing"/>
+      <xs:enumeration value="indentation"/>
+      <xs:enumeration value="dilatometry"/>
+      <xs:enumeration value="other"/>
+      <xs:enumeration value="non-specific"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:simpleType name="ComputationalDataAcquisitionMethod">
+    <xs:annotation>
+      <xs:documentation>
+         allowed values representing categories of data acquisition method
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="density functional theory calculation"/>
+      <xs:enumeration value="molecular dynamics simulation"/>
+      <xs:enumeration value="numerical simulations"/>
+      <xs:enumeration value="multiscale simulations"/>
+      <xs:enumeration value="finite element analysis"/>
+      <xs:enumeration value="computational thermodynamics"/>
+      <xs:enumeration value="statistical mechanics"/>
+      <xs:enumeration value="dislocation dynamics"/>
+      <xs:enumeration value="phase field calculation"/>
+      <xs:enumeration value="crystal plasticity calculation"/>
+      <xs:enumeration value="monte-carlo simulation"/>
+      <xs:enumeration value="boundary tracking/level set"/>
+      <xs:enumeration value="non-specific"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SampleProcessing">
+    <xs:annotation>
+      <xs:documentation>
+         allowed values representing categories of sample processing method
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="casting"/>
+      <xs:enumeration value="annealing"/>
+      <xs:enumeration value="vapor deposition"/>
+      <xs:enumeration value="milling"/>
+      <xs:enumeration value="extrusion"/>
+      <xs:enumeration value="pressing"/>
+      <xs:enumeration value="exfoliation"/>
+      <xs:enumeration value="melt blending"/>
+      <xs:enumeration value="polymerisation"/>
+      <xs:enumeration value="curing"/>
+      <xs:enumeration value="evaporation"/>
+      <xs:enumeration value="non-specific"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+
+

@@ -1,0 +1,51 @@
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: menu.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+# 		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+<ul class="tabbed">
+	<li class="{% if active_tab == 'tab1' %} current_page_item {% endif %}"><a href="/">Home</a></li>
+	{% if user|has_perm:'curate.curate_access' %}
+	<li class="{% if active_tab == 'tab2' %} current_page_item {% endif %}"><a href="/curate">{{CUSTOM_CURATE}}</a></li>
+	{% endif %}
+	{% if user|has_perm:'explore.explore_access' %}
+	<li class="{% if active_tab == 'tab3' %} current_page_item {% endif %}"><a href="/explore">{{CUSTOM_EXPLORE}}</a></li>
+	{% endif %}
+	{% if user|has_perm:'compose.compose_access' %}
+	<li class="{% if active_tab == 'tab4' %} current_page_item {% endif %}"><a href="/compose">{{CUSTOM_COMPOSE}}</a></li>
+	{% endif %}
+	{% if active_tab == 'login' %}
+	<li class="current_page_item"><a href="/login">Login</a></li>
+	{% elif active_tab == 'options' %}
+	<li class="current_page_item"><a href="/all-options">All Options</a></li>
+	{% elif active_tab == 'all' %}
+	<li class="current_page_item"><a href="/browse-all">Browse All</a></li>
+	{% elif active_tab == 'contact' %}
+	<li class="current_page_item"><a href="/contact">Contact</a></li>
+	{% elif active_tab == 'profile' %}
+	<li class="current_page_item"><a href="/my-profile">My Profile</a></li>
+	{% elif active_tab == 'privacy' %}
+	<li class="current_page_item"><a href="/privacy-policy">Privacy Policy</a></li>
+	{% elif active_tab == 'terms' %}
+	<li class="current_page_item"><a href="/terms-of-use">Terms of Use</a></li>
+	{% elif active_tab == 'request' %}
+	<li class="current_page_item"><a href="request-new-account">Request New Account</a></li>
+	{% elif active_tab == 'help' %}
+	<li class="current_page_item"><a href="/help">Help</a></li>
+	{% endif %}
+</ul>

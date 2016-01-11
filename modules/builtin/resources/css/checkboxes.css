@@ -1,0 +1,8 @@
+.col {
+    float: left;
+    padding: 0 1em 0 1em;
+}
+
+.col span {
+    display: block;
+}

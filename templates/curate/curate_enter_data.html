@@ -1,0 +1,182 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: curate_enter_data.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+# 		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTreeCurator.css' %}" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/repo.css' %}" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/form_validation.css' %}" media="screen" />
+{% endblock %}
+
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
+{% endblock %}
+
+{% block title %}
+<h3>
+{% if template_name == 'organization' %}
+<img width="100" src="/static/img/organization.png">
+Add New Organization
+{% elif template_name == 'datacollection' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Data Collection
+{% elif template_name == 'repository' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Repository
+{% elif template_name == 'projectarchive' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Project Archive
+{% elif template_name == 'database' %}
+<img width="100" src="/static/img/datacollection.png">
+Add New Database
+{% elif template_name == 'dataset' %}
+<img width="100" src="/static/img/dataset.png">
+Add New Dataset
+{% elif template_name == 'service' %}
+<img width="100" src="/static/img/service.png">
+Add New Service
+{% elif template_name == 'informational' %}
+<img width="100" src="/static/img/informational.png">
+Add New Informational Site
+{% elif template_name == 'software' %}
+<img width="100" src="/static/img/software.jpg">
+Add New Software
+{% endif %}
+
+
+</h3>
+{% endblock %}
+
+
+{% block content %}
+<div class="toolbar">
+	<div class="btn-group pull-right">
+		{% if template_name == 'organization' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=organization';"><i class="icon-file"></i> My Organizations </button>
+		{% elif template_name == 'datacollection' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Data Collections </button>
+		{% elif template_name == 'repository' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Repositories </button>
+		{% elif template_name == 'projectarchive' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Project Archives </button>
+		{% elif template_name == 'database' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Databases </button>
+		{% elif template_name == 'dataset' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=dataset';"><i class="icon-file"></i> My Datasets </button>
+		{% elif template_name == 'service' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=service';"><i class="icon-file"></i> My Services </button>
+		{% elif template_name == 'informational' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=informational';"><i class="icon-file"></i> My Informational Sites </button>
+		{% elif template_name == 'software' %}
+		<button class="btn" onclick="location.href='/my-profile/resources?template=software';"><i class="icon-file"></i> My Software </button>
+		{% endif %}
+    	<button class="btn" onclick="location.href='/my-profile/resources?template=all';"><i class="icon-hdd"></i> My Resources </button>
+	</div>
+<br/><br/>
+<div id="xsdForm">
+Please wait while the form is loading...
+<br/><br/>
+</div>
+</div>
+<div style="float:left;">
+{% if not edit %}
+<a class="button save-to-repo">REVIEW AND ADD RESOURCE</a>
+{% else %}
+<a class="button save-to-repo">REVIEW AND SAVE CHANGES</a>
+{% endif %}
+</div>
+<div style="float:right;">
+{% if not edit %}
+<a class="button save-form">Save Form </a>
+{% endif %}
+<a class="button button-reversed clear-fields">Clear Form</a>
+<a class="button button-reversed cancel">Cancel Form</a>
+</div>
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-cleared-message" title="Clear Form" style="display:none;">
+<p></p>
+  <p>
+    Are you sure you want to reset the form?
+  </p>
+</div>
+
+<div id="dialog-cancel-message" title="Cancel Form" style="display:none;">
+<p></p>
+  <p>
+    Are you sure you want to cancel the form? All your changes will be lost.
+  </p>
+</div>
+
+<div id="dialog-save-form-message" title="Save Form" style="display:none;">
+  Are you sure you want to save the form? If you are editing an existing form, this will replace the previous version of the form.
+</div>
+
+<div id="dialog-saved-message" title="Form Saved" style="display:none;">
+<p></p>
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+    Form saved with success.
+  </p>
+</div>
+
+<div id="dialog-save-error-message" title="Validation Error" style="display:none;">
+<p></p>
+  <div id="saveErrorMessage">
+  </div>
+</div>
+
+<div id="dialog-use-message" title="Validation Warning" style="display:none;">
+<p>
+Some <span style="color:red;">required</span> or <span style="color:blue;">recommended</span> fields are empty:
+</p>
+  <div id="useErrorMessage">
+  </div>
+ <p>Edit the form or proceed to review page.</p> 
+</div>
+
+<div id="dialog-use-message" title="Validation Warning" style="display:none;">
+<p>
+Some <span style="color:red;">required</span> or <span style="color:blue;">recommended</span> fields are empty:
+</p>
+  <div id="useErrorMessage">
+  </div>
+ <p>Edit the form or proceed to review page.</p> 
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/XMLTreeCurator.js' %}"></script>
+<script src="{% static 'inc/controllers/js/modules.js' %}"></script>
+<script src="{% static 'inc/controllers/js/curate.js' %}"></script>
+<script src="{% static 'inc/controllers/js/nmrr/nmrr_curate.js' %}"></script>
+<script>
+generate_xsd_form();
+$('.button.save-to-repo').on('click', validateXML);
+$('.button.clear-fields').on('click', clearFields);
+$('.button.cancel').on('click', cancelForm);
+$('.button.save-form').on('click', saveForm);
+</script>
+{% endblock %}
+

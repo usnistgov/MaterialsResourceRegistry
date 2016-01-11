@@ -1,0 +1,110 @@
+<!-- 
+################################################################################
+#
+# File Name: explore_detail_results.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+#
+#         Pierre Francois RIGODIAT
+#		  pierre-francois.rigodiat@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% extends "mdcs/extra/two_columns.html" %}
+
+{% load staticfiles %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/style.add.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exploreTabs.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/explore.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/queryResult.css' %}" media="screen" />
+{% endblock %}
+
+{% block title %}<h1>{{title}}</h1>{% endblock %}
+{% block description %}From here you can view the detail of the selected result.{% endblock %}
+
+{% block menu %}{% include 'mdcs/menus/main.html' with active_tab='tab3' %}{% endblock %}
+
+{% block submenu %}
+	<ul id="subnav-tab-1" class="tabbed">
+		<li><a href="/explore/select-template">Select Template</a></li>
+		<li><a href="/explore/customize-template">Select Fields</a></li>
+		<li class="current_page_item"><a href="/explore/perform-search">Perform Search</a></li>
+	</ul>
+{% endblock %}
+
+
+
+{% block content %}
+<div class="toolbar">
+	<div class="btn-group pull-right">
+    	<span class="btn" onclick="backToResults();" style="text-decoration:none">Back to Results</span>
+  	</div>
+	<br/><br/>
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+<div id="XMLHolder">
+        {% autoescape off %}
+    	{{XMLHolder}}
+    	{% endautoescape %} </div>
+<br/><br/>
+
+{% endblock %}
+
+{% block sidebar %}
+<div class="box">
+	<div class="box-title">{{CUSTOM_EXPLORE}}</div>
+	<div id="explore-tabs">
+		<div class="tab">
+			{% if request.session.currentExploreTab == "tab-1" %}
+			<input type="radio" id="tab-1" name="tab-group-1" checked>
+			{% else %}
+			<input type="radio" id="tab-1" name="tab-group-1">
+			{% endif %}
+			<label for="tab-1" onclick="switchTab('tab-1')">Query by Example</label>
+
+			<div class="content">
+				<div class="box-content">
+				  <ul class="nice-list">
+					{% include 'explore/menu/menu-items.html' with step='s3' %}
+				  </ul>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab">
+		   {% if request.session.currentExploreTab == "tab-2" %}
+		   <input type="radio" id="tab-2" name="tab-group-1" checked>
+		   {% else %}
+		   <input type="radio" id="tab-2" name="tab-group-1" disabled>
+		   {% endif %}
+		   <label for="tab-2" class="unavailable">SPARQL Endpoint</label>
+
+			<div class="content">
+			   <div class="box-content">
+				  <ul class="nice-list">
+					{% include 'explore/menu/menu-items.html' with step='s3' %}
+				  </ul>
+				</div>
+		   </div>
+	   </div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/explore.js' %}"></script>
+{% endblock %}

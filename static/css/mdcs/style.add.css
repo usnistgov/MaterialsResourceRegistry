@@ -1,0 +1,352 @@
+@charset "utf-8";
+/*
+ * Auto complete CSS
+ */
+.ui-autocomplete {
+    max-height: 100px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+}
+.ui-autocomplete-loading {
+    background: white url('ui-anim_basic_16x16.gif') right center no-repeat;
+}
+
+.text.small
+{
+	width: 40px;
+}
+
+.message
+{
+	width: 260px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#main_prop
+{
+	float: left;
+}
+
+.left-side
+{
+	float: left;
+	text-align:left;
+}
+
+.right-side
+{
+	text-align:right;
+	margin:7px;
+}
+
+.ctx_menu
+{
+	padding: 3px;
+	background-color: #f2f2f2;
+	border: 1px solid gray;
+	border-radius: 5px;
+}
+
+#page_content
+{
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.ctx_menu
+{
+	margin: 2px;
+}
+
+.ctx_menu.button
+{
+	cursor:pointer;	
+}
+
+.ctx_menu.selected
+{
+	background-color: #92C8DE;
+	font-weight: bold;
+	color: white;
+}
+
+#misc_prop
+{
+	text-align:right;
+}
+
+#schema_prop
+{
+	border-bottom: 1px solid black;
+	padding-bottom: 15px;
+	margin-bottom: 7px;
+}
+
+.prop>.fieldname
+{
+	font-weight: bold;
+	text-decoration:underline;
+}
+
+#schema_content
+{
+	margin: 7px;
+}
+
+#schema_elements
+{
+	margin: 3px;
+	padding: 5px;
+	border: 1px solid gray;
+	max-height: 300px;
+	overflow:auto;
+	background-color: #f2f2f2;
+}
+
+#schema_modules
+{
+	margin: 3px;
+	margin-bottom: 10px;
+}
+
+#schema_modules>.module
+{
+	display: block;
+}
+
+.attr
+{
+	background-color: #999;
+	border-color: #E0A21B;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 1px;
+	margin-left: 5px;
+	padding: 3px;
+	color: white;
+}
+
+#help {
+	text-align:center;
+}
+
+#main>h2 {
+	text-align: center;
+	padding-bottom: 10px;
+}
+
+.center {
+	text-align:center;
+}
+
+#cfg_content {
+	padding-top: 5px;
+}
+
+b
+{
+	margin-right: 3px;
+}
+
+.unavailable
+{
+	color: gray;
+}
+
+#content-wrapper li
+{
+	margin-top: 7px;
+}
+
+.inform{
+	
+	width:220px;
+	margin-left:20px;
+}
+
+.inform.small {
+	width: 100px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input.inform,
+input.double,
+input.float,
+input.integer
+{
+	/* nicer input for type=number */	
+	border: 1px inset #AAA;
+	padding: 2px;
+}
+
+textarea.inform{
+	height:50px;
+}
+
+.hide {
+	display: none;
+}
+
+#form_in_box div{
+	text-align:left;
+}
+
+#form_in_box div.center{
+	text-align:center;
+}
+
+#form_in_box label{
+	font-weight: normal;
+}
+
+#form_in_box label.main
+{
+	font-weight: bold;
+}
+
+.submenu:hover
+{
+	color: #111;
+	cursor: pointer;
+}
+
+.submenu
+{
+	color: #666;
+	display: block;
+	font: bold 1.1em sans-serif;
+	padding: 10px 10px;
+	
+}
+
+.submenu.current
+{
+	color: #111;
+}
+
+.clickable
+{
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.clickable:hover
+{
+	font-weight:bold;
+}
+
+.query_element
+{
+	margin-left:5px;
+}
+
+.xsdman.choice
+{
+	margin-left:5px;
+}
+
+.checkbox
+{
+	min-height:0px;
+}
+
+.inline
+{
+	display:inline-block;
+}
+
+.margin
+{
+	margin-left:10px;
+	margin-right:5px;
+}
+
+.radio
+{
+	min-height:0px;
+}
+.tpl-title {
+	text-align: center;
+	font-size: 18px;
+	margin-bottom: 0.5em;
+}
+
+.l-img {
+    float: left;
+    height: 40px;
+}
+
+.r-txt {
+    height: 40px;
+    padding-top: 10px;
+    padding-left: 50px;
+}
+
+.r-txt a {
+    cursor: pointer;
+}
+
+.r-txt-selected {
+    font-weight: bold;
+    height: 40px;
+    padding-top: 10px;
+    padding-left: 50px;
+}
+
+.th-actions {
+    width: 200px;
+}
+
+.th-15px {
+	width: 15px;
+}
+
+.empty-table {
+    margin: 2em;
+}
+
+.cmn-toggle-round + label {
+  padding: 2px;
+  width: 60px;
+  height: 25px;
+  background-color: #dddddd;
+  border-radius: 25px;
+}
+input.cmn-toggle-round + label:before,
+input.cmn-toggle-round + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 25px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round + label:after {
+  width: 28px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round:checked + label:before {
+  background: #8ce196 no-repeat url('../../resources/img/check.png');
+  background-size:  16px;
+  background-position: 15%;
+}
+input.cmn-toggle-round:checked + label:after {
+  margin-left: 33px;
+}

@@ -1,0 +1,74 @@
+{% load admin_static %}
+{% load staticfiles %}
+{% load i18n %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: default.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta charset="UTF-8">
+	<meta name="description" content=""/>
+	<meta name="keywords" content=""/>
+	<meta name="author" content=""/>
+	<meta name="robots" content="NONE,NOARCHIVE"/>
+
+	<title>{{CUSTOM_TITLE}} Curation System</title>
+
+    <!--<link rel="stylesheet" type="text/css" href="{% static 'libs/reset/2.0/reset.css' %}"  />-->
+    <link rel="stylesheet" type="text/css" href="{% static 'libs/font-awesome/4.4.0/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'libs/bootstrap/3.3.5/css/bootstrap.min.css' %}"
+          media="screen" />
+	<!--<link rel="stylesheet" type="text/css" href="{% static 'resources/css/icons.css' %}" media="screen" />-->
+    <link rel="stylesheet" type="text/css" href="{% static 'libs/jquery-ui/smoothness/1.11.4/jquery-ui.css' %}"/>
+
+    {% block theme %}{% endblock %}
+    {% block extrastyle %}{% endblock %}
+
+    <!--nmrr added-->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!--nmrr added end-->
+</head>
+<body>
+    {% block body %}{% endblock %}
+
+    <!-- JQuery & JQuery UI -->
+	<script src="{% static 'libs/jquery/1.11.3/jquery.min.js' %}"></script>
+	<script src="{% static 'libs/bootstrap/3.3.5/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'libs/jquery-ui/smoothness/1.11.4/jquery-ui.js' %}"></script>
+    <script src="{% static 'inc/controllers/js/csrf.js' %}"></script>
+
+    {% block themejs %}{% endblock %}
+
+    <script type="text/javascript">
+        window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";
+    </script>
+
+    {% block extrajs %}{% endblock %}
+</body>
+</html>

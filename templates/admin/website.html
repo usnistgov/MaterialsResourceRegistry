@@ -1,0 +1,63 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: website.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+    <style>
+        /*h3 {
+            height: 12em;
+        }*/
+
+    </style>
+{% endblock %}
+
+{% block title %}<h1>Website Management</h1>{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab5' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/website.html' %}{% endblock %}
+
+
+{% block content%}
+<table>
+    <tr>
+        <td>
+            <h3><a href="website/privacy-policy"><i class="fa fa-eye"></i> Privacy Policy</a></h3>
+            <p>Click here to edit the Privacy Policy page of the system.</p>
+        </td>
+        <td>
+            <h3><a href="website/terms-of-use"><i class="fa fa-file-text-o"></i> Terms of Use</a></h3>
+            <p>Click here to edit the Terms of Use page of the system.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h3><a href="website/help"><i class="fa fa-question-circle"></i> Help</a></h3>
+            <p>Click here to edit the Help page of the system.</p>
+        </td>
+        <td></td>
+    </tr>
+</table>
+
+<div class="clearer">&nbsp;</div>
+{% endblock %}  

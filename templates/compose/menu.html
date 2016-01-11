@@ -1,0 +1,26 @@
+{% load staticfiles %}
+
+<ul class="nice-list">
+    <li>
+        <div class="l-img">
+            <img width="40" height="40" src="{% static 'resources/img/Orange_Number_1.png' %}"
+                 alt="1">
+        </div>
+        {% if step == 's1' %}
+        <div class="r-txt-selected"><a href="/compose/select-template">Select Template</a></div>
+        {% else %}
+        <div class="r-txt"><a href="/compose/select-template">Select Template</a></div>
+        {% endif %}
+    </li>
+    <li>
+        <div class="l-img">
+            <img width="40" height="40" src="{% static 'resources/img/Orange_Number_2.png' %}"
+                 alt="2">
+        </div>
+        {% if step == 's1' %}
+        <div class="r-txt"><a onclick="verifyTemplateIsSelected('/compose/build-template');">Compose Template</a></div>
+        {% else %}
+        <div class="r-txt-selected"><a href="/explore/select-template">Compose Template</a></div>
+        {% endif %}
+    </li>
+</ul>

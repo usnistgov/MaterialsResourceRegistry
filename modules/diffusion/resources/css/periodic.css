@@ -1,0 +1,83 @@
+.periodic-table {
+    background-color: white;
+    border: 0;
+    border-collapse: collapse;
+}
+
+table.periodic-table tr {
+    vertical-align: middle;
+    text-align: left;
+}
+
+table.periodic-table tr td {
+    background-color: white;
+    padding: 6px;
+    border: 1px solid white;
+
+    text-align: center;
+}
+
+table.periodic-table tr td.p-elem {
+    cursor: pointer;
+}
+
+table.periodic-table tr td.p-elem:hover {
+    background-color: #FFFF80;
+}
+
+table.periodic-table tr td.p-elem.selected {
+    background-color: #FFFF80;
+}
+
+table.periodic-table tr td.title {
+    font-size: small;
+    vertical-align: top;
+}
+
+table.periodic-table tr td.c-header {
+    vertical-align: bottom;
+    font-size: x-small;
+}
+
+table.periodic-table tr td.r-header {
+    text-align: right;
+    font-size: small;
+}
+
+table.periodic-table tr td.green {
+    background-color: #b0ffb0;
+}
+
+table.periodic-table tr td.blue {
+    background-color: #a0a0ff;
+}
+
+table.periodic-table tr td.lightblue {
+    background-color: #a0c0ff;
+}
+
+table.periodic-table tr td.cyan {
+    background-color: #c0ffff;
+}
+
+table.periodic-table tr td.purple {
+    background-color: #e080e0;
+}
+
+table.periodic-table tr td.yellow {
+    background-color: #ffe080;
+}
+
+table.periodic-table tr td.orange {
+    background-color: #ffa080;
+}
+
+table.periodic-table tr td.gray {
+    background-color: #e0e0e0;
+}
+
+table.periodic-table tr td.darkgray {
+    background-color: #c0c0c0;
+}
+
+

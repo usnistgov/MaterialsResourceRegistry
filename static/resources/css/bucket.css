@@ -1,0 +1,25 @@
+/*
+################################################################################
+#
+# File Name: bucket.css
+# Purpose:   For display of buckets
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+.bucket {
+	font-weight: bold;
+	color:white;
+	margin-left: 2px;
+	padding: 3px;
+	text-align: center; 
+	border-radius: 5px;
+}

@@ -1,0 +1,55 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: add_repository.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}<h1>New Instance</h1>{% endblock %}
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab4' %}{% endblock %}
+
+
+{% block content%}
+<p>
+    Use the following form to register a remote instance of the Curator. Please provide required information to get an
+    access to the remote system.
+</p>
+
+<div>
+	<form action="/admin/repositories/add-repository/" method="post" onsubmit="return validateInstance()">
+	 	{% csrf_token %}
+	    {{ form }}
+	    <br/>
+	    <div id="instance_error" style="font-weight: bold;">
+	    {{action_result}}
+	    </div>
+	    <input type="submit" class="btn" name="action" value="Ping"/>
+	    <input type="submit" class="btn" name="action" value="Register"/>
+	</form>
+</div>
+
+{% endblock %}  
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/fed_of_queries.js' %}"></script>
+{% endblock %}  

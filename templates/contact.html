@@ -1,0 +1,47 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: contact.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3>Contact</h3>{% endblock %}
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab5' %}
+{% endblock %}
+
+{% block content %}
+<div>
+<br/>
+<style>
+textarea {
+	width: 700px;
+}
+</style>
+<form action="/contact" method="post">
+ 	{% csrf_token %}
+    {{ form }}
+    <br/>
+    <div id="contact_error" style="font-weight: bold;">
+    {{action_result}}
+    </div>
+    <input type="submit" class="btn" value="Send Message"/>
+</form>
+</div>
+{% endblock %}

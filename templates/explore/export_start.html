@@ -1,0 +1,22 @@
+ {% if nb_elts_exp > 0 %}
+ <p>
+	{{export_form}}
+ </p>
+ {% endif %}
+
+  {% if nb_elts_xslt > 0 %}
+ <p>
+	<div id="fileXSLT">
+		<i>XSLT files</i>
+		{{upload_xslt_Form}}
+	</div>
+ </p>
+  {% endif %}
+
+ {% if nb_elts_exp == 0 and nb_elts_xslt == 0 %}
+  <p>
+	<div id="form_start_errors" style="color:red;">
+		No exporters available
+	</div>
+ </p>
+  {% endif %}

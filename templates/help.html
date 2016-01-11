@@ -1,0 +1,91 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: help.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3><span>Help</span></h3>{% endblock %}
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab4' %}
+{% endblock %}
+
+{% block content%}
+<div class="left" style="width: 830px">
+	<br/>
+	{% if help %}
+	    {{ help.content | safe}}
+	{% else %}
+<div class="left" style="width: 600px">
+
+	<p class="large">
+	  <a href="#What-is-the-NIST-Materials-Resource-Registry">What is the NIST Materials Resource Registry (NMRR)?</a><br/>
+	  <a href="#How-do-I-get-access">How do I get access to the NMRR?</a><br/>
+	  <a href="#What-are-activities">What are some of the activities I can do on the NMRR?</a><br/>
+	  <a href="#How-do-I-contact-the-admin">How do I contact the NMRR administrator for questions?</a><br/>
+	</p>
+
+</div>
+
+<hr>
+
+<a name="What-is-the-NIST-Materials-Resource-Registry"></a>
+<h5>
+What is the NIST Materials Resource Registry (NMRR)?
+</h5>
+<p class="large">
+NMRR allows for materials resources into various repository registered with our system to be discoverable. The system also allows for browsing and search of the materials resources using advanced search.
+</p>
+
+<div class="clearer">&nbsp;</div>
+
+<a name="How-do-I-get-access"></a>
+<h5>
+How do I get access to the NMRR?
+</h5>
+<p class="large">
+Any individual may search for and discover materials resources without registration. If you are a materials resource repository owner and would like to add your repository to our system for search and discovery, then please make a request for an account to access NMRR using the online request form. Once the NMRR administrator accepts your account request, your will be notified that the account is created with the appropriate credentials.
+</p>
+
+<div class="clearer">&nbsp;</div>
+
+<a name="What-are-activities"></a>
+<h5>
+What are some of the activities I can do on the NMRR?
+</h5>
+<p class="large">
+A user can search and discovery materials resources, add a new repository of materials resources for harvesting and discovery, and perform a federation of queries across several NMRR instanes.
+</p>
+
+<div class="clearer">&nbsp;</div>
+					
+<a name="How-do-I-contact-the-admin"></a>
+<h5>
+How do I contact the NMRR administrator for questions?
+</h5>
+<p class="large">
+You can contact the NMRR administrator using this <a href="/contact">form</a>.
+</p>
+
+<div class="clearer">&nbsp;</div>
+
+	{% endif %}
+</div>
+<div class="clearer">&nbsp;</div>
+{% endblock %}

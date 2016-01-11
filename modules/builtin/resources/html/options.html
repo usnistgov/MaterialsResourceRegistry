@@ -1,0 +1,15 @@
+<div class="mod_options">
+	{% if label %}
+	<label>{{label}}</label>
+	{% endif %}
+    
+	{% if disabled %}
+	<select disabled>
+	{%else%}
+	<select>
+	{% endif %}
+    	{% autoescape off %}
+		{{options}}
+		{% endautoescape %}
+	</select>
+</div>

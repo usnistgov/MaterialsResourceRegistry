@@ -1,0 +1,43 @@
+/*
+################################################################################
+#
+# File Name: queryResult.css
+# Purpose:   Css specific to the query results
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+#results .xmlResult
+{
+	width:610px;
+	max-height:400px;
+	overflow:auto;
+	cursor:text;
+	background-color: #F8F8F8 ;
+}
+
+#detail_results .xmlResult
+{
+	overflow:auto;
+	cursor:text;
+	background-color: #F8F8F8 ;
+}
+
+#results .sparqlResult
+{
+	width:610px;
+	height:500px;
+	resize:none;
+	cursor:text;
+	overflow: auto;
+	white-space: pre;
+	word-wrap: normal;
+}

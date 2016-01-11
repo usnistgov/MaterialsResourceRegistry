@@ -1,0 +1,158 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: explore_keyword.html
+# Application: templates
+# Description: This is the keyword explore template used by the system.
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume Sousa Amaral
+#		  guillaume.sousa@nist.gov
+#
+#         Pierre Francois RIGODIAT
+#         pierre-francois.rigodiat@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/explore.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/keyword.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/lib/jquery.tagit.css' %}"  media="screen" />
+{% endblock %}
+
+{% block title %}<h3>Search for Resources</h3>{% endblock %}
+{% block menu %}
+    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
+{% endblock %}
+
+{% block content %}
+<div id="search">
+        <div id="searchContainer">			
+			<div class="loading" id="loading"></div>
+			<input id="submit" name="submit" type="button" onclick="get_results_keyword_refined()" value="Search" />
+			<div>
+				{{search_Form.search_entry}}
+			</div>
+        </div>
+		<div style="display: none;">{{search_Form.my_schemas}}</div>
+        <div id="form_result_start_current"></div>
+</div>
+<div id="results_infos" style="color:grey;"></div>
+<div class="clearer">&nbsp;</div>
+<div id="results_errors" style="color:red;"></div>
+<table id="icons_table">
+<tr>
+<td align="center" class="selected_resource" value="all">
+<img width="100" src="/static/img/allresources.png"><br/>
+All Resources
+</td>
+<td align="center" value="organization">
+<img width="100" src="/static/img/organization.png"><br>
+Organizations
+</td>
+<td align="center" value="datacollection">
+<img width="100" src="/static/img/datacollection.png"><br>
+Data Collections
+</td>
+<td align="center" value="dataset">
+<img width="100" src="/static/img/dataset.png"><br>
+Datasets
+</td>
+<td align="center" value="service">
+<img width="100" src="/static/img/service.png"><br>
+Services
+</td>
+<td align="center" value="informational">
+<img width="100" src="/static/img/informational.png"><br>
+Informational Sites
+</td>
+<td align="center" value="software">
+<img width="100" src="/static/img/software.jpg"><br>
+Software
+</td>
+</tr>
+</table>
+<br/><br/>
+
+<table>
+<tr>
+<td style="background-color:#fafafa;">
+<select id="results_view" name="results_view">
+<option value="simple"> Brief Results View
+<option value="detailed"> Detailed Results View
+<option value="custom"> Custom View
+</select>
+<table style="margin-top:-40px;">
+<tr>
+<td style="width:220px">
+<br/>
+<a id="config_custom" onclick="configure_custom_view();" style="display:none;cursor: pointer;">Change Custom View</a>
+<br/><br/>
+Resource Type:
+<form id="refine_resource_type"> 
+<input type="radio" name="resource_type" value="all"> All Resources<br/>
+<input type="radio" name="resource_type" value="organization"> Organization<br/>
+<input type="radio" name="resource_type" value="datacollection"> Data Collection<br/>
+<input type="radio" name="resource_type" value="repository"> Repository<br/>
+<input type="radio" name="resource_type" value="projectarchive"> Project Archive<br/>
+<input type="radio" name="resource_type" value="database"> Database<br/>
+<input type="radio" name="resource_type" value="dataset"> Dataset<br/>
+<input type="radio" name="resource_type" value="service"> Service<br/>
+<input type="radio" name="resource_type" value="informational"> Informational Site<br/>
+<input type="radio" name="resource_type" value="software"> Software<br/>
+<br/>
+</form>
+<div id="refine_common"></div>
+<div id="refine_resource"></div>
+</td>
+<td style="background-color:#e0e0e0">
+<div id="results">
+Please wait...
+</div>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-detail-result" title="Resource Details" style="display:none;">
+<div id="result_detail">
+</div>
+</div>
+
+<div id="dialog-custom-view" title="Custom View" style="display:none;">
+Select the fields that you want to display in the result page and click on 'Apply'. <br/><br/>
+<div id="custom_view">
+</div>
+</div>
+
+<div id="dialog-custom-view-error" title="Custom View" style="display:none;">
+No Custom View available for this type of resource.
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/explore.js' %}"></script>
+<script src="{% static 'libs/tags/tag-it.js' %}"></script>
+<script src="{% static 'inc/controllers/js/nmrr/nmrr_explore.js' %}"></script>
+<script>
+    initAutocomplete();
+    initSearch();
+</script>
+{% endblock %}
+

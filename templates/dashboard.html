@@ -1,0 +1,63 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load auth_extras %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: dashboard.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+#         Xavier SCHMITT
+#         xavier.schmitt@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block title %}<h3>Dashboard</h3>{% endblock %}
+
+{% block content %}
+
+<div id="body">
+	
+	<div class="width">
+
+	<section id="content" class="one-column">
+
+        <article>
+
+<div class="article-info"></div>
+
+<ul>
+<li><a href="/my-profile">My Profile</a>
+<li><a href="/my-profile/resources">My Resources</a>
+<!-- <li><a href="/my-profile/favorites">My Favorites</a> -->
+</ul>
+
+
+<div class="clearer">&nbsp;</div>
+<br/><br/>
+
+
+
+</article>
+
+        </section>
+        
+        
+    	<div class="clear"></div>
+    </div>
+	</div>
+
+
+{% endblock %}

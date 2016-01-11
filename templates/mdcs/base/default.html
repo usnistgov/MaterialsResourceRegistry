@@ -1,0 +1,71 @@
+{% extends 'commons/root.v1.html' %}
+{% load staticfiles %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: default.html
+# Application: templates
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block theme %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/mdcs/style.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/mdcs/style.add.css' %}"/>
+{% endblock %}
+
+{% block body %}
+<div id="container">
+	<!-- Header -->
+    {% if not is_popup %}
+        {% include 'mdcs/base/header.html' %}
+        <div id="navigation-wrapper">
+            <div id="navigation-wrapper-2">
+                <div class="center-wrapper">
+                    <div id="navigation">
+                        {% block menu %}{% endblock %}
+                        <div class="clearer">&nbsp;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="subnav-wrapper">
+            <div id="subnav-wrapper-2">
+                <div class="center-wrapper">
+                    <div id="subnav">
+                        {% block submenu %}{% endblock %}
+                        <div class="clearer">&nbsp;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	{% endif %}
+	<!-- END Header -->
+
+	<!-- Content -->
+	<div id="content" class="{% block coltype %}colM{% endblock %}">
+		{% block pretitle %}{% endblock %}
+		<div id="content-wrapper">
+			<div class="center-wrapper">
+                {% block container %}{% endblock %}
+			</div>
+		</div>
+	</div>
+
+	<!-- END Content -->
+	{% include 'mdcs/base/footer.html' %}
+	{% include 'mdcs/base/bottom.html' %}
+</div>
+{% endblock %}

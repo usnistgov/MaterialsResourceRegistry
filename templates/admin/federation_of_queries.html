@@ -1,0 +1,92 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: fed_of_queries.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/fed_of_queries.css' %}" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}<h1>Repositories</h1>{% endblock %}
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab4' %}{% endblock %}
+
+{% block content%}
+<div class="right-side">
+    <span class="ctx_menu">
+        <a href="/admin/repositories/add-repository">Add new instance</a>
+    </span>
+</div>
+
+{% if instances %}
+<table class="data-table">
+    <tr>
+        <th>Instance Name</th>
+        <th>Instance URL</th>
+        <th>Token expires</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for instance in instances %}
+        {% cycle 'even' '' as rowcolors silent %}
+        <tr class="{{ rowcolors }}">
+            <td>{{ instance.name }}</td>
+            <td>{{ instance.protocol }}://{{ instance.address }}:{{ instance.port }}</td>
+            <td>{{ instance.expires }}</td>
+            <td>
+                <div class="icon legend long edit instance" instanceid="{{ instance.id }}">Edit</div>
+                <a href="/admin/repositories/refresh-repository?id={{ instance.id }}">
+                    <div class="icon legend long refresh instance" instanceid="{{ instance.id }}">Refresh</div>
+                </a>
+                <div class="icon legend delete instance" instanceid="{{ instance.id }}">Delete</div>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+    No other Curator instance registered. Click on 'Add new instance' to add a connection to another repositroy.
+{% endif %}
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-deleteinstance-message" title="Confirm Delete" style="display:none;">
+<p></p>
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+    <span>Are you sure you want to delete this instance?</span>
+  </p>
+</div>
+
+<div id="dialog-edit-instance" title="Edit Instance" style="display:none;">
+	<p>
+		<b>Name:</b> <input type="text" id="edit-name"/>
+	</p>
+	<div id="edit_instance_error">
+	</div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/fed_of_queries.js' %}"></script>
+<script>
+	loadFedOfQueriesHandler();
+</script>
+{% endblock %}
