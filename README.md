@@ -1,9 +1,9 @@
 Materials Resource Registry
 ===========================
 
-Access to scientific data and resources across the materials community is limited and fragmented. Local resource providers are frequently populated with new resources but the larger community is often unaware that these potentially interesting resources are available. The NIST Materials Resource Registry bridges the gap between existing resources and the end users by registering the resources and their metadata for search and discovery. 
+Access to scientific data and resources across the materials community is limited and fragmented. Local resource providers are frequently populated with new resources but the larger community is often unaware that these potentially interesting resources are available. The NIST Materials Resource Registry (MMR) bridges the gap between existing resources and the end users by registering the resources and their metadata for search and discovery. 
 
-Resource providers would use the software to register their resources' descriptive metadata, access, and communication protocol for search and retrieval. The software, functioning as a comprehensively located service, would then make the registered information available for lookup to the materials community.
+Resource providers would use the MMR software to register their resources' descriptive metadata, access, and communication protocol for search and retrieval. The MRR software, functioning as a comprehensively located service, would then make the registered information available for lookup to the materials community.
 
 The software was developed by the National Institute of Standards and Technology (NIST).
 
