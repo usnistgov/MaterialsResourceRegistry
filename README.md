@@ -5,7 +5,7 @@ Access to scientific data and resources across the materials community is limite
 
 Resource providers would use the software to register their resources' descriptive metadata, access, and communication protocol for search and retrieval. The software, functioning as a comprehensively located service, would then make the registered information available for lookup to the materials community.
 
-The software was developed by the National Institute of Standards and Technology (NIST)
+The software was developed by the National Institute of Standards and Technology (NIST).
 
 <h3>Installation</h3>
 To install and run the Registry on your machine:
