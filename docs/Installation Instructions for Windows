@@ -1,0 +1,90 @@
+Installation Instructions (Windows)
+for Materials Resource Registry
+
+Setup:
+
+For python:
+
+1)	Download python 2.7 for windows 32bits (https://www.python.org/download/)
+2)	Add to PATH:
+C:\Python27\
+C:\Python27\Scripts
+
+For pip:
+
+We need pip to do the installation of the required dependencies.  pip requires setuptools and it has to be installed first, before pip can run: http://www.pip-installer.org/en/latest/installing.html 
+
+1)	Download get-pip.py
+2)	In a command prompt :
+python get-pip.py 
+
+
+For the virtual environment:
+
+1)	In a command prompt:
+pip install virtualenvwrapper-win
+2)	Add environment variable (Win 7 :Start, right click on Computer, Properties, click on Advance system settings in the left panel, go to advanced tab, Environment Variables…, New)
+WORKON_HOME=%USERPROFILE%\Develop\Envs
+3)	In a command prompt and then :
+mkdir %WORKON_HOME%
+cd %WORKON_HOME%
+mkvirtualenv mgi
+4)	To use the environment:
+workon mgi (the prompt will change and become mgi. You should always see the mgi prompt when installing new packages)
+
+
+Configure MongoDB:
+Please follow general instructions provided in the file called MongoDB Configuration.
+
+Install all required python packages:
+
+Use the file called Required Python Packages to install them in their good version. If you are using a virtual environment, make sure it is activated before starting the installation. Instructions specific to Windows platform can be found below.
+
+
+For ldap:
+
+1)	Install the django-auth-ldap package:
+a.	Download django-auth-ldap package from pypi (https://pypi.python.org/pypi/django-auth-ldap/1.2.0)
+b.	In a command prompt:
+cd PATH_TO_django-auth-ldap_FOLDER
+python setup.py install build
+
+For lxml:
+
+1)	Download lxml from pypi (https://pypi.python.org/pypi/lxml/2.3)
+a.	Use the Windows link for Python 2.7 : lxml-2.3.win32-py2.7.exe (win32)
+2)	Run the installer
+a.	If you use a virtual environment. 
+You can’t change the destination folder set in the installer so you will have to install the package in the specified folder (C:\Python27\Lib\site-packages\) and then copy the lxml directories from C:\Python27\Lib\site-packages\ to %USERPROFILE%\Develop\Envs\mgi\Lib\site-packages.
+
+
+Running the MRR for the first time:
+
+1)	Run mongodb (if not already running). In a command prompt :
+mongod --config /path/to/mrr/conf/mongodb.conf
+
+2)	python manage.py syncdb
+
+Answer yes to:
+You just installed Django's auth system, which means you don't have any superusers defined.
+Would you like to create one now? (yes/no):yes
+
+
+To Run the software:
+
+1)	Run mongodb (if not already running). In a command prompt :
+mongod --config /path/to/mrr/conf/mongodb.conf
+
+2)	Run the MRR. In a command prompt :
+workon mgi
+cd path/to/mrr
+python manage.py runserver
+
+
+To be able to access the system remotely, instead of using python manage.py runserver, use: python manage.py runserver 0.0.0.0:<port>
+
+Access:
+
+For Materials Data Curation System, Go to:  http://127.0.0.1:8000/ 
+
+For Materials Data Curation Administration, Go to:  http://127.0.0.1:8000/admin/ 
