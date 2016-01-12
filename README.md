@@ -26,3 +26,7 @@ The XML-based schemas provided with the Materials Resource Registry are examples
 <h3>Installers</h3>
 
 Automatic installers for Windows and Mac OS are available upon request.
+
+<h3>Known Issues</h3>
+
+The use of Mozilla Firefox is discouraged for the current release.
