@@ -9,6 +9,8 @@ The MRR software was developed by the National Institute of Standards and Techno
 
 <h3>Installation</h3>
 To install and run the Registry on your machine:
+- Pick the instruction notes for your operating system, inside the docs folder,
+- Follow the installation instructions,
 - Make sure that the python packages and software that you are installing, match the versions listed in the document Required Python Packages and Required Software,
 - Recommended Internet Browser: Google Chrome/Safari.
 
