@@ -353,6 +353,33 @@ def get_nodes_xpath(elements, xmlTree, namespace):
             xpaths.extend(get_subnodes_xpath(element, xmlTree, namespace))
     return xpaths
 
+    
+# def isDeterminist(element, xmlTree, namespace):
+#     determinist = True
+#     try:        
+#         # look at sequence children, to see if it contains only elements 
+#         if(len(list(element)) != 0):
+#             for child in element:
+#                 if (child.tag != "{0}element".format(namespace)):
+#                     determinist = False
+#                     break
+#             # doesn't contain only elements, need to get sub elements xpath to see if they are determinist
+#             if determinist == False:
+#                 # get xpath of all elements
+#                 xpaths = get_nodes_xpath(list(element), xmlTree, namespace)
+#                 # check that xpaths are unique
+#                 if len(xpaths) == len(set(xpaths)):
+#                     determinist = True
+#                 else:
+#                     print "NOT DETERMINISTIC"
+#     except:
+#         print "ERROR"
+#         return False
+#         
+#     return determinist
+
+
+
 
 ################################################################################
 # 

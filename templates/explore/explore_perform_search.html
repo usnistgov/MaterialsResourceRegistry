@@ -1,4 +1,4 @@
-{% extends "mdcs/extra/two_columns.html" %}
+{% extends "nmrr/extra/small_intro.html" %}
 {% load staticfiles %}
 {% load auth_extras %}
 
@@ -30,56 +30,35 @@
 {% block title %}<h1>Perform Search</h1>{% endblock %}
 
 {% block description %}
-    {% if request.session.currentExploreTab == "tab-1" %}
-        <span id="tab1Desc">
-            Click on a field of the Query Builder to add an element to your query. The custom tree defined in Step 2
-            will appear and you will be able to select one of the highlighted elements. Click on plus/minus icons to
-            add/remove criteria. You can save queries to build more complex queries and you will retrieve them on your
-            next connection. When your query is done, please click on Submit Query to get XML documents that match the
-            criterias. <a href="/explore/all_results?id={{template_id}}">Click here to get all documents of selected
-            template.</a> or <a href="/explore/all_versions_results?id={{template_id}}">Click here to get all documents
-            from all versions of selected template.</a>
-        </span>
-        <span id="tab2Desc" class="large" style="display:none;">Enter your query in the field below.</span>
-    {%else%}
-        <span id="tab1Desc" style="display:none;">
-            Click on a field of the Query Builder to add an element to your query. The custom tree defined in Step 2
-            will appear and you will be able to select one of the highlighted elements. Click on plus/minus icons to
-            add/remove criteria. You can save queries to build more complex queries and you will retrieve them on your
-            next connection. When your query is done, please click on Submit Query to get XML documents that match the
-            criterias. <a href="/explore/all_results?id={{template_id}}">Click here to get all documents of selected
-            template.</a> or <a href="/explore/all_versions_results?id={{template_id}}">Click here to get all documents
-            from all versions of selected template.</a>
-        </span>
-        <span id="tab2Desc" class="large">Enter your query in the field below.</span>
-    {%endif%}
+   <span>
+       Click on a field of the Query Builder to add an element to your query. The custom tree defined in Step 2
+       will appear and you will be able to select one of the highlighted elements. Click on plus/minus icons to
+       add/remove criteria. You can save queries to build more complex queries and you will retrieve them on your
+       next connection. When your query is done, please click on Submit Query to get XML documents that match the
+       criterias. <a href="/explore/all_results?id={{template_id}}">Click here to get all documents of selected
+       template.</a> or <a href="/explore/all_versions_results?id={{template_id}}">Click here to get all documents
+       from all versions of selected template.</a>
+   </span>
 {% endblock %}
 
 {% block menu %}{% include 'mdcs/menus/main.html' with active_tab='tab3' %}{% endblock %}
 
 {% block submenu %}	
 <ul id="subnav-tab-1" class="tabbed">
-	<li><a href="/explore/select-template">Select Template</a></li>
-	<li><a href="/explore/customize-template">Select Fields</a></li>
-	<li class="current_page_item"><a href="/explore/perform-search">Perform Search</a></li>
-</ul>
-<ul id="subnav-tab-2" class="tabbed" style="display: none;">
-  <li><a href="/explore/select-template">Select Template</a></li>
-  <li><div style="cursor:pointer">
-      <a onclick="verifyTemplateIsSelected('/explore/customize-template');">Select Fields</a>
-  </div></li>
-  <li class="current_page_item"><div style="cursor:pointer">
-      <a onclick="verifyTemplateIsSelected('/explore/perform-search');">Perform Search</a>
-  </div></li>
+    <li class="current_page_item">
+    	<a href="/explore">Query by Example</a>
+   	</li>
+    <li>
+        <div style="cursor:pointer">
+            <a href="/explore/keyword">Search by Keyword</a>
+        </div>
+    </li>
 </ul>
 {% endblock %}
 
 {% block content %}
-    {% if request.session.currentExploreTab == "tab-1" %}
-    <div id="queryBuilder">
-    {% else %}
-    <div id="queryBuilder" style="display: none;">
-    {% endif %}
+     <div id="queryBuilder">
+   
 
 	<h2>Query Builder</h2>		
 	<div id="queryForm">
@@ -136,62 +115,18 @@
 	</div>
 	{% endif %}
 </div>
-					 
-{% if request.session.currentExploreTab == "tab-2" %}
-<div id="SPARQLqueryBuilder">
-{% else %}
-<div id="SPARQLqueryBuilder" style="display: none;">
-{% endif %} 						
-	<form>
-		<textarea class="SPARQLTextArea">{}
-{}</textarea>							
-		<span class="btn" onclick="sparqlquery()">Submit Query</span>
-		<span class="btn" onclick="getElementPath()">Get an Element</span>
-	</form>
-</div>					
+					 		
 {% endblock %}
 	
 {% block sidebar %}
-<div class="box">
-	<div class="box-title">{{CUSTOM_EXPLORE}}</div>
-	<div id="explore-tabs">
-		<div class="tab">
-			{% if request.session.currentExploreTab == "tab-1" %}
-		    <input type="radio" id="tab-1" name="tab-group-1" checked>
-		    {% else %}
-		    <input type="radio" id="tab-1" name="tab-group-1">
-		    {% endif %}
-		    <label for="tab-1" onclick="switchTab('tab-1')">Query by Example</label>
-	
-		    <div class="content">
-		        <div class="box-content">
-				  <ul class="nice-list">
-				    {% include 'explore/menu/menu-items.html' with step='s3' %}
-				  </ul>
-				</div>	
-		    </div> 
-		</div>
-		
-		<div class="tab">		
-	       {% if request.session.currentExploreTab == "tab-2" %}
-	       <input type="radio" id="tab-2" name="tab-group-1" checked>
-	       {% else %}
-	       <input type="radio" id="tab-2" name="tab-group-1" disabled>
-	       {% endif %}
-	       <label for="tab-2" class="unavailable">SPARQL Endpoint</label>
-		
-		    <div class="content">
-	           <div class="box-content">
-				  <ul class="nice-list">
-				    {% include 'explore/menu/menu-items.html' with step='s3' %}
-				  </ul>
-				</div>	
-	       </div> 
-	   </div>		   
-	</div>
-</div>
-
-<div class="box">
+<div class="box">		    
+    <div class="content">
+       <div class="box-content">
+           <ul class="nice-list">
+               {% include 'explore/menu/menu-items.html' with step='s3' %}
+           </ul>
+       </div>
+    </div> 			
 	<div class="box-title">Repositories</div><br/>
 	<div id="fed_of_queries_instances">
 	{% for instance in instances %}
@@ -226,16 +161,6 @@
 	</p>
 	<div id="customForm">
 	</div>
-</div>
-
-<div id="dialog-sparqlcustomTree" title="Get the path to an Element" style="display:none;">
-	<p>
-	This window allows to help you to build the query. Select the element that you want to insert in the query and then go to the bottom of the window to copy/paste the path in your query.
-	</p>
-	<div id="sparqlCustomForm">
-	</div>
-	<br/><strong>Element Path :</strong><br/>
-	<input id="sparqlElementPath" type="text"/>
 </div>
 
 <div id="dialog-subElementQuery" title="Subelement Query" style="display:none;">

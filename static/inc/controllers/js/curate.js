@@ -1181,6 +1181,7 @@ load_start_form = function(){
         	
         },
         success: function(data){
+            $("#banner_errors").hide()
             $("#form_start_content").html(data.template);
             enterKeyPressSubscription();
         }
@@ -1208,12 +1209,14 @@ enterKeyPressSubscription = function ()
  */
 validateStartCurate = function(){
 	errors = ""
-	
+
+	$("#banner_errors").hide()
 	// check if an option has been selected
 	selected_option = $( "#form_start" ).find("input:radio[name='curate_form']:checked").val()
 	if (selected_option == undefined){
 		errors = "No option selected. Please check one radio button."
 		$("#form_start_errors").html(errors);
+		$("#banner_errors").show(500)
 		return (false);
 	}else{
 		if (selected_option == "new"){
@@ -1233,6 +1236,7 @@ validateStartCurate = function(){
 		
 	if (errors != ""){
 		$("#form_start_errors").html(errors);
+		$("#banner_errors").show(500)
 		return (false);
 	}else{
 		return (true)
@@ -1399,5 +1403,12 @@ useErrosAndView = function(errors){
             	$("#useErrorMessage").html("");
             }
         });
+    });
+}
+
+initBanner = function()
+{
+    $("[data-hide]").on("click", function(){
+        $(this).closest("." + $(this).attr("data-hide")).hide(200);
     });
 }

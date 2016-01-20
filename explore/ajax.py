@@ -935,76 +935,99 @@ def get_results_by_instance_keyword(request):
     resultsByKeyword = []
     results = []
     resultString = ""
-    sessionName = "resultsExploreLocal"
 
-    if settings.EXPLORE_BY_KEYWORD:
-        try:
-            keyword = request.GET['keyword']
-            schemas = request.GET.getlist('schemas[]')
-            refinements = refinements_to_mongo(request.GET.getlist('refinements[]'))
-            onlySuggestions = json.loads(request.GET['onlySuggestions'])
-        except:
-            keyword = ''
-            schemas = []
-            refinements = {}
-            onlySuggestions = True
+    #Instance
+    json_instances = []
+    if 'HTTPS' in request.META['SERVER_PROTOCOL']:
+        protocol = "https"
+    else:
+        protocol = "http"
+    instance = Instance(name="Local", protocol=protocol, address=request.META['REMOTE_ADDR'], port=request.META['SERVER_PORT'], access_token="token", refresh_token="token")
+    json_instances.append(instance.to_json())
+    request.session['instancesExplore'] = json_instances
+    sessionName = "resultsExplore" + instance['name']
 
-        #We get all template versions for the given schemas
-        templatesVersions = Template.objects(title__in=schemas).distinct(field="templateVersion")
-        #We get all templates ID, for all versions
-        templatesID = TemplateVersion.objects(pk__in=templatesVersions).distinct(field="versions")
-        
-        instanceResults = XMLdata.executeFullTextQuery(keyword, templatesID, refinements)
-        if len(instanceResults) > 0:
+
+    try:
+        keyword = request.GET['keyword']
+        schemas = request.GET.getlist('schemas[]')
+        userSchemas = request.GET.getlist('userSchemas[]')
+        refinements = refinements_to_mongo(request.GET.getlist('refinements[]'))
+        onlySuggestions = json.loads(request.GET['onlySuggestions'])
+    except:
+        keyword = ''
+        schemas = []
+        userSchemas = []
+        refinements = {}
+        onlySuggestions = True
+
+    #We get all template versions for the given schemas
+    #First, we take care of user defined schema
+    templatesIDUser = Template.objects(title__in=userSchemas).distinct(field="id")
+    templatesIDUser = [str(x) for x in templatesIDUser]
+
+    #Take care of the rest, with versions
+    templatesVersions = Template.objects(title__in=schemas).distinct(field="templateVersion")
+
+    #We get all templates ID, for all versions
+    allTemplatesIDCommon = TemplateVersion.objects(pk__in=templatesVersions, isDeleted=False).distinct(field="versions")
+    #We remove the removed version
+    allTemplatesIDCommonRemoved = TemplateVersion.objects(pk__in=templatesVersions, isDeleted=False).distinct(field="deletedVersions")
+    templatesIDCommon = list(set(allTemplatesIDCommon) - set(allTemplatesIDCommonRemoved))
+
+    templatesID = templatesIDUser + templatesIDCommon
+    instanceResults = XMLdata.executeFullTextQuery(keyword, templatesID, refinements)
+    if len(instanceResults) > 0:
+        if not onlySuggestions:
+            xsltPath = os.path.join(settings.SITE_ROOT, 'static/resources/xsl/xml2html.xsl')
+            xslt = etree.parse(xsltPath)
+            transform = etree.XSLT(xslt)
+            template = loader.get_template('explore/explore_result_keyword.html')
+
+        for instanceResult in instanceResults:
             if not onlySuggestions:
-                xsltPath = os.path.join(settings.SITE_ROOT, 'static/resources/xsl/xml2html.xsl')
-                xslt = etree.parse(xsltPath)
-                transform = etree.XSLT(xslt)
-                template = loader.get_template('explore/explore_result_keyword.html')
-
-            for instanceResult in instanceResults:
-                if not onlySuggestions:
-                    custom_xslt = False
-                    results.append({'title':instanceResult['title'], 'content':xmltodict.unparse(instanceResult['content']),'id':str(instanceResult['_id'])})
-                    dom = etree.XML(str(xmltodict.unparse(instanceResult['content']).encode('utf-8')))
-                    #Check if a custom list result XSLT has to be used
-                    try:
-                        schema = Template.objects.get(pk=instanceResult['schema'])
-                        if schema.ResultXsltList:
-                            listXslt = etree.parse(BytesIO(schema.ResultXsltList.content.encode('utf-8')))
-                            listTransform = etree.XSLT(listXslt)
-                            newdom = listTransform(dom)
-                            custom_xslt = True
-                        else:
-                            newdom = transform(dom)
-                    except Exception, e:
-                        #We use the default one
+                custom_xslt = False
+                results.append({'title':instanceResult['title'], 'content':xmltodict.unparse(instanceResult['content']),'id':str(instanceResult['_id'])})
+                dom = etree.XML(str(xmltodict.unparse(instanceResult['content']).encode('utf-8')))
+                #Check if a custom list result XSLT has to be used
+                try:
+                    schema = Template.objects.get(pk=instanceResult['schema'])
+                    if schema.ResultXsltList:
+                        listXslt = etree.parse(BytesIO(schema.ResultXsltList.content.encode('utf-8')))
+                        listTransform = etree.XSLT(listXslt)
+                        newdom = listTransform(dom)
+                        custom_xslt = True
+                    else:
                         newdom = transform(dom)
-                        custom_xslt = False
+                except Exception, e:
+                    #We use the default one
+                    newdom = transform(dom)
+                    custom_xslt = False
 
-                    context = RequestContext(request, {'id':str(instanceResult['_id']),
-                                       'xml': str(newdom),
-                                       'title': instanceResult['title'],
-                                       'custom_xslt': custom_xslt})
+                context = RequestContext(request, {'id':str(instanceResult['_id']),
+                                   'xml': str(newdom),
+                                   'title': instanceResult['title'],
+                                   'custom_xslt': custom_xslt,
+                                   'template_name': schema.title})
 
-                    resultString+= template.render(context)
-                else:
-                    wordList = re.sub("[^\w]", " ",  keyword).split()
-                    wordList = [x + "|" + x +"\w+" for x in wordList]
-                    wordList = '|'.join(wordList)
-                    listWholeKeywords = re.findall("\\b("+ wordList +")\\b", xmltodict.unparse(instanceResult['content']).encode('utf-8'), flags=re.IGNORECASE)
-                    labels = list(set(listWholeKeywords))
+                resultString+= template.render(context)
+            else:
+                wordList = re.sub("[^\w]", " ",  keyword).split()
+                wordList = [x + "|" + x +"\w+" for x in wordList]
+                wordList = '|'.join(wordList)
+                listWholeKeywords = re.findall("\\b("+ wordList +")\\b", xmltodict.unparse(instanceResult['content']).encode('utf-8'), flags=re.IGNORECASE)
+                labels = list(set(listWholeKeywords))
 
-                    for label in labels:
-                        label = label.lower()
-                        result_json = {}
-                        result_json['label'] = label
-                        result_json['value'] = label
-                        if not result_json in resultsByKeyword:
-                            resultsByKeyword.append(result_json)
+                for label in labels:
+                    label = label.lower()
+                    result_json = {}
+                    result_json['label'] = label
+                    result_json['value'] = label
+                    if not result_json in resultsByKeyword:
+                        resultsByKeyword.append(result_json)
 
-            result_json = {}
-            result_json['resultString'] = resultString
+        result_json = {}
+        result_json['resultString'] = resultString
 
     request.session[sessionName] = results
     print 'END def getResultsKeyword(request)'
@@ -1036,6 +1059,24 @@ def get_results_by_instance(request):
         if instance['name'] == "Local":
             query = copy.deepcopy(request.session['queryExplore'])
             manageRegexBeforeExe(query)
+            
+            selected_template_id = request.session['exploreCurrentTemplateID']
+            template = Template.objects().get(pk=selected_template_id)
+            
+            # template is user defined
+            if template.user is not None:
+                # update the query
+                query.update({'schema': str(selected_template_id)})
+            else:
+                # template is global
+                template_version_id = template.templateVersion
+                # get version manager
+                template_version = TemplateVersion.objects().get(pk=template_version_id)
+                # get all versions, not deleted
+                versions = [version for version in template_version.versions if version not in template_version.deletedVersions]
+                # update the query
+                query.update({'schema' : {'$in': versions} } ) 
+            
             instanceResults = XMLdata.executeQueryFullResult(query)
 
             if len(instanceResults) > 0:
@@ -1066,7 +1107,8 @@ def get_results_by_instance(request):
                     context = RequestContext(request, {'id':str(instanceResult['_id']),
                                                'xml': str(newdom),
                                                'title': instanceResult['title'],
-                                               'custom_xslt': custom_xslt})
+                                               'custom_xslt': custom_xslt,
+                                               'template_name': schema.title})
 
                     resultString+= template.render(context)
 
@@ -2271,10 +2313,7 @@ def get_custom_form(request):
             
         
     if (customFormString != ""):
-        if 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-1":
-            customForm = customFormString
-        elif 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-2":
-            customForm = ""
+        customForm = customFormString
     else:
         customFormErrorMsg = "<p style='color:red;'>You should customize the template first. <a href='/explore/customize-template' style='color:red;font-weight:bold;'>Go back to Step 2 </a> and select the elements that you want to use in your queries.</p>"
         customForm = customFormErrorMsg
@@ -2438,65 +2477,6 @@ def back_to_query(request):
 
 ################################################################################
 #
-# Function Name: redirect_explore(request)
-# Inputs:        request - 
-# Outputs:       
-# Exceptions:    None
-# Description:   Switch tab
-#                
-################################################################################
-def redirect_explore(request):
-    request.session['currentExploreTab'] = "tab-2"
-
-
-################################################################################
-#
-# Function Name: redirectExploreTabs(request)
-# Inputs:        request - 
-# Outputs:       
-# Exceptions:    None
-# Description:   Switch tab
-#                
-################################################################################
-def redirect_explore_tabs(request):
-    if 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-2":
-        response_dict = {'tab':'tab-2'}
-    else:
-        response_dict = {'tab':'tab-1'}
-     
-    return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
-
-################################################################################
-#
-# Function Name: redirectExploreTabs(request)
-# Inputs:        request - 
-# Outputs:       
-# Exceptions:    None
-# Description:   Switch tab and clears/sets custom forms
-#                
-################################################################################
-def switch_explore_tab(request):    
-    request.session["currentExploreTab"] = request.POST['tab']
-    customForm = ""
-    
-    if 'customFormStringExplore' in request.session:   
-        customFormString = request.session['customFormStringExplore']
-    else:
-        customFormString = ""
-    
-    if (customFormString != ""):
-        if 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-1":
-            customForm = customFormString
-        elif 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-2":
-            customForm = ""
-    
-    response_dict = {"customForm": customForm}
-    return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
-
-################################################################################
-#
 # Function Name: set_current_criteria(request)
 # Inputs:        request - 
 # Outputs:       
@@ -2516,7 +2496,7 @@ def set_current_criteria(request):
 # Inputs:        request - 
 # Outputs:       
 # Exceptions:    None
-# Description:   Select an element from the Get Element feature of the SPARQL endpoint
+# Description:   Select an element in the custom tree
 #                
 ################################################################################
 def select_element(request):
@@ -2524,18 +2504,11 @@ def select_element(request):
     element_id = request.POST['elementID']
     element_name = request.POST['elementName']
     
-    if 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-1":
-        criteria_id = request.session['criteriaIDExplore']  
-        response_dict = {"tab": "tab-1", 
-                         "criteriaTagID": criteria_id,
-                         "criteriaID": str(criteria_id[4:])}  
-        
-        request.session['criteriaIDExplore'] = ""
-    elif 'currentExploreTab' in request.session and request.session['currentExploreTab'] == "tab-2":
-        mapTagIDElementInfo = request.session['mapTagIDElementInfoExplore']
-        elementPath = eval(mapTagIDElementInfo[str(element_id)])['path']
-        response_dict = {"tab": "tab-2", 
-                         "elementPath": elementPath} 
+    criteria_id = request.session['criteriaIDExplore']  
+    response_dict = {"criteriaTagID": criteria_id,
+                     "criteriaID": str(criteria_id[4:])}  
+    
+    request.session['criteriaIDExplore'] = ""
 
     return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
 
@@ -2844,33 +2817,6 @@ def delete_result(request):
     
     return HttpResponse(json.dumps({}), content_type='application/javascript')
 
-################################################################################
-#
-# Function Name: update_publish(request)
-# Inputs:        request -
-# Outputs:
-# Exceptions:    None
-# Description:   Publish and update the publish date of an XMLdata
-#
-################################################################################
-def update_publish(request):
-    XMLdata.update_publish(request.GET['result_id'])
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-################################################################################
-#
-# Function Name: update_unpublish(request)
-# Inputs:        request -
-# Outputs:
-# Exceptions:    None
-# Description:   Unpublish an XMLdata
-#
-################################################################################
-def update_unpublish(request):
-    XMLdata.update_unpublish(request.GET['result_id'])
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-
 
 ################################################################################
 #
@@ -2961,12 +2907,15 @@ def load_refinements(request):
                                 element = element[0]
                                 query.insert(0,element.attrib['name'])
                         elif element.tag == "{0}complexType".format(default_namespace):
-                            element = xmlDocTree.findall(".//{0}element[@type='{1}']".format(default_namespace, element.attrib['name']))
-                            if len(element) > 1:
-                                print "error: more than one element using the enumeration (" +str(len(element)) +")"
-                            else:
-                                element = element[0]
-                                query.insert(0,element.attrib['name'])
+                            try:
+                                element = xmlDocTree.findall(".//{0}element[@type='{1}']".format(default_namespace, element.attrib['name']))
+                                if len(element) > 1:
+                                    print "error: more than one element using the enumeration (" +str(len(element)) +")"
+                                else:
+                                    element = element[0]
+                                    query.insert(0,element.attrib['name'])
+                            except:
+                                pass
                         element = element.getparent()            
                 
                 dot_query = ".".join(query)

@@ -63,6 +63,12 @@ Add New Software
 {% endblock %}
 
 {% block content %}
+<div class="alert alert-danger" id="banner_errors" style="display: none;">
+        <a href="#" class="close" data-hide="alert" aria-label="close">&times;</a>
+     	<h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_start_errors">
+</div>
+</div>
 <div class="clearer">&nbsp;</div>
 <div id="dialog-message" title="Template Loaded">
     <form id="form_start" action="/curate/start_curate" method="post">
@@ -81,5 +87,6 @@ Add New Software
 <script src="{% static 'inc/controllers/js/curate.js' %}"></script>
 <script>
     enterKeyPressSubscription();
+    initBanner();
 </script>
 {% endblock %}

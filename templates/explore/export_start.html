@@ -1,6 +1,6 @@
  {% if nb_elts_exp > 0 %}
  <p>
-	{{export_form}}
+	{{export_form.my_exporters}}
  </p>
  {% endif %}
 
@@ -8,10 +8,29 @@
  <p>
 	<div id="fileXSLT">
 		<i>XSLT files</i>
-		{{upload_xslt_Form}}
+		{{upload_xslt_Form.my_xslts}}
 	</div>
  </p>
-  {% endif %}
+
+ {% endif %}
+
+ {% if export_form.my_exporters_disabled or upload_xslt_Form.my_xslts_disabled %}
+    <hr>
+   <div class="alert alert-info">
+       <h4><i class="fa fa-info fa-2x"></i> Information</h4>
+       <p>Unavailable exporters due to selection of results from different templates:</p>
+       <ul>
+        <li>
+          {{export_form.my_exporters_disabled}}
+        </li>
+        {% if upload_xslt_Form.my_xslts_disabled %}
+        <li>
+          XSLT Files: {{upload_xslt_Form.my_xslts_disabled}}
+         </li>
+        {% endif %}
+       </ul>
+    </div>
+ {% endif %}
 
  {% if nb_elts_exp == 0 and nb_elts_xslt == 0 %}
   <p>

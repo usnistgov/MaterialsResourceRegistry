@@ -241,15 +241,14 @@ class XMLdata():
 
     @staticmethod
     def initIndexes():
-        if settings.EXPLORE_BY_KEYWORD:
-            #create a connection
-            client = MongoClient(MONGODB_URI)
-            # connect to the db 'mgi'
-            db = client['mgi']
-            # get the xmldata collection
-            xmldata = db['xmldata']
-            # create the full text index
-            xmldata.create_index([('$**', TEXT)], default_language="en", language_override="en")
+        #create a connection
+        client = MongoClient(MONGODB_URI)
+        # connect to the db 'mgi'
+        db = client['mgi']
+        # get the xmldata collection
+        xmldata = db['xmldata']
+        # create the full text index
+        xmldata.create_index([('$**', TEXT)], default_language="en", language_override="en")
 
 
     def save(self):
@@ -348,7 +347,22 @@ class XMLdata():
         # get the xmldata collection
         xmldata = db['xmldata']
         return xmldata.find_one({'_id': ObjectId(postID)}, as_class = OrderedDict)
-    
+
+
+    @staticmethod
+    def getByIDsAndDistinctBy(listIDs, distinctBy=None):
+        """
+            Returns the object with the given id
+        """
+        # create a connection
+        client = MongoClient(MONGODB_URI)
+        # connect to the db 'mgi'
+        db = client['mgi']
+        # get the xmldata collection
+        xmldata = db['xmldata']
+        listIDs = [ObjectId(x) for x in listIDs]
+        return xmldata.find({'_id': { '$in': listIDs }}, as_class = OrderedDict).distinct(distinctBy)
+
     
     @staticmethod
     def delete(postID):
@@ -403,32 +417,6 @@ class XMLdata():
         json = {'content': json_content, 'title': title}
                     
         xmldata.update({'_id': ObjectId(postID)}, {"$set":json}, upsert=False)
-
-    @staticmethod
-    def update_publish(postID):
-        """
-            Update the object with the given id
-        """
-        # create a connection
-        client = MongoClient(MONGODB_URI)
-        # connect to the db 'mgi'
-        db = client['mgi']
-        # get the xmldata collection
-        xmldata = db['xmldata']
-        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'publicationdate': datetime.datetime.now(), 'ispublished': True}}, upsert=False)
-
-    @staticmethod
-    def update_unpublish(postID):
-        """
-            Update the object with the given id
-        """
-        # create a connection
-        client = MongoClient(MONGODB_URI)
-        # connect to the db 'mgi'
-        db = client['mgi']
-        # get the xmldata collection
-        xmldata = db['xmldata']
-        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'ispublished': False}}, upsert=False)
 
     @staticmethod
     def update_publish(postID):

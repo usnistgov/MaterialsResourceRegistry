@@ -31,7 +31,9 @@ def init_rules():
     If the default group does not exist, creation of the group with associate permissions
     """
     try:
-        # Get or Create the Group anonymous
+        ###########################################
+        #### Get or Create the Group anonymous ####
+        ###########################################
         anonymousGroup, created = Group.objects.get_or_create(name=anonymous_group)
         if not created:
             anonymousGroup.permissions.clear()
@@ -44,8 +46,6 @@ def init_rules():
         defaultGroup, created = Group.objects.get_or_create(name=default_group)
         if not created:
             defaultGroup.permissions.clear()
-
-        #We add the exploration_access and curate_acces by default
         explore_access_perm = Permission.objects.get(codename=explore_access)
         curate_access_perm = Permission.objects.get(codename=curate_access)
         curate_edit_perm = Permission.objects.get(codename=curate_edit_document)

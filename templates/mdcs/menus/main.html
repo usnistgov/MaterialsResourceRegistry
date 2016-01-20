@@ -24,7 +24,7 @@
 	<li class="{% if active_tab == 'tab2' %} current_page_item {% endif %}"><a href="/curate">{{CUSTOM_CURATE}}</a></li>
 	{% endif %}
 	{% if user|has_perm:'explore.explore_access' %}
-	<li class="{% if active_tab == 'tab3' %} current_page_item {% endif %}"><a href="/explore">{{CUSTOM_EXPLORE}}</a></li>
+	<li class="{% if active_tab == 'tab3' %} current_page_item {% endif %}"><a href="/explore/keyword">{{CUSTOM_EXPLORE}}</a></li>
 	{% endif %}
 	{% if user|has_perm:'compose.compose_access' %}
 	<li class="{% if active_tab == 'tab4' %} current_page_item {% endif %}"><a href="/compose">{{CUSTOM_COMPOSE}}</a></li>

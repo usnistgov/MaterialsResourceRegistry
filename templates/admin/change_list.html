@@ -148,14 +148,14 @@
             {% block search %}{% search_form cl %}{% endblock %}
             {% block date_hierarchy %}{% date_hierarchy cl %}{% endblock %}
 
-            {% block filters %}
-                {% if cl.has_filters %}
-                    <div id="changelist-filter">
-                        <h2>{% trans 'Filter' %}</h2>
-                        {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
-                    </div>
-                {% endif %}
-            {% endblock %}
+            <!--{% block filters %}-->
+                <!--{% if cl.has_filters %}-->
+                    <!--<div id="changelist-filter">-->
+                        <!--<h2>{% trans 'Filter' %}</h2>-->
+                        <!--{% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}-->
+                    <!--</div>-->
+                <!--{% endif %}-->
+            <!--{% endblock %}-->
 
             <form id="changelist-form" action="" method="post"
                   {% if cl.formset.is_multipart %}enctype="multipart/form-data"{% endif %}>
@@ -178,10 +178,5 @@
     </div>
   </div>
 
-			</div>
-
-		</div>
-
-	</div>
-
+<br/><br/><br/><br/><br/>
 {% endblock %}

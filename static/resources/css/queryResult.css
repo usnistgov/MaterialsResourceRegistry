@@ -30,14 +30,3 @@
 	cursor:text;
 	background-color: #F8F8F8 ;
 }
-
-#results .sparqlResult
-{
-	width:610px;
-	height:500px;
-	resize:none;
-	cursor:text;
-	overflow: auto;
-	white-space: pre;
-	word-wrap: normal;
-}

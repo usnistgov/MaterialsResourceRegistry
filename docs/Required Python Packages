@@ -1,12 +1,11 @@
 Required Python Packages
 
-This document provides a list of all python packages that are required to make the Registry run well. 
+This document provides a list of all python packages that are required to make the MRR run well. 
 To install a specific version of a package, the following command can be used:
 pip install <PACKAGE_NAME>==<PACKAGE_VERSION>
 
 pip install Django==1.7 (https://docs.djangoproject.com/en/1.7/)
 pip install mongoengine==0.8.7 (http://mongoengine.org/)
-pip install pyzmq==14.3.1 (https://pypi.python.org/pypi/pyzmq)
 pip install djangorestframework==2.3.13 (http://www.django-rest-framework.org/)
 pip install django-oauth-toolkit==0.8.0 (https://django-oauth-toolkit.readthedocs.org/en/latest/)
 pip install django-rest-framework-mongoengine==1.3 (https://pypi.python.org/pypi/django-rest-framework-mongoengine)

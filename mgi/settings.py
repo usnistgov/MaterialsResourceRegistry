@@ -101,9 +101,6 @@ CUSTOM_EXPLORE = 'Search for resources'
 CURATE_MIN_TREE = True
 CURATE_COLLAPSE = False
 
-#KEYWORD
-EXPLORE_BY_KEYWORD = True  #True or False
-
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 
 TEMPLATE_LOADERS = (

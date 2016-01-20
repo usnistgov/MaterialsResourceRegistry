@@ -58,7 +58,8 @@ Running the MRR for the first time:
 1)	Run mongodb (if not already running). In a command prompt :
 mongod --config /path/to/mrr/conf/mongodb.conf
 
-2)	python manage.py syncdb
+2)	python manage.py migrate
+	python manage.py createsuperuser
 
 Answer yes to:
 You just installed Django's auth system, which means you don't have any superusers defined.

@@ -90,45 +90,6 @@
 	background-color: #FF9933;
 }
 
-#SPARQLqueryBuilder .SPARQLTextArea
-{
-	width:640px;
-	height:300px;
-	resize:none;
-	cursor:text;
-}
-
-#SPARQLqueryBuilder .btn
-{
-	float: right;
-	margin-bottom: 20px;
-}
-
-#SPARQLFormat
-{
-	width: 70px;
-	float: right;
-	margin-bottom: 20px;
-	margin-top: 0px;
-}
-
-#sparqlCustomForm
-{
-	height: 300px;
-	overflow: auto;
-}
-
-#sparqlElementPath
-{
-	width: 95%;
-}
-
-#sparqlExample
-{
-	width: 95%;	
-	resize: none;
-}
-
 #subElementQueryBuilder select
 {
 	width:70px;	

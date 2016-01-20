@@ -1,4 +1,4 @@
-{% extends "mdcs/extra/two_columns.html" %}
+{% extends "nmrr/extra/small_intro.html" %}
 {% load staticfiles %}
 {% load auth_extras %}
 
@@ -34,11 +34,16 @@ available in the query screen. When you are done, please click on Perform Search
 {% endblock %}
 
 {% block menu %}{% include 'mdcs/menus/main.html' with active_tab='tab3' %}{% endblock %}
-{% block submenu %}
+{% block submenu %}	
 <ul id="subnav-tab-1" class="tabbed">
-	<li><a href="/explore/select-template">Select Template</a></li>
-	<li class="current_page_item"><a href="/explore/customize-template">Select Fields</a></li>
-	<li><a onclick="exploreData();" style="cursor:pointer;">Perform Search</a></li>
+    <li class="current_page_item">
+    	<a href="/explore">Query by Example</a>
+   	</li>
+    <li>
+        <div style="cursor:pointer">
+            <a href="/explore/keyword">Search by Keyword</a>
+        </div>
+    </li>
 </ul>
 {% endblock %}
 
@@ -53,42 +58,14 @@ available in the query screen. When you are done, please click on Perform Search
 {% endblock %}
 
 {% block sidebar %}
-<div class="box">
-	<div class="box-title">{{CUSTOM_EXPLORE}}</div>
-	<div id="explore-tabs">	
-		<div class="tab">
-			{% if request.session.currentExploreTab == "tab-1" %}
-		        <input type="radio" id="tab-1" name="tab-group-1" checked>
-		    {% else %}
-		        <input type="radio" id="tab-1" name="tab-group-1">
-		    {% endif %}
-		    <label for="tab-1" onclick="switchTab('tab-1')">Query by Example</label>
-		    <div class="content">
-		        <div class="box-content">
-					<ul class="nice-list">
-					    {% include 'explore/menu/menu-items.html' with step='s2' %}
-                    </ul>
-				</div>	
-			</div> 
-		</div>
-		<div class="tab">
-	       {% if request.session.currentExploreTab == "tab-2" %}
-		       <input type="radio" id="tab-2" name="tab-group-1" checked>
-           {% else %}
-		       <input type="radio" id="tab-2" name="tab-group-1" disabled>
-	       {% endif %}
-
-       	   <label for="tab-2" class="unavailable">SPARQL Endpoint</label>
-	       	       	    
-			<div class="content">
-				<div class="box-content">
-					<ul class="nice-list">
-						{% include 'explore/menu/menu-items.html' with step='s2' %}
-					</ul>
-				</div>	
-			</div> 			      
-		</div>
-	</div>
+<div class="box">		    
+    <div class="content">
+       <div class="box-content">
+           <ul class="nice-list">
+               {% include 'explore/menu/menu-items.html' with step='s2' %}
+           </ul>
+       </div>
+    </div> 			
 </div>
 {% endblock %}
 

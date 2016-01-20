@@ -32,13 +32,30 @@
 {% endblock %}
 
 {% block title %}<h3>Search for Resources</h3>{% endblock %}
-{% block menu %}
-    {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
-{% endblock %}
+
+
 
 {% block content %}
 <div id="search">
-        <div id="searchContainer">			
+		<div class="toolbar" style="display: block;">
+			<div class="alert alert-warning" id="banner_results_wait" style="display: none;">
+		 		<h4><i class='fa fa-circle-o-notch fa-spin fa-2x'></i>  </i>&nbsp;&nbsp;Please wait...</h4>
+    		</div>
+			<div class="alert alert-error" id="banner_errors" style="display: none;">
+				<a href="#" class="close" data-hide="alert" aria-label="close">&times;</a>
+				<h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+				<div id="btn_errors">
+				</div>
+			</div>
+			<div class="alert alert-info" id="banner_results_errors" style="display: none;">
+				<h4>
+					<a href="#" class="close" data-hide="alert" aria-label="close">&times;</a>
+					<p id="results_errors">
+					</p>
+				</h4>
+			</div>
+		</div>
+        <div id="searchContainer">
 			<div class="loading" id="loading"></div>
 			<input id="submit" name="submit" type="button" onclick="get_results_keyword_refined()" value="Search" />
 			<div>
@@ -50,7 +67,6 @@
 </div>
 <div id="results_infos" style="color:grey;"></div>
 <div class="clearer">&nbsp;</div>
-<div id="results_errors" style="color:red;"></div>
 <table id="icons_table">
 <tr>
 <td align="center" class="selected_resource" value="all">

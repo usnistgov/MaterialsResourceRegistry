@@ -25,7 +25,7 @@ import datetime
 from django.conf import settings
 from dateutil import tz
 
-RESOURCES_PATH = os.path.join(settings.SITE_ROOT, 'exporter/pop/resources/')
+RESOURCES_PATH = os.path.join(settings.SITE_ROOT, 'exporter/diffusion/pop/resources/')
 
 class POPExporter(Exporter):
     """

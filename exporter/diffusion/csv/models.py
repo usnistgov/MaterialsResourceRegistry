@@ -22,7 +22,7 @@ import os
 import re
 from django.conf import settings
 
-RESOURCES_PATH = os.path.join(settings.SITE_ROOT, 'exporter/csv/resources/')
+RESOURCES_PATH = os.path.join(settings.SITE_ROOT, 'exporter/diffusion/csv/resources/')
 
 class CSVExporter(XSLTExporter):
     """
