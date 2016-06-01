@@ -23,7 +23,7 @@ import os
 import sys
 from mongoengine import connect
 
-VERSION = "alpha"
+VERSION = "beta"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
