@@ -1,0 +1,53 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:element name="Data" type="Table"/>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Table -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType xmlns:ns0="http://mdcs.ns" name="Table" ns0:_mod_mdcs_="/diffusion/upload-excel">
+		<xsd:sequence>
+			<xsd:element name="headers" type="Headers"/>
+			<xsd:element name="rows" type="Rows"/>
+		</xsd:sequence>
+		<xsd:attribute type="xsd:string" name="name" use="optional"/>
+	</xsd:complexType>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Headers -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType name="Headers">
+		<xsd:sequence>
+			<xsd:element name="column" type="Column" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Rows -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType name="Rows">
+		<xsd:sequence>
+			<xsd:element name="row" type="Row" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Row -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType name="Row">
+		<xsd:sequence>
+			<xsd:element name="column" type="Column" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute type="xsd:string" name="id" use="required"/>
+	</xsd:complexType>
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Column -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType name="Column">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute type="xsd:string" name="id" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+</xsd:schema>

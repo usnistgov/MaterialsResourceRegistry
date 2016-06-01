@@ -22,5 +22,8 @@
 # Next:
 # - add some version management
 # - get the schema using the ID and use the hash in the API call
-def getSchemaLocation(request, schemaID):
-    return 'http://'+str(request.get_host())+'/rest/types/get-dependency?id=' + str(schemaID)
+from mgi.settings import MDCS_URI
+
+
+def getSchemaLocation(schemaID):
+    return str(MDCS_URI)+'/rest/types/get-dependency?id=' + str(schemaID)

@@ -1,0 +1,7 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="complex">
+        <sequence minOccurs="2" maxOccurs="unbounded">
+            <any maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+</schema>

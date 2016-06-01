@@ -62,7 +62,7 @@ urlpatterns = patterns(
     url(r'^exporter/xslt/delete$','delete_xslt'),
     url(r'^exporter/export','export'),
     url('', include([url(r'^ping$', ping)], namespace='ping')),
-    url(r'^.*$', include([url(r'', docs)], namespace='error_redirect')),    
+    url(r'^.*$', include([url(r'', docs)], namespace='error_redirect')),
 )
 
 

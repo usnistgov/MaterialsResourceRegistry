@@ -1,0 +1,14 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"	elementFormDefault="qualified">
+	<xsd:include schemaLocation="http://127.0.0.1:8000/rest/type/get-dependency?id=54c7b7bc89772a1a780db2b4"/>
+	<xsd:include schemaLocation="http://127.0.0.1:8000/rest/type/get-dependency?id=54c7b7b489772a1a780db2b2"/>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!--  Time  -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType name="TimeType">
+		<xsd:sequence>
+			<xsd:element name="duration" type="xsd:double"/>
+			<xsd:element name="unit" type="TimeUnitType"/>
+			<xsd:element minOccurs="0" name="uncertainty" type="Uncertainty"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

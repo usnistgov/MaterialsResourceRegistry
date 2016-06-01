@@ -1,0 +1,8 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element name="id2">
+        <unique name="un2">
+            <selector xpath="id2"/>
+            <field xpath="@id2"/>
+        </unique>
+    </element>
+</schema>

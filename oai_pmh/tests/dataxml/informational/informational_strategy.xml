@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Resource status="active">
+    <identity>
+        <title>Strategy for extensible, evolving terminology</title>
+    </identity>
+    <curation>
+        <publisher>NIST</publisher>
+        <creator>TN Bhat</creator>
+        <contact>
+            <name>TN Bhat</name>
+            <emailAddress>Bhat@nist.gov</emailAddress>
+        </contact>
+    </curation>
+    <content>
+        <type>Informational</type>
+        <description>Current terminology used to describe materials data is heterogeneous, redundant, and often ambiguous. The lack of common, community-based terminology hinders the discovery and integration of material data for improved design of advanced materials. Intuitive, flexible, and evolving terminology plays a significant role in capitalizing on recommended knowledge representation models for material engineering applications. We are developing a rules-based approach with initial examples from a growing corpus of materials terms in the NIST Materials Repository ( https://materialsdata.nist.gov). Our method aims to establish a common, and consistent evolving set of rules for creating or extending terminology as needed to describe materials data. The rules are intended to be simple and generalizable for users to understand and extend. The rules are also for other groups to apply to repositories they are building and to guide machines during automated processing of the terms and their execution.</description>
+        <subject>MGI</subject>
+        <subject>terminology</subject>
+        <referenceURL>https://mgi.nist.gov/strategy-extensible-evolving-terminology-mgi-efforts</referenceURL>
+        <primaryAudience>research</primaryAudience>
+    </content>
+    <applicability>
+        <materialsScience>
+            <materialType>non-specific</materialType>
+        </materialsScience>
+    </applicability>
+    <access>
+        <policy>
+            <rights>public</rights>
+        </policy>
+        <portal>
+            <homeURL>https://mgi.nist.gov/strategy-extensible-evolving-terminology-mgi-efforts</homeURL>
+        </portal>
+    </access>
+</Resource>

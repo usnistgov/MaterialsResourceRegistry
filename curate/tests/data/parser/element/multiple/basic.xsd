@@ -1,0 +1,22 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element name="id11">
+        <simpleType>
+            <restriction base="integer">
+                <minInclusive value="0"/>
+                <maxInclusive value="100"/>
+            </restriction>
+        </simpleType>
+        <unique name="un110">
+            <selector xpath="test"/>
+            <field xpath="@CustomerID"/>
+        </unique>
+        <unique name="un111">
+            <selector xpath="test"/>
+            <field xpath="@CustomerID"/>
+        </unique>
+        <key name="ky11">
+            <selector xpath="id3"/>
+            <field xpath="@key-number"/>
+        </key>
+    </element>
+</schema>

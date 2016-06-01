@@ -1,0 +1,17 @@
+{
+  "tag": "restriction",
+  "options": {
+    "base": "xs:string"
+  },
+  "value": "child0",
+  "children": [
+    {
+      "tag": "enumeration",
+      "value": "child0"
+    },
+    {
+      "tag": "enumeration",
+      "value": "child1"
+    }
+  ]
+}

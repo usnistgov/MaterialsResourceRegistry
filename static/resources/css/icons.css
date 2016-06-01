@@ -208,8 +208,34 @@
 	background-position: -180px 0px;
 }
 
-.icon.resultXslt
+
+
+.icon.changeOwner
 {
-	background-position: -80px -180px;
-	border-left: -10000px;
+	background-position: -60px -200px;
+}
+
+.icon.publish
+{
+	background-position: 0px -300px;
+}
+
+.icon.resultXslt, .icon.result
+{
+	background-position: -60px -396px;
+}
+
+.icon.oaiPmh
+{
+	background-position: -180px -420px;
+}
+
+.icon.editOaiPmh
+{
+	background-position:  -60px -260px;
+}
+
+.icon.update
+{
+	background-position:  0px -20px;
 }

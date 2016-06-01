@@ -1,0 +1,23 @@
+<div xmlID='root' name='xsdForm'>
+    <ul>
+        <li class='choice' id='element0'>
+            Choose
+
+            <select id='choice0' onchange="changeChoice(this);">
+                <option value='test0'>test0</option>
+                <option value='test1' selected='selected'>test1</option>
+            </select>
+
+            <ul id="choice0-0" class="notchosen"></ul>
+            <ul id="choice0-1" >
+                <li class='element  ' id='element1' tag='test1'>
+                    test1
+                    <select>
+                        <option value='child1' selected='selected'>child1</option>
+                        <option value='child2'>child2</option>
+                    </select>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>

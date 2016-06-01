@@ -1,0 +1,23 @@
+{
+    "tag": "simple_content",
+    "value": null,
+    "children": [
+        {
+            "tag": "restriction",
+            "options": {
+                "base": "element"
+            },
+            "value": "child0",
+            "children": [
+                {
+                    "tag": "enumeration",
+                    "value": "child0"
+                },
+                {
+                    "tag": "enumeration",
+                    "value": "child1"
+                }
+            ]
+        }
+    ]
+}

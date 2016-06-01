@@ -1,0 +1,8 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="base0">
+        <sequence>
+            <element name="firstname" type="string"/>
+            <element name="lastname" type="string"/>
+        </sequence>
+    </complexType>
+</schema>

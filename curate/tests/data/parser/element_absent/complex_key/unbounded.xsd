@@ -1,0 +1,14 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element minOccurs="2" maxOccurs="unbounded" name="id9">
+        <complexType>
+            <sequence>
+                <element name="child0" type="string"/>
+                <element name="child1" type="string"/>
+            </sequence>
+        </complexType>
+        <key name="pNumKey">
+            <selector xpath="id3"/>
+            <field xpath="@key-number"/>
+        </key>
+    </element>
+</schema>

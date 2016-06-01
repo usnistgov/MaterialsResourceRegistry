@@ -7,7 +7,7 @@
 #
 # File Name: curate_view_data.html
 # Application: templates
-# Description: 
+# Description:
 #
 # Author: Sharief Youssef
 #         sharief.youssef@nist.gov
@@ -29,7 +29,7 @@
     {% include 'nmrr/menus/main.html' with active_tab='tab2' %}
 {% endblock %}
 
-{% block title %}<h3>Review Data</h3>{% endblock %}
+{% block title %}<h3>Review Draft Record</h3>{% endblock %}
 {% block description %}
 
 {% endblock %}
@@ -37,7 +37,7 @@
 
 {% block content %}
 {% if not edit %}
-You can now review your data. Click on 'Add Resource' to add the resource to the registry. You will then be able to publish it from your Dashboard to make it publicly discoverable by everyone.
+You can now review the data you have entered. Click on 'Add Record' to add the resource to the registry. You will then be able to publish it from your Dashboard to make it publicly discoverable by everyone.
 {% else %}
 You can now review your data. Click on 'Save Changes' to update the resource in the registry.
 {% endif %}
@@ -46,12 +46,12 @@ You can now review your data. Click on 'Save Changes' to update the resource in 
 <div id="XMLHolder"></div>
 
 <br/><br/>
+<a class="button button-reversed edit">GO BACK TO DRAFT</a>
 {% if not edit %}
-<a class="button save-to-repo">ADD RESOURCE</a>
+<a class="button save-to-repo">ADD RECORD</a>
 {% else %}
-<a class="button save-to-repo">SAVE CHANGES</a>
+<a class="button save-changes">SAVE CHANGES</a>
 {% endif %}
-<a class="button button-reversed edit">Edit Form</a>
 {% endblock %}
 
 
@@ -73,6 +73,23 @@ You can now review your data. Click on 'Save Changes' to update the resource in 
   </p>
 </div>
 
+<div id="dialog-save-redirect-dashboard-message" title="Data Saved" style="display:none;">
+<p></p>
+  <p>
+	  <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+	  The resource has been successfully added.
+	  You can now publish it from the My Resources section under your Dashboard.
+  </p>
+</div>
+
+<div id="dialog-update-redirect-dashboard-message" title="Data Saved" style="display:none;">
+<p></p>
+  <p>
+	  <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+	  The resource has been successfully updated.
+  </p>
+</div>
+
 {% endblock %}
 
 {% block extrajs %}
@@ -81,7 +98,12 @@ You can now review your data. Click on 'Save Changes' to update the resource in 
 <script src="{% static 'inc/controllers/js/nmrr/nmrr_curate.js' %}"></script>
 <script>
 load_xml();
-$('.button.save-to-repo').on('click', saveToRepositoryProcess);
+$('.button.save-to-repo').on('click',  function(event) {
+    saveToRepositoryProcess(XMLDataSavedToPublish);
+});
+$('.button.save-changes').on('click', function(event) {
+	saveToRepositoryProcess(XMLDataUpdated);
+});
 $('.button.edit').on('click', editForm);
 </script>
 {% endblock %}

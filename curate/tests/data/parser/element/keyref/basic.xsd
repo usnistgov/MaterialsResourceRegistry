@@ -1,0 +1,8 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element name="id4">
+        <keyref name="kref4" refer="ky">
+            <selector xpath="id4"/>
+            <field xpath="@id4"/>
+        </keyref>
+    </element>
+</schema>

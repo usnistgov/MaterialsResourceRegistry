@@ -1,0 +1,56 @@
+{
+  "tag": "sequence",
+  "options": {
+    "xpath": {
+      "xml": "",
+      "xsd": "/xs:schema/xs:complexType/xs:sequence"
+    },
+    "max": 1,
+    "min": 1,
+    "schema_location": null
+  },
+  "value": null,
+  "children": [
+    {
+      "tag": "sequence-iter",
+      "children": [
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/id0",
+              "xsd": "/xs:schema/xs:complexType/xs:sequence/xs:element"
+            },
+            "max": 1,
+            "name": "id0",
+            "label": "id0",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": [
+            {
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "tag": "input",
+                  "options": {
+                    "placeholder": "",
+                    "tooltip": "",
+                    "use": ""
+                  },
+                  "value": ""
+                }
+              ],
+              "value": null
+            }
+          ]
+        }
+      ],
+      "value": null
+    }
+  ]
+}

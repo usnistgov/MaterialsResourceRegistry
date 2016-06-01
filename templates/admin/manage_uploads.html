@@ -47,7 +47,7 @@
     <div class="col-md-12">
 <div class="btn-group pull-right">
 <!--<span class="ctx_menu">-->
-    <span class="btn btn-default upload"><i class="fa fa-upload"></i> Upload {{ objectType }}</span>
+    <a class="btn btn-default upload" href="/admin/upload_xsd?type={{objectType}}"><i class="fa fa-upload"></i> Upload {{ objectType }}</a>
     {% if objectType == "Type" %}
         <span class="btn btn-default buckets"><i class="fa fa-tags"></i> Manage Buckets</span>
     {% endif %}
@@ -103,10 +103,10 @@
             {% else %}
                 <td><span style="color:green;">Registered</span></td>
                 <td>
-                    <span class="btn btn-default version" objectType="{{ objectType }}" objectid="{{ object.id }}">
+                    <a class="btn btn-default version" objectType="{{ objectType }}" objectid="{{ object.id }}" href="/admin/manage_versions?type={{objectType}}&id={{object.id}}">
                         <i class="fa fa-check"></i>
                         Versions
-                    </span>
+                    </a>
                     <span class="btn btn-default edit" objectType="{{ objectType }}" objectid="{{ object.id }}">
                         <i class="fa fa-edit"></i>
                         Edit
@@ -127,6 +127,10 @@
                         <span class="btn btn-default resultXslt" objectType="{{ objectType }}" objectid="{{ object.id }}">
                             <i class="fa fa-eye"></i>
 			                Results
+			            </span>
+                        <span class="btn btn-default oaiPmh" objectType="{{ objectType }}" objectid="{{ object.id }}">
+                            <i class="fa fa-rss"></i>
+			                OAI-PMH
 			            </span>
                     {% endif %}
                 </td>
@@ -163,50 +167,6 @@
 </p>
 </div>
 
-<div id="dialog-upload-message" title="Upload {{ objectType }}" style="display:none;">
-<table>
-	<tr>
-		<td>
-			Enter {{ objectType }} name:
-		</td>
-		<td> 
-			<input type="text" id="object_name" objectType="{{ objectType }}" name="object_name"/>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			Select a file:
-		</td>
-		<td>
-			<input type="file" id="files" name="files[]" />
-			<output id="list"></output>
-		</td>
-	</tr>
-	{% if objectType == "Type" %}
-	<tr>
-		<td>
-			Select the buckets:
-		</td>
-		<td>
-			<div id="model_select_buckets">
-				<select multiple="multiple" id="select_buckets">
-					{% for bucket in buckets %}
-						<option bucketid="{{ bucket.id }}">{{ bucket.label }}</option>
-					{% endfor %}
-				</select>
-			</div>
-		</td>
-	</tr>
-	{% endif %}
-</table>
-
-
-
-<div id="objectUploadErrorMessage"></div>
-<div id="dependenciesArea"></div>
-
-
-</div>
 
 <div id="dialog-deleteconfirm-message" title="Confirm Delete" style="display:none;">
 <p></p>
@@ -221,16 +181,6 @@
   <p>
     A type with this filename already exists.
   </p>
-</div>
-
-
-<div id="dialog-upload-error" title="Upload Error" style="display:none;">
-<p></p>
-  <div>
-    <span class="ui-icon ui-icon-circle-close" style="float:left; margin:0 7px 10px 0;"></span>
-    <p>No file selected.</p>
-    <p>Please select a file before trying to upload a schema.</p>
-  </div>
 </div>
 
 
@@ -301,87 +251,6 @@
 <script src="{% static 'inc/controllers/js/xsd_mgr.js' %}"></script>
 <script>
   loadUploadManagerHandler();
-</script>
-<script>
-  var files;
-
-  function errorHandler(evt) {
-    switch(evt.target.error.code) {
-      case evt.target.error.NOT_FOUND_ERR:
-        alert('File Not Found!');
-        break;
-      case evt.target.error.NOT_READABLE_ERR:
-        alert('File is not readable');
-        break;
-      case evt.target.error.ABORT_ERR:
-        break; // noop
-      default:
-        alert('An error occurred reading this file.');
-    };
-  }
-
-  function handleFileUpload(evt) {
-    console.log('BEGIN handleFileUpload(evt)');
-
-    if ($("#object_name").val().trim().length == 0) {
-        $('#objectUploadErrorMessage').html("<font color=\"red\">Please enter a name</font>");
-        return false;
-    } else if (!check_name($("#object_name").val())) {
-        $('#objectUploadErrorMessage').html("<font color=\"red\">Template name is already used. Please enter another name</font>");
-        return false;
-    } else if (!check_name($("#object_name").val())) {
-        $('#objectUploadErrorMessage').html("<font color=\"red\">Template name is already used. Please enter another name</font>");
-        return false;
-    } else {
-        $('#objectUploadErrorMessage').html("")
-    }
-    var reader;
-
-    document.getElementById('uploadFile').disabled = true;
-
-    reader = new FileReader();
-    reader.onerror = errorHandler;
-    reader.onabort = function(e) {
-      alert('File read cancelled');
-    };
-    reader.onload = function(e) {
-
-      var objectName = document.getElementById('object_name').value.trim();
-
-      objectFilename = files[0].name;
-      objectContent = reader.result;
-      upload_object(objectName, objectFilename, objectContent, '{{ objectType }}');
-    }
-
-    // Read in the image file as a binary string.
-    reader.readAsText(files[0]);
-
-    console.log('END handleFileUpload(evt)');
-  }
-
-  function handleFileSelect(evt) {
-    files = evt.target.files; // FileList object
-
-    // files is a FileList of File objects. List some properties.
-    var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-      output.push('<button id=\'uploadFile\'>Upload</button>');
-    }
-    document.getElementById('list').innerHTML = output.join('');
-    document.getElementById('uploadFile').disabled = false;
-    document.getElementById('uploadFile').addEventListener('click', handleFileUpload, false);
-  }
-
-  document.getElementById('files').addEventListener('change', handleFileSelect, false);
-</script>
-<script>
-// Check for the various File API support.
-if (window.File && window.FileReader && window.FileList && window.Blob) {
-  // Great success! All the File APIs are supported.
-  // alert('The File APIs are fully supported in this browser.');
-} else {
-  alert('The File APIs are not fully supported in this browser.');
-}
 </script>
 
 {% endblock %}

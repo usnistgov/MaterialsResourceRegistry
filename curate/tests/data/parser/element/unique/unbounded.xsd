@@ -1,0 +1,15 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="complex"/>
+
+    <xs:complexType name="complex">
+        <xs:sequence>
+            <xs:element minOccurs="2" maxOccurs="unbounded" name="id2">
+        <xs:unique name="un2">
+            <xs:selector xpath="id2"/>
+            <xs:field xpath="@id2"/>
+        </xs:unique>
+    </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
+

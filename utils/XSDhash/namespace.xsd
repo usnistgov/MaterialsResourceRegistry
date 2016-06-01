@@ -1,0 +1,141 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	attributeFormDefault="unqualified" 
+	elementFormDefault="qualified">
+
+	<xs:element name="chemicalElement" type="ChemicalElement"/>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!--  ChemicalElement  -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:simpleType name="ChemicalElement">
+		<xs:annotation>
+		  <xs:documentation>
+			<div class="summary">Allowed <tt>ChemicalElementType</tt> values.</div>
+			<div class="description">
+			  <p>Modified from Chemical Markup Language. The periodic table (up to
+				element number 118. In addition the following strings are allowed:
+			  </p> 
+			</div>
+		  </xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+		  <xs:enumeration value="Ac"/>
+		  <xs:enumeration value="Al"/>
+		  <xs:enumeration value="Ag"/>
+		  <xs:enumeration value="Am"/>
+		  <xs:enumeration value="Ar"/>
+		  <xs:enumeration value="As"/>
+		  <xs:enumeration value="At"/>
+		  <xs:enumeration value="Au"/>
+		  <xs:enumeration value="B"/>
+		  <xs:enumeration value="Ba"/>
+		  <xs:enumeration value="Bh"/>
+		  <xs:enumeration value="Bi"/>
+		  <xs:enumeration value="Be"/>
+		  <xs:enumeration value="Bk"/>
+		  <xs:enumeration value="Br"/>
+		  <xs:enumeration value="C"/>
+		  <xs:enumeration value="Ca"/>
+		  <xs:enumeration value="Cd"/>
+		  <xs:enumeration value="Ce"/>
+		  <xs:enumeration value="Cf"/>
+		  <xs:enumeration value="Cl"/>
+		  <xs:enumeration value="Cm"/>
+		  <xs:enumeration value="Co"/>
+		  <xs:enumeration value="Cr"/>
+		  <xs:enumeration value="Cs"/>
+		  <xs:enumeration value="Cu"/>
+		  <xs:enumeration value="Db"/>
+		  <xs:enumeration value="Dy"/>
+		  <xs:enumeration value="Er"/>
+		  <xs:enumeration value="Es"/>
+		  <xs:enumeration value="Eu"/>
+		  <xs:enumeration value="F"/>
+		  <xs:enumeration value="Fe"/>
+		  <xs:enumeration value="Fm"/>
+		  <xs:enumeration value="Fr"/>
+		  <xs:enumeration value="Ga"/>
+		  <xs:enumeration value="Gd"/>
+		  <xs:enumeration value="Ge"/>
+		  <xs:enumeration value="H"/>
+		  <xs:enumeration value="He"/>
+		  <xs:enumeration value="Hf"/>
+		  <xs:enumeration value="Hg"/>
+		  <xs:enumeration value="Ho"/>
+		  <xs:enumeration value="Hs"/>
+		  <xs:enumeration value="I"/>
+		  <xs:enumeration value="In"/>
+		  <xs:enumeration value="Ir"/>
+		  <xs:enumeration value="K"/>
+		  <xs:enumeration value="Kr"/>
+		  <xs:enumeration value="La"/>
+		  <xs:enumeration value="Li"/>
+		  <xs:enumeration value="Lr"/>
+		  <xs:enumeration value="Lu"/>
+		  <xs:enumeration value="Md"/>
+		  <xs:enumeration value="Mg"/>
+		  <xs:enumeration value="Mn"/>
+		  <xs:enumeration value="Mo"/>
+		  <xs:enumeration value="Mt"/>
+		  <xs:enumeration value="N"/>
+		  <xs:enumeration value="Na"/>
+		  <xs:enumeration value="Nb"/>
+		  <xs:enumeration value="Nd"/>
+		  <xs:enumeration value="Ne"/>
+		  <xs:enumeration value="Ni"/>
+		  <xs:enumeration value="No"/>
+		  <xs:enumeration value="Np"/>
+		  <xs:enumeration value="O"/>
+		  <xs:enumeration value="Os"/>
+		  <xs:enumeration value="P"/>
+		  <xs:enumeration value="Pa"/>
+		  <xs:enumeration value="Pb"/>
+		  <xs:enumeration value="Pd"/>
+		  <xs:enumeration value="Pm"/>
+		  <xs:enumeration value="Po"/>
+		  <xs:enumeration value="Pr"/>
+		  <xs:enumeration value="Pt"/>
+		  <xs:enumeration value="Pu"/>
+		  <xs:enumeration value="Ra"/>
+		  <xs:enumeration value="Rb"/>
+		  <xs:enumeration value="Re"/>
+		  <xs:enumeration value="Rf"/>
+		  <xs:enumeration value="Rh"/>
+		  <xs:enumeration value="Rn"/>
+		  <xs:enumeration value="Ru"/>
+		  <xs:enumeration value="S"/>
+		  <xs:enumeration value="Sb"/>
+		  <xs:enumeration value="Sc"/>
+		  <xs:enumeration value="Se"/>
+		  <xs:enumeration value="Sg"/>
+		  <xs:enumeration value="Si"/>
+		  <xs:enumeration value="Sm"/>
+		  <xs:enumeration value="Sn"/>
+		  <xs:enumeration value="Sr"/>
+		  <xs:enumeration value="Ta"/>
+		  <xs:enumeration value="Tb"/>
+		  <xs:enumeration value="Tc"/>
+		  <xs:enumeration value="Te"/>
+		  <xs:enumeration value="Th"/>
+		  <xs:enumeration value="Ti"/>
+		  <xs:enumeration value="Tl"/>
+		  <xs:enumeration value="Tm"/>
+		  <xs:enumeration value="U"/>
+		  <xs:enumeration value="Uun"/>
+		  <xs:enumeration value="Uuu"/>
+		  <xs:enumeration value="Uub"/>
+		  <xs:enumeration value="Uut"/>
+		  <xs:enumeration value="Uuq"/>
+		  <xs:enumeration value="Uup"/>
+		  <xs:enumeration value="Uuh"/>
+		  <xs:enumeration value="Uus"/>
+		  <xs:enumeration value="Uuo"/>
+		  <xs:enumeration value="V"/>
+		  <xs:enumeration value="W"/>
+		  <xs:enumeration value="Xe"/>
+		  <xs:enumeration value="Y"/>
+		  <xs:enumeration value="Yb"/>
+		  <xs:enumeration value="Zn"/>
+		  <xs:enumeration value="Zr"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

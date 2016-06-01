@@ -1,0 +1,29 @@
+table.excel-file {
+    border-collapse: separate;
+    border: 3px solid white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table.excel-file th {
+    background-color: #AECEFF;
+}
+
+table.excel-file th, td {
+    text-align: center !important;
+}
+
+table.excel-file tr.empty {
+    color: red;
+}
+
+
+table.excel-file input {
+    width: 90%;
+    margin-bottom: 0;
+}
+
+div.excel_table {
+    max-height: 20em;
+    overflow: scroll;
+}

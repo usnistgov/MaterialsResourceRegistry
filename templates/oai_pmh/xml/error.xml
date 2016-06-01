@@ -1,0 +1,7 @@
+{% extends "oai_pmh/xml/base.xml" %}
+
+{% block content %}
+  {% for error in errors %}
+    <error code="{{ error.code }}">{{ error.message }}</error>
+  {% endfor %}
+{% endblock %}

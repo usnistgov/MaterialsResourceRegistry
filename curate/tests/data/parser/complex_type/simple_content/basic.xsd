@@ -1,0 +1,11 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="complex"/>
+
+    <xs:complexType name="complex">
+        <xs:simpleContent>
+            <xs:extension base="xs:integer">
+                <xs:attribute name="attr0" type="xs:string" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+</xs:schema>

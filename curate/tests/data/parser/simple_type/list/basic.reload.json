@@ -1,0 +1,16 @@
+{
+  "tag": "simple_type",
+  "value": null,
+  "options": {
+    "name": "simple",
+    "ns_prefix": null,
+    "xmlns": null
+  },
+  "children": [
+    {
+      "tag": "list",
+      "value": "",
+      "children": []
+    }
+  ]
+}

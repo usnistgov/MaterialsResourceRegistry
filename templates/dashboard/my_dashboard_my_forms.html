@@ -1,0 +1,94 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: my_dashboard_my_forms.html
+# Application: templates
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Xavier SCHMITT
+#		  xavier.schmitt@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exploreTabs.css' %}"  media="screen" />
+{% endblock %}
+
+{% block title %}<h3>My Drafts</h3>{% endblock %}
+{% block menu %}{% include 'nmrr/menus/main.html' with active_tab='profile' %}{% endblock %}
+
+{% block content%}
+
+<div class="btn-group pull-right">
+            <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
+</div>
+{% if forms %}
+<span>
+You can review all drafts you have created and delete the ones you don't need.
+</span>
+<br/><br/>
+
+<div id="my-forms">
+    <table class="data-table">
+        <tr>
+        	<th width="175em">Name</th>
+        	<th width="100em">Template</th>
+            <th width="160em">Actions</th>
+        </tr>
+        {% for form in forms %}
+            {% cycle 'even' '' as rowcolors silent %}
+            <tr class="{{ rowcolors }}">
+                <td style="word-break: break-all;">{{ form.form.name }}</td>
+                <td style="word-break: break-all;">{{ form.template_name}}</td>
+                <td>
+                    <div class="icon legend result" onclick="location.href='/dashboard/detail?type=form&id={{form.form.id}}'">View</div>
+                    <div class="icon legend edit" onclick="location.href='/curate/edit-form?id={{form.form.id}}'"> Edit</div>
+                    <div class="icon legend delete" onclick='deleteForm("{{form.form.id}}")'>Delete</div>
+                    <div class="icon legend changeOwner" onclick='changeOwnerForm("{{form.form.id}}")'>Change Owner</div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% else %}
+<div>
+    <br/>
+        There are no drafts saved for now.
+    <br/>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-delete-form" title="Delete Form" style="display:none;">
+Are you sure you want to delete this draft?
+</div>
+
+<div id="dialog-change-owner-form" title="Change Form Owner" style="display:none;">
+    <div class="alert alert-danger" id="banner_errors" style="display: none;">
+        <a href="#" class="close" data-hide="alert" aria-label="close">&times;</a>
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_start_errors">
+        </div>
+    </div>
+    Please select the new owner:
+       {{user_form}}
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/curate.js' %}"></script>
+{% endblock %}
+

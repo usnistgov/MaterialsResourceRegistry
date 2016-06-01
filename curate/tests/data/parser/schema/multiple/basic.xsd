@@ -1,0 +1,57 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <include schemaLocation="http://www.w3schools.com/schema" />
+
+    <import namespace="http://www.w3schools.com/schema"/>
+
+    <redefine schemaLocation="schema.xsd">
+        <complexType name="pname">
+            <complexContent>
+                <extension base="pname">
+                    <sequence>
+                        <element name="country"/>
+                    </sequence>
+                </extension>
+            </complexContent>
+        </complexType>
+    </redefine>
+
+    <simpleType name="id0">
+        <restriction base="string">
+            <enumeration value="child0" />
+            <enumeration value="child1" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="base0">
+        <sequence>
+            <element name="firstname" type="string"/>
+            <element name="lastname" type="string"/>
+        </sequence>
+    </complexType>
+
+    <group name="group0">
+        <sequence>
+            <element name="firstname" type="string"/>
+            <element name="lastname" type="string"/>
+        </sequence>
+    </group>
+
+    <attributeGroup name="ag0">
+        <attribute name="child0" type="string"/>
+        <attribute name="child1" type="integer"/>
+    </attributeGroup>
+
+    <element name="test0">
+        <simpleType name="id0">
+            <restriction base="string">
+                <enumeration value="child0" />
+                <enumeration value="child1" />
+            </restriction>
+        </simpleType>
+    </element>
+
+    <attribute name="child0" type="string"/>
+
+    <notation name="gif" public="image/gif" system="view.exe"/>
+
+</schema>

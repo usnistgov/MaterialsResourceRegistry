@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Resource localid="UKK8LPL6G0TAK9DEWC6W" status="active">
+    <identity>
+        <title>MPInterfaces</title>
+    </identity>
+    <curation>
+        <publisher>Hennig group, University of Florida</publisher>
+        <contact>
+            <name>Richard Hennig</name>
+        </contact>
+    </curation>
+    <content>
+        <description>MPinterfaces is a python package that enables high throughput Density
+            Functional Theory (DFT) analysis of arbitrary material interfaces (ligand capped
+            nanoparticles, surfaces in the presence of solvents and hetero-structure interfaces)
+            using VASP, VASPsol, LAMMPS, materialsproject database as well as their open source
+            tools and a little bit of ASE.</description>
+        <subject/>
+        <referenceURL>http://henniggroup.github.io/MPInterfaces/</referenceURL>
+        <sourceRepoURL>https://github.com/henniggroup/MPInterfaces</sourceRepoURL>
+        <distributionURL>http://henniggroup.github.io/MPInterfaces/</distributionURL>
+        <referenceCitation>Arunima K. Singh ; Kiran Mathew ; Albert V. Davydov ; Richard G. Hennig
+            and Francesca Tavazza \" High throughput screening of substrates for synthesis and
+            functionalization of 2D materials \", Proc. SPIE 9553, Low-Dimensional Materials and
+            Devices, 955316 (August 26, 2015); doi:10.1117/12.2192866;
+            http://dx.doi.org/10.1117/12.2192866 .</referenceCitation>
+    </content>
+    <applicability>
+        <materialsScience>
+            <materialType>non-specific</materialType>
+            <structuralMorphology>interfacial</structuralMorphology>
+            <structuralMorphology>interphase</structuralMorphology>
+            <structuralMorphology>composite</structuralMorphology>
+            <structuralMorphology>non-specific</structuralMorphology>
+            <structuralMorphology>crystalline</structuralMorphology>
+            <propertyClass>thermodynamic</propertyClass>
+            <propertyClass>mechanical</propertyClass>
+            <propertyClass>defect</propertyClass>
+            <propertyClass>simulated</propertyClass>
+            <propertyClass>non-specific</propertyClass>
+            <propertyClass>structural</propertyClass>
+        </materialsScience>
+    </applicability>
+    <access>
+        <policy>
+            <rights>public</rights>
+        </policy>
+    </access>
+</Resource>

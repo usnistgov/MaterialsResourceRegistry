@@ -1,0 +1,13 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <redefine schemaLocation="schema.xsd">
+        <complexType name="pname">
+            <complexContent>
+                <extension base="pname">
+                    <sequence>
+                        <element name="country"/>
+                    </sequence>
+                </extension>
+            </complexContent>
+        </complexType>
+    </redefine>
+</schema>

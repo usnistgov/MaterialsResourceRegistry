@@ -21,3 +21,7 @@ ul>li#element0>ul>li.element {
 ul>li#element0>ul>li.element>ul {
     font-size: 0.8em;
 }
+
+.hidden {
+    display: none;
+}

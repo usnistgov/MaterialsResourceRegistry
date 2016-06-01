@@ -1,0 +1,142 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	attributeFormDefault="unqualified" 
+	elementFormDefault="qualified">
+
+	<xsd:element name="chemicalElement" type="ChemicalElement"/>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!--  ChemicalElement  -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:simpleType name="ChemicalElement">
+		<xsd:annotation>
+		  <xsd:documentation>
+			<div class="summary">Allowed <tt>ChemicalElementType</tt> values.</div>
+			<div class="description">
+			  <p>Modified from Chemical Markup Language. The periodic table (up to
+				element number 118. In addition the following strings are allowed:
+				test
+			  </p> 
+			</div>
+		  </xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+		  <xsd:enumeration value="Ac"/>
+		  <xsd:enumeration value="Al"/>
+		  <xsd:enumeration value="Ag"/>
+		  <xsd:enumeration value="Am"/>
+		  <xsd:enumeration value="Ar"/>
+		  <xsd:enumeration value="As"/>
+		  <xsd:enumeration value="At"/>
+		  <xsd:enumeration value="Au"/>
+		  <xsd:enumeration value="B"/>
+		  <xsd:enumeration value="Ba"/>
+		  <xsd:enumeration value="Bh"/>
+		  <xsd:enumeration value="Bi"/>
+		  <xsd:enumeration value="Be"/>
+		  <xsd:enumeration value="Bk"/>
+		  <xsd:enumeration value="Br"/>
+		  <xsd:enumeration value="C"/>
+		  <xsd:enumeration value="Ca"/>
+		  <xsd:enumeration value="Cd"/>
+		  <xsd:enumeration value="Ce"/>
+		  <xsd:enumeration value="Cf"/>
+		  <xsd:enumeration value="Cl"/>
+		  <xsd:enumeration value="Cm"/>
+		  <xsd:enumeration value="Co"/>
+		  <xsd:enumeration value="Cr"/>
+		  <xsd:enumeration value="Cs"/>
+		  <xsd:enumeration value="Cu"/>
+		  <xsd:enumeration value="Db"/>
+		  <xsd:enumeration value="Dy"/>
+		  <xsd:enumeration value="Er"/>
+		  <xsd:enumeration value="Es"/>
+		  <xsd:enumeration value="Eu"/>
+		  <xsd:enumeration value="F"/>
+		  <xsd:enumeration value="Fe"/>
+		  <xsd:enumeration value="Fm"/>
+		  <xsd:enumeration value="Fr"/>
+		  <xsd:enumeration value="Ga"/>
+		  <xsd:enumeration value="Gd"/>
+		  <xsd:enumeration value="Ge"/>
+		  <xsd:enumeration value="H"/>
+		  <xsd:enumeration value="He"/>
+		  <xsd:enumeration value="Hf"/>
+		  <xsd:enumeration value="Hg"/>
+		  <xsd:enumeration value="Ho"/>
+		  <xsd:enumeration value="Hs"/>
+		  <xsd:enumeration value="I"/>
+		  <xsd:enumeration value="In"/>
+		  <xsd:enumeration value="Ir"/>
+		  <xsd:enumeration value="K"/>
+		  <xsd:enumeration value="Kr"/>
+		  <xsd:enumeration value="La"/>
+		  <xsd:enumeration value="Li"/>
+		  <xsd:enumeration value="Lr"/>
+		  <xsd:enumeration value="Lu"/>
+		  <xsd:enumeration value="Md"/>
+		  <xsd:enumeration value="Mg"/>
+		  <xsd:enumeration value="Mn"/>
+		  <xsd:enumeration value="Mo"/>
+		  <xsd:enumeration value="Mt"/>
+		  <xsd:enumeration value="N"/>
+		  <xsd:enumeration value="Na"/>
+		  <xsd:enumeration value="Nb"/>
+		  <xsd:enumeration value="Nd"/>
+		  <xsd:enumeration value="Ne"/>
+		  <xsd:enumeration value="Ni"/>
+		  <xsd:enumeration value="No"/>
+		  <xsd:enumeration value="Np"/>
+		  <xsd:enumeration value="O"/>
+		  <xsd:enumeration value="Os"/>
+		  <xsd:enumeration value="P"/>
+		  <xsd:enumeration value="Pa"/>
+		  <xsd:enumeration value="Pb"/>
+		  <xsd:enumeration value="Pd"/>
+		  <xsd:enumeration value="Pm"/>
+		  <xsd:enumeration value="Po"/>
+		  <xsd:enumeration value="Pr"/>
+		  <xsd:enumeration value="Pt"/>
+		  <xsd:enumeration value="Pu"/>
+		  <xsd:enumeration value="Ra"/>
+		  <xsd:enumeration value="Rb"/>
+		  <xsd:enumeration value="Re"/>
+		  <xsd:enumeration value="Rf"/>
+		  <xsd:enumeration value="Rh"/>
+		  <xsd:enumeration value="Rn"/>
+		  <xsd:enumeration value="Ru"/>
+		  <xsd:enumeration value="S"/>
+		  <xsd:enumeration value="Sb"/>
+		  <xsd:enumeration value="Sc"/>
+		  <xsd:enumeration value="Se"/>
+		  <xsd:enumeration value="Sg"/>
+		  <xsd:enumeration value="Si"/>
+		  <xsd:enumeration value="Sm"/>
+		  <xsd:enumeration value="Sn"/>
+		  <xsd:enumeration value="Sr"/>
+		  <xsd:enumeration value="Ta"/>
+		  <xsd:enumeration value="Tb"/>
+		  <xsd:enumeration value="Tc"/>
+		  <xsd:enumeration value="Te"/>
+		  <xsd:enumeration value="Th"/>
+		  <xsd:enumeration value="Ti"/>
+		  <xsd:enumeration value="Tl"/>
+		  <xsd:enumeration value="Tm"/>
+		  <xsd:enumeration value="U"/>
+		  <xsd:enumeration value="Uun"/>
+		  <xsd:enumeration value="Uuu"/>
+		  <xsd:enumeration value="Uub"/>
+		  <xsd:enumeration value="Uut"/>
+		  <xsd:enumeration value="Uuq"/>
+		  <xsd:enumeration value="Uup"/>
+		  <xsd:enumeration value="Uuh"/>
+		  <xsd:enumeration value="Uus"/>
+		  <xsd:enumeration value="Uuo"/>
+		  <xsd:enumeration value="V"/>
+		  <xsd:enumeration value="W"/>
+		  <xsd:enumeration value="Xe"/>
+		  <xsd:enumeration value="Y"/>
+		  <xsd:enumeration value="Yb"/>
+		  <xsd:enumeration value="Zn"/>
+		  <xsd:enumeration value="Zr"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

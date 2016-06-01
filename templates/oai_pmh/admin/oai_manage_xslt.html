@@ -1,0 +1,122 @@
+{% load staticfiles %}
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: oai_manage_xslt.html
+# Application: templates/oai_pmh/admin
+# Description:
+#
+# Author: Pierre Francois RIGODIAT
+#		  pierre-francois.rigodiat@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+{% block extrastyle %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block content%}
+
+<h2 class="left">OAI-PMH XSLT</h2>
+<div class="clearer">&nbsp;</div>
+<div class="btn-group pull-right">
+<span class="btn btn-default upload" onclick="displayOaiImport();">
+	<i class="fa fa-upload"></i> Upload XSLT
+</span>
+</div>
+
+{% if oai_pmh_xslt %}
+<table class="data-table">
+  <tr>
+  	<th>XSLT name</th>
+    <th>Filename</th>
+    <th>Actions</th>
+  </tr>
+
+{% for object in oai_pmh_xslt %}
+  {% cycle 'even' '' as rowcolors silent %}
+  <tr class="{{ rowcolors }}">
+    <td>{{ object.name }}</td>
+    <td>{{ object.filename }}</td>
+    <td>
+    	<div id="EditOAI" class="icon legend editOaiPmh" objectid="{{ object.id }}" typeXSLT="OAI-PMH">Edit</div>
+    	<div class="icon legend delete" objectid="{{ object.id }}" typeXSLT="OAI-PMH" onclick="deleteOaiXSLT(this)">Delete</div>
+	</td>
+  </tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+	There are currently no OAI-PMH XSLT uploaded.  Please click "Upload XSLT" to the right to add OAI-PMH XSLT files.
+	<br>
+	<br>
+{% endif %}
+{% endblock %}
+{% block popups %}
+<div id="dialog-oai-pmh-message" title="Upload OAI-PMH XSLT" style="display: none;">
+	<div class="alert alert-error" id="banner_oai_pmh_errors" style="display: none;">
+		<h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+		<div id="form_oai_pmh_start_errors">
+		</div>
+	</div>
+	<form id="form_oai_pmh_start" action="/oai_pmh/admin/edit-xslt" method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		<table>
+			<tr>
+				<td>{{upload_oai_pmh_xslt_Form.oai_name.label}}</td>
+				<td>{{upload_oai_pmh_xslt_Form.oai_name}}</td>
+			</tr>
+			<tr>
+				<td>{{upload_oai_pmh_xslt_Form.oai_pmh_xslt_file.label}}</td>
+				<td>{{upload_oai_pmh_xslt_Form.oai_pmh_xslt_file}}</td>
+			</tr>
+		</table>
+		<div id="form_oai_pmh_start_current"></div>
+	</form>
+</div>
+
+<div id="dialog-oai-pmh-edit-message" title="Edit OAI-PMH XSLT" style="display: none;">
+	<div class="alert alert-error" id="banner_oai_pmh_edit_errors" style="display: none;">
+		<h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+		<div id="form_oai_pmh_edit_errors">
+		</div>
+	</div>
+	<table>
+		<tr>
+			<td>{{upload_xslt_Form.name.label}}</td>
+			<td><input type="text" id="edit-oai_pmh_name"/></td>
+		</tr>
+		<tr>
+	</table>
+</div>
+
+
+<div id="dialog-oai-pmh-deletexslt-message" title="Confirm Delete" style="display:none;">
+<p></p>
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
+    <p>Are you sure you want to delete this XSLT?</p>
+    <p id="delete_oai_pmh_custom_message"></p>
+  </p>
+</div>
+
+<div id="dialog-oai-pmh-error-edit" title="Error Edit Information" style="display:none;">
+<p></p>
+  <p>
+    An XSLT with this filename already exists.
+  </p>
+</div>
+{% endblock %}
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/oai_pmh_xslt_mgr.js' %}"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+InitOai();
+</script>
+{% endblock %}
+

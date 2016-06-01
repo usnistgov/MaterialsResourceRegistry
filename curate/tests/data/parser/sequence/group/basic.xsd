@@ -1,0 +1,15 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="complex"/>
+
+    <xs:complexType name="complex">
+        <xs:sequence>
+            <xs:group ref="grp0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:group name="grp0">
+        <xs:sequence>
+            <xs:element name="id1" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
+</xs:schema>

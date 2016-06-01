@@ -1,0 +1,192 @@
+
+Identity
+{
+        "text": [
+            "Selected collections of digitized historical materials from the Library of Congress, including many from American Memory and the Prints and Photographs Online Catalog (PPOC). Includes photographs, movies, maps, pamphlets and printed ephemera, sheet music, and books."
+        ],
+        "height": [
+            "35"
+        ],
+        "protocolVersion": [
+            "2.0"
+        ],
+        "oai-identifier": [
+            null
+        ],
+        "sampleIdentifier": [
+            "oai:lcoa1.loc.gov:loc.music/musdi.002"
+        ],
+        "title": [
+            "Library of Congress"
+        ],
+        "metadataPolicy": [
+            null
+        ],
+        "content": [
+            null
+        ],
+        "width": [
+            "100"
+        ],
+        "branding": [
+            null
+        ],
+        "repositoryName": [
+            "Library of Congress Open Archive Initiative Repository 1"
+        ],
+        "adminEmail": [
+            "dwoo@loc.gov",
+            "cmah@loc.gov",
+            "caar@loc.gov"
+        ],
+        "metadataRendering": [
+            "http://www.loc.gov/standards/marcxml/xslt/MARC21slim2HTML.xsl"
+        ],
+        "deletedRecord": [
+            "no"
+        ],
+        "description": [
+            null,
+            null,
+            null
+        ],
+        "URL": [
+            "http://memory.loc.gov/ammem/oamh/lcoa1_content.html"
+        ],
+        "repositoryIdentifier": [
+            "lcoa1.loc.gov"
+        ],
+        "link": [
+            "http://www.loc.gov"
+        ],
+        "granularity": [
+            "YYYY-MM-DDThh:mm:ssZ"
+        ],
+        "collectionIcon": [
+            null
+        ],
+        "eprints": [
+            null
+        ],
+        "scheme": [
+            "oai"
+        ],
+        "url": [
+            "http://memory.loc.gov/ammem/oamh/lc-icon.gif"
+        ],
+        "baseURL": [
+            "http://memory.loc.gov/cgi-bin/oai2_0"
+        ],
+        "earliestDatestamp": [
+            "2002-06-01T00:00:00Z"
+        ],
+        "delimiter": [
+            ":"
+        ],
+        "dataPolicy": [
+            null
+        ]
+    }
+
+
+
+{
+"name":"LOC",
+"url":"http://www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi"
+}
+
+
+
+{
+"name":"LOC",
+"url":"http://www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi",
+"harvestrate":"0",
+"metadataprefix":"oai_dc",
+"identity":{
+        "text": [
+            "Selected collections of digitized historical materials from the Library of Congress, including many from American Memory and the Prints and Photographs Online Catalog (PPOC). Includes photographs, movies, maps, pamphlets and printed ephemera, sheet music, and books."
+        ],
+        "height": [
+            "35"
+        ],
+        "protocolVersion": [
+            "2.0"
+        ],
+        "oai-identifier": [
+            null
+        ],
+        "sampleIdentifier": [
+            "oai:lcoa1.loc.gov:loc.music/musdi.002"
+        ],
+        "title": [
+            "Library of Congress"
+        ],
+        "metadataPolicy": [
+            null
+        ],
+        "content": [
+            null
+        ],
+        "width": [
+            "100"
+        ],
+        "branding": [
+            null
+        ],
+        "repositoryName": [
+            "Library of Congress Open Archive Initiative Repository 1"
+        ],
+        "adminEmail": [
+            "dwoo@loc.gov",
+            "cmah@loc.gov",
+            "caar@loc.gov"
+        ],
+        "metadataRendering": [
+            "http://www.loc.gov/standards/marcxml/xslt/MARC21slim2HTML.xsl"
+        ],
+        "deletedRecord": [
+            "no"
+        ],
+        "description": [
+            null,
+            null,
+            null
+        ],
+        "URL": [
+            "http://memory.loc.gov/ammem/oamh/lcoa1_content.html"
+        ],
+        "repositoryIdentifier": [
+            "lcoa1.loc.gov"
+        ],
+        "link": [
+            "http://www.loc.gov"
+        ],
+        "granularity": [
+            "YYYY-MM-DDThh:mm:ssZ"
+        ],
+        "collectionIcon": [
+            null
+        ],
+        "eprints": [
+            null
+        ],
+        "scheme": [
+            "oai"
+        ],
+        "url": [
+            "http://memory.loc.gov/ammem/oamh/lc-icon.gif"
+        ],
+        "baseURL": [
+            "http://memory.loc.gov/cgi-bin/oai2_0"
+        ],
+        "earliestDatestamp": [
+            "2002-06-01T00:00:00Z"
+        ],
+        "delimiter": [
+            ":"
+        ],
+        "dataPolicy": [
+            null
+        ]
+    }
+}

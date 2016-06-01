@@ -1,0 +1,37 @@
+{
+  "tag": "restriction",
+  "options": {
+    "base": null
+  },
+  "value": null,
+  "children": [
+    {
+      "tag": "simple_type",
+      "children": [
+        {
+          "tag": "restriction",
+          "options": {
+            "base": "xs:string"
+          },
+          "value": "child0",
+          "children": [
+            {
+              "tag": "enumeration",
+              "value": "child0"
+            },
+            {
+              "tag": "enumeration",
+              "value": "child1"
+            }
+          ]
+        }
+      ],
+      "value": null,
+      "options": {
+        "ns_prefix": null,
+        "xmlns": null,
+        "name": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+<ul>
+    <li class='sequence' id='element0'>
+        <span class='collapse' style='cursor:pointer;' onclick='showhideCurate(event);'></span>
+        Sequence
+
+        <span id='add0' class="icon add" onclick="changeHTMLForm('add',0);"></span>
+        <span id='remove0' class="icon remove" style="display:none;" onclick="changeHTMLForm('remove',0);"></span>
+
+        <ul>
+            <li class='choice' id='element1'>
+                Choose
+                <select id='choice0' onchange="changeChoice(this);">
+                    <option value='id20'>id20</option>
+                    <option value='id21'>id21</option>
+                </select>
+
+                <ul id="choice0-0">
+                    <li class='element  ' id='element2' tag='id20'>
+                        id20 <input type='text' value=''/>
+                    </li>
+                </ul>
+                <ul id="choice0-1" class="notchosen"></ul>
+            </li>
+        </ul>
+    </li>
+    <li class='sequence' id='element3'>
+        <span class='collapse' style='cursor:pointer;' onclick='showhideCurate(event);'></span>
+        Sequence
+
+        <span id='add3' class="icon add" onclick="changeHTMLForm('add',3);"></span>
+        <span id='remove3' class="icon remove" style="display:none;" onclick="changeHTMLForm('remove',3);"></span>
+
+        <ul>
+            <li class='choice' id='element4'>
+                Choose
+                <select id='choice1' onchange="changeChoice(this);">
+                    <option value='id20'>id20</option>
+                    <option value='id21'>id21</option>
+                </select>
+
+                <ul id="choice1-0">
+                    <li class='element  ' id='element5' tag='id20'>
+                        id20 <input type='text' value=''/>
+                    </li>
+                </ul>
+                <ul id="choice1-1" class="notchosen"></ul>
+            </li>
+        </ul>
+    </li>
+</ul>

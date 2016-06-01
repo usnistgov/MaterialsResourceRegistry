@@ -1,0 +1,7 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="simple" />
+
+    <xs:simpleType name="simple">
+        <xs:list itemType="xs:integer"/>
+    </xs:simpleType>
+</xs:schema>

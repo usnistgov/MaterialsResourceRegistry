@@ -1,0 +1,54 @@
+{
+  "tag": "element",
+  "options": {
+    "xpath": {
+      "xml": "/root",
+      "xsd": "/*/*"
+    },
+    "max": 1,
+    "name": "root",
+    "label": "root",
+    "module": null,
+    "min": 1,
+    "ns_prefix": null,
+    "xmlns": null,
+    "schema_location": null
+  },
+  "value": null,
+  "children": [
+    {
+      "tag": "elem-iter",
+      "children": [
+        {
+          "tag": "simple_type",
+          "options": {
+            "name": "",
+            "ns_prefix": null,
+            "xmlns": null
+          },
+          "children": [
+            {
+              "tag": "restriction",
+              "options": {
+                "base": "string"
+              },
+              "value": "child0",
+              "children": [
+                {
+                  "tag": "enumeration",
+                  "value": "child0"
+                },
+                {
+                  "tag": "enumeration",
+                  "value": "child1"
+                }
+              ]
+            }
+          ],
+          "value": null
+        }
+      ],
+      "value": null
+    }
+  ]
+}

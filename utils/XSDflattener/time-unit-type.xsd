@@ -1,0 +1,16 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"	elementFormDefault="qualified">
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!--  Unit: Time Unit TODO Integrate UnitsML  -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:simpleType name="TimeUnitType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="years"/>
+			<xsd:enumeration value="days"/>
+			<xsd:enumeration value="hours"/>
+			<xsd:enumeration value="minutes"/>
+			<xsd:enumeration value="seconds"/>
+			<xsd:enumeration value="milliseconds"/>
+			<xsd:enumeration value="microseconds"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

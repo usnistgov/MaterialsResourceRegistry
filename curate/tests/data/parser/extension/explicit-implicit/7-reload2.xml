@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <a xsi:type="extension2">
+        <a1>a</a1>
+        <a2>b</a2>
+        <extension2>c</extension2>
+    </a>
+</root>

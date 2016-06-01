@@ -1,7 +1,7 @@
 var loadedModules = [];
 
-loadModuleResources = function(moduleURLList) {
-    neededURLList = [];
+var loadModuleResources = function(moduleURLList) {
+    var neededURLList = [];
 
     for(var modIndex=0; modIndex<moduleURLList.length; modIndex++) {
         var moduleURL = moduleURLList[modIndex];
@@ -26,22 +26,22 @@ loadModuleResources = function(moduleURLList) {
             for(var modIndex=0; modIndex<neededURLList.length; modIndex++) {
                 loadedModules.push(neededURLList[modIndex]);
             }
-
-            //console.log(loadedModules);
         },
         error: function() {
             // Raise error
+            console.error('An error occured when loading the modules');
         }
     });
-}
+};
 
-saveModuleData = function($module, modData, asyncOpt) {
+var saveModuleData = function($module, modData, asyncOpt) {
     if(typeof asyncOpt === 'undefined') {
         asyncOpt = true;
     }
 
     //TODO: test if id always class element (could it be choice or sequence?)
-	var moduleId = $module.parents('.element').attr('id');
+    //var moduleId = $module.parents('.element').attr('id');
+    var moduleId = $module.attr('id');
     var moduleURL = $module.find('.moduleURL').text();
 
     if(moduleURL === '') {
@@ -49,7 +49,13 @@ saveModuleData = function($module, modData, asyncOpt) {
         return;
     }
 
-    modData['htmlId'] = moduleId;
+    if ( modData instanceof FormData ) {
+        modData.append("module_id", moduleId);
+    } else {
+        modData['module_id'] = moduleId;
+    }
+
+    console.log(modData);
 
     var ajaxOptions = {
         url : '/modules'+moduleURL,
@@ -67,35 +73,35 @@ saveModuleData = function($module, modData, asyncOpt) {
             var moduleResult = $(data.html).find('.moduleResult').html();
 
             $module.find('.moduleDisplay').html(moduleDisplay);
-            $module.find('.moduleResult').html(moduleResult);     
-            
+            $module.find('.moduleResult').html(moduleResult);
+
             /* look at extra data received from the server */
-            if ('xpath_accessor' in data){
+            /*if ('xpath_accessor' in data){
             	xpath_accessor(data.xpath_accessor);
-            }
+            }*/
         },
-        error: function(data) {
-            console.error("Error when saving data");
+        error: function() {
+            console.error("An error occured when saving module data");
         }
-    }
+    };
 
     if(modData instanceof FormData) {
         ajaxOptions.processData = false;
         ajaxOptions.contentType = false;
     }
 
-    $.ajax(ajaxOptions);   
+    $.ajax(ajaxOptions);
 };
 
 // Modules initialisation
-initModules = function() {
+var initModules = function() {
     var moduleList = $('.module');
     var moduleURLList = [];
     console.log(moduleList);
 
     $.each(moduleList, function(index, value) {
-//        console.log($(value));
-//        loadModule($(value));
+        // console.log($(value));
+        // loadModule($(value));
 
         var moduleURL = $(value).find('.moduleURL').text();
         if(moduleURL !== "" && moduleURLList.indexOf(moduleURL) === -1) {
@@ -104,23 +110,23 @@ initModules = function() {
     });
 
     console.log(moduleURLList);
-    loadModuleResources(moduleURLList)
+    loadModuleResources(moduleURLList);
 };
 
 
 // set sibling nodes with values from the server
-xpath_accessor = function(data){
-	for (id in data){
-		console.log(id + " -> " + data[id]);
-		if ($("#" + id).children("input").length == 1){ /* input */
-			$("#" + id).children("input").val(data[id]);
-		}else if($("#" + id).children("select").length == 1){ /* select */
-			$("#" + id).children("select").val(data[id]);
-		}else if($("#" + id).children("div.module").length == 1){ /* module */
-			var module = $("#" + id).children("div.module");		
-			saveModuleData(module, data[id]);
-		}else{ /* other */
-			console.log("Unable to set " + id + " with value " + data[id]);
-		}
-	}
-}
+//xpath_accessor = function(data){
+//	for (id in data){
+//		console.log(id + " -> " + data[id]);
+//		if ($("#" + id).children("input").length == 1){ /* input */
+//			$("#" + id).children("input").val(data[id]);
+//		}else if($("#" + id).children("select").length == 1){ /* select */
+//			$("#" + id).children("select").val(data[id]);
+//		}else if($("#" + id).children("div.module").length == 1){ /* module */
+//			var module = $("#" + id).children("div.module");
+//			saveModuleData(module, data[id]);
+//		}else{ /* other */
+//			console.log("Unable to set " + id + " with value " + data[id]);
+//		}
+//	}
+//}

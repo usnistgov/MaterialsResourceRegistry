@@ -116,7 +116,7 @@ Software
 <a id="config_custom" onclick="configure_custom_view();" style="display:none;cursor: pointer;">Change Custom View</a>
 <br/><br/>
 Resource Type:
-<form id="refine_resource_type"> 
+<form id="refine_resource_type">
 <input type="radio" name="resource_type" value="all"> All Resources<br/>
 <input type="radio" name="resource_type" value="organization"> Organization<br/>
 <input type="radio" name="resource_type" value="datacollection"> Data Collection<br/>
@@ -166,6 +166,7 @@ No Custom View available for this type of resource.
 <script src="{% static 'inc/controllers/js/explore.js' %}"></script>
 <script src="{% static 'libs/tags/tag-it.js' %}"></script>
 <script src="{% static 'inc/controllers/js/nmrr/nmrr_explore.js' %}"></script>
+<script src="{% static 'inc/controllers/js/nmrr/oai_pmh_explore.js' %}"></script>
 <script>
     initAutocomplete();
     initSearch();

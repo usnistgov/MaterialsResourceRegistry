@@ -1,0 +1,207 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: oai_pmh.html
+# Application: templates/oai_pmh/admin
+# Description:
+#
+# Author: Pierre Francois RIGODIAT
+#		  pierre-francois.rigodiat@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/oai_pmh.css' %}" media="screen" />
+{% endblock %}
+
+{% block title %}<h1>Data Providers</h1>{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab6' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/oai-pmh.html' with active_tab='tab2' %}{% endblock %}
+
+{% block content%}
+<div class="clearer">&nbsp;</div>
+<div class="toolbar">
+	<div class="btn-group pull-right">
+    	<span class="btn" onclick="displayAddRegistry();" style="text-decoration:none"><i class="fa fa-plus-circle"></i> Add new Data Provider</span>
+		<span class="btn" onclick="checkAllStatus();"><i class="fa fa-check-circle"></i> Check all Data Providers</span>
+        <span class="btn" onclick="harvestAllData();"><i class="fa fa-arrow-circle-down"></i> Harvest All data</span>
+  	</div>
+</div>
+<br/><br/><br/>
+    {% if registries %}
+    <div id="Refreshing" style="display: none;"><i class="fa fa-spinner fa-spin"></i> Refreshing...</div>
+    <div id="RefreshInfo">
+        <i class='fa fa-refresh' aria-hidden='true'></i>
+            Refresh in <div id="countdown" style="display:inline-block;"></div> sec.
+    </div>
+
+    <table class="data-table font-medium">
+        <tr>
+            <th>Name</th>
+            <th>URL</th>
+            <th>Harvest Rate</th>
+            <th>Status</th>
+            <th>Harvest</th>
+            <th>Last harvest</th>
+            
+            <th>Actions</th>
+        </tr>
+
+        {% for registry in registries %}
+            {% cycle 'even' '' as rowcolors silent %}
+            {% if registry.isHarvesting %}
+                <tr id="banner{{registry.id}}"  class="alertTr">
+            {% else %}
+                <tr id="banner{{registry.id}}" class="alertTr" style="display: none;">
+            {% endif %}
+                <td class="alert alert-warning" colspan="7">
+                    <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>&nbsp;&nbsp;Data harvesting ...</h4>
+                </td>
+            </tr>
+            {% if registry.isUpdating %}
+                <tr id="bannerUpdate{{registry.id}}"  class="alertTr">
+            {% else %}
+                <tr id="bannerUpdate{{registry.id}}" class="alertTr" style="display: none;">
+            {% endif %}
+                <td class="alert alert-warning" colspan="7">
+                    <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>&nbsp;&nbsp;Updating Data Provider information ...</h4>
+                </td>
+            </tr>
+            <tr class="{{ rowcolors }}">
+                <td width="200em;" id="name{{registry.id}}">{{ registry.name }}</td>
+                <td>{{ registry.url }}</td>
+                <td>{{ registry.harvestrate }}</td>
+                {% if registry.isDeactivated %}
+                    <td style='color:red'>Deactivated</td>
+                {% else %}
+                     <td style="text-align:center;" url="{{registry.url}}" registryID="{{registry.id}}" id="Status{{registry.id}}">
+                        <span class="btn" onclick="checkStatus('{{registry.id}}', '{{registry.url}}');" style="text-decoration:none">Check status</span>
+                    </td>
+                {% endif %}
+                <td id="ButtonSet{{registry.id}}">
+                        {% if registry.harvest %}
+                            <input id="{{registry.id}}" class="cmn-toggle cmn-toggle-round" disabled="True" type="checkbox" checked >
+                        {% else %}
+                            <input id="{{registry.id}}" class="cmn-toggle cmn-toggle-round" type="checkbox" disabled="True">
+                        {% endif %}
+                        <label onclick="editRegistry('{{ registry.id }}')" for="{{registry.id}}"></label>
+                </td>
+                <td width="100em;" id="lastUpdate{{registry.id}}">{{ registry.lastUpdate }}</td>
+                <!--<td>{{ registry.records|length }}</td>-->
+                <td width="150em;">
+                    {% if registry.isDeactivated %}
+                        <span class="icon legend result" onclick="viewRegistry('{{ registry.id }}')">View</span>
+                        <span class="icon legend retrieve" onclick="reactivateRegistry('{{ registry.id }}')">Restore</span>
+                    <span class="icon legend remove" onclick="deleteRegistry('{{ registry.id }}')">Delete definitely</span>
+                    {% else %}
+                        <span class="icon legend result" onclick="viewRegistry('{{ registry.id }}')">View</span>
+                        <span class="icon legend edit" onclick="editRegistry('{{ registry.id }}')">Edit</span>
+                        <span class="icon legend edit" onclick="editHarvestRegistry('{{ registry.id }}')">Edit harvest</span>
+                        <span class="icon legend delete" onclick="deactivateRegistry('{{ registry.id }}')">Delete</span>
+                        <hr class="action">
+                        {% if not registry.isUpdating %}
+                        <span id="update{{registry.id}}" class="icon legend update" onclick="updateRegistryInfos('{{ registry.id }}')">Update information</span>
+                        {% else %}
+                        <span id="update{{registry.id}}" class="icon legend update" onclick="updateRegistryInfos('{{ registry.id }}')" style="display: none;">Update information</span>
+                        {% endif %}
+                        {% if not registry.isHarvesting %}
+                        <span id="harvest{{registry.id}}" registryID="{{registry.id}}"  class="icon legend refresh" onclick="harvestData('{{ registry.id }}')">Harvest data</span>
+                        {% else %}
+                        <span id="harvest{{registry.id}}" registryID="{{registry.id}}"  class="icon legend refresh" onclick="harvestData('{{ registry.id }}')" style="display: none;">Harvest data</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-header">
+             <div class="alert alert-warning" style="display: block;">
+                <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        No data providers available. Click on the Add button to add data providers.
+    {% endif %}
+{% endblock %}  
+
+{% block popups %}
+<div id="dialog-detail-registry" title="Data Provider Details" style="display:none;">
+    <div id="registry_detail"></div>
+</div>
+
+<div id="dialog-registry" title="Add new Data Provider" style="display: none;">
+    <div class="alert alert-warning" id="banner_add_wait" style="display: none;">
+        <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait for connection verification ...</h4>
+    </div>
+    <div class="alert alert-error" id="banner_add_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_add_errors">
+        </div>
+    </div>
+	<form id="form_add"  enctype="multipart/form-data">
+		{% csrf_token %}
+		{% include 'oai_pmh/admin/form_registry_add.html'%}
+		<div id="form_add_current"></div>
+	</form>
+</div>
+
+<div id="dialog-edit" title="Edit" style="display:none;">
+    <div class="alert alert-error" id="banner_edit_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_edit_errors">
+        </div>
+    </div>
+    <form id="form_edit"  action="/oai_pmh/update/registry" method="put" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="form_edit_current"></div>
+    </form>
+</div>
+
+<div id="dialog-edit-harvest" title="Edit Harvest" style="display:none;">
+    <div class="alert alert-error" id="banner_edit_harvest_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_edit_harvest_errors">
+        </div>
+    </div>
+    <form id="form_edit_harvest"  action="/oai_pmh/update/registry-harvest" method="put" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="form_edit_harvest_current"></div>
+    </form>
+</div>
+
+<div id="dialog-confirm-delete" title="Delete" style="display:none;">
+    <div class="alert alert-warning" id="banner_delete_wait" style="display: none;">
+        <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+    </div>
+    <div class="alert alert-error" id="banner_delete_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_delete_errors">
+        </div>
+    </div>
+    Are you sure you want to delete this repository?
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'libs/duration/jquery-duration-picker.js' %}"></script>
+<script src="{% static 'inc/controllers/js/oai_pmh.js' %}"></script>
+<script>
+	InitOaiPmh();
+</script>
+
+{% endblock %}  

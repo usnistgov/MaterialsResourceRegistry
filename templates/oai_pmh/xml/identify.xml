@@ -1,0 +1,27 @@
+{% extends "oai_pmh/xml/base.xml" %}
+
+{% block content %}
+  <Identify>
+    <repositoryName>{{ name }}</repositoryName>
+    <baseURL>{{ url }}</baseURL>
+    <protocolVersion>{{ protocole_version }}</protocolVersion>
+    {% for admin in admins %}
+    <adminEmail>{{ admin }}</adminEmail>
+    {% endfor %}
+    <earliestDatestamp>{{ earliest_date }}</earliestDatestamp>
+    <deletedRecord>{{ deleted }}</deletedRecord>
+    <granularity>{{ granularity }}</granularity>
+    <!--<compression>{{ compression }}</compression>-->
+    <description>
+      <oai-identifier
+        xmlns="http://www.openarchives.org/OAI/2.0/oai-identifier"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai-identifier http://www.openarchives.org/OAI/2.0/oai-identifier.xsd">
+        <scheme>{{ identifier_scheme }}</scheme>
+        <repositoryIdentifier>{{ repository_identifier }}</repositoryIdentifier>
+        <delimiter>{{ identifier_delimiter }}</delimiter>
+        <sampleIdentifier>{{ sample_identifier }}</sampleIdentifier>
+      </oai-identifier>
+    </description>
+ </Identify>
+{% endblock %}

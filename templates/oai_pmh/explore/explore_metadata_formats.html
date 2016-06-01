@@ -1,0 +1,19 @@
+{% if metadata_formats_Form.my_schemas_nb > 0 %}
+    <div id="id_my_schemas" style="display: block;">
+        <ul>
+        {% for metadata in metadata_formats_Form.my_schemas %}
+        <li>
+            <span class="icon legend result" onclick="viewMetadataFormats('{{ metadata.choice_value }}')" style="margin-right: 2.5em;">Details</span>
+            {{metadata}}
+        </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <hr/>
+{% endif %}
+
+{% block popups %}
+<div id="dialog-detail-metadataformats" title="Detail" style="display:none;">
+    <div id="metadataformats_detail"></div>
+</div>
+{% endblock %}

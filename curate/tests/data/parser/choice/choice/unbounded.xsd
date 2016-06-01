@@ -1,0 +1,10 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="id3">
+        <choice minOccurs="2" maxOccurs="unbounded">
+            <choice>
+                <element name="child0" type="string"/>
+                <element name="child1" type="string"/>
+            </choice>
+        </choice>
+    </complexType>
+</schema>

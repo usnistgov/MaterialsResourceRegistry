@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Resource status="active">
+    <identity>
+        <title>NIST Structural Ceramics Database</title>
+        <shortName>NIST SCD</shortName>
+    </identity>
+    <curation>
+        <publisher>NIST</publisher>
+        <contact>
+            <name>Vicky Karen</name>
+            <emailAddress>data@nist.gov</emailAddress>
+        </contact>
+    </curation>
+    <content>
+        <type>Database</type>
+        <description>The NIST WWW Structural Database (WebSCD) provides evaluated materials property data for a wide range of advanced ceramics known variously as structural ceramics, engineering ceramics, and fine ceramics. These materials tend to have low mass densities and high strengths and tend to be resistant to corrosion. These characteristics form the basis for applications of these materials in high-temperature, energy-efficient heat exchangers, advanced engine designs, bearings, wear resistant parts, and stable electronic substrates and electronic packaging.</description>
+        <subject>structural ceramics</subject>
+        <subject>fine ceramics</subject>
+        <subject>engineering ceramics</subject>
+        <referenceURL>http://srdata.nist.gov/ceramicDataPortal</referenceURL>
+        <primaryAudience>research</primaryAudience>
+    </content>
+    <applicability>
+        <materialsScience>
+            <materialType>ceramic</materialType>
+            <structuralMorphology>crystalline</structuralMorphology>
+            <propertyClass>thermodynamic</propertyClass>
+            <propertyClass>structural</propertyClass>
+            <experimentalDataAcquisitionMethod>spectroscopy</experimentalDataAcquisitionMethod>
+            <sampleProcessing>pressing</sampleProcessing>
+        </materialsScience>
+    </applicability>
+    <access>
+        <policy>
+            <rights>public</rights>
+        </policy>
+        <portal>
+            <homeURL>http://srdata.nist.gov/CeramicDataPortal/</homeURL>
+        </portal>
+    </access>
+</Resource>

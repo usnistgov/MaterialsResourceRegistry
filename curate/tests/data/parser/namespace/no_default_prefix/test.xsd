@@ -1,0 +1,18 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema"> 
+    <element name="root" >
+        <complexType >
+         <sequence>
+             <element name="a">
+                 <simpleType>
+                     <restriction base="string">
+                         <enumeration value="a1"/>
+                         <enumeration value="a2"/>
+                         <enumeration value="a3"/>
+                     </restriction>
+                 </simpleType>
+             </element>
+             <element name="id" type="float"/>
+         </sequence>
+        </complexType>
+    </element>
+</schema>

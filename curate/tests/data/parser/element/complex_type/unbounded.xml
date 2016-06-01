@@ -1,0 +1,14 @@
+<root>
+    <id1>
+        <child0>entry0</child0>
+        <child1>entry1</child1>
+    </id1>
+    <id1>
+        <child0>entry2</child0>
+        <child1>entry3</child1>
+    </id1>
+    <id1>
+        <child0>entry4</child0>
+        <child1>entry5</child1>
+    </id1>
+</root>

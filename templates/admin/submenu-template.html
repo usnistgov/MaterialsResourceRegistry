@@ -1,0 +1,22 @@
+<!-- 
+################################################################################
+#
+# File Name: submenu-template.html
+# Application: templates/admin
+# Description: 
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+<ul class="tabbed">
+	<li class="{% if active_tab == 'tab1' %} current_page_item {% endif %}"><a href="/admin/xml-schemas/manage-schemas">Manage Templates</a></li>
+	<li class="{% if active_tab == 'tab2' %} current_page_item {% endif %}"><a href="/admin/xml-schemas/manage-types">Manage Types</a></li>
+	<li class="{% if active_tab == 'tab3' %} current_page_item {% endif %}"><a href="/admin/xml-schemas/manage-xslt">Manage XSLT</a></li>
+</ul>

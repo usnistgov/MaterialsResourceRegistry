@@ -1,0 +1,45 @@
+{
+  "tag": "extension",
+  "children": [
+    {
+      "tag": "attribute",
+      "options": {
+        "xpath": {
+          "xml": "/@child0",
+          "xsd": "/xs:schema/xs:element/xs:complexType/xs:simpleContent/xs:extension/xs:attribute"
+        },
+        "ns_prefix": null,
+        "xmlns": null,
+        "name": "child0",
+        "min": 1,
+        "max": 1,
+        "module": null,
+        "label": "child0",
+        "schema_location": null
+      },
+      "value": null,
+      "children": [
+        {
+          "tag": "elem-iter",
+          "children": [
+            {
+              "tag": "input",
+              "options": {
+                "placeholder": "",
+                "use": "",
+                "tooltip": ""
+              },
+              "value": ""
+            }
+          ],
+          "value": null
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "value": ""
+    }
+  ],
+  "value": null
+}

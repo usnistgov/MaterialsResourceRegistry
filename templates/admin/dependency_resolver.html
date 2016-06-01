@@ -1,0 +1,32 @@
+{% load dict_key_extras %}
+The uploaded schema contains one or more import/include elements. Some references could not be loaded.
+Please check that the resource is accessible (not on your local file system, or on a server down).
+You can choose files from the database to resolve each import/include.
+<table id='dependencies'>
+    <tr>
+        <th>Import/Include</th>
+        <th>Schema Location</th>
+        <th>Dependency</th>
+    </tr>
+
+    {% for import in imports %}
+    <tr>
+        <td>Import</td>
+        <td><textarea readonly="readonly" class="schemaLocation">{{import.attrib|get:"schemaLocation"}}</textarea></td>
+        <td>{{dependencies}}</td>
+    </tr>
+    {% endfor %}
+
+    {% for include in includes %}
+    <tr>
+        <td>Include</td>
+        <td><textarea readonly="readonly" class="schemaLocation">{{include.attrib|get:"schemaLocation"}}</textarea></td>
+        <td>{{dependencies}}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div id="xsd_content" style="display: none;">
+    {{xsd_content}}
+</div>
+<span class='btn resolve' onclick='resolveDependencies();'>Save</span>
+<div id='errorDependencies'></div>

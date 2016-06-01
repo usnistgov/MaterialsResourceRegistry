@@ -117,7 +117,7 @@ class KeywordForm(forms.Form):
         userSchemas = Template.objects(user=str(userId)).distinct(field="title")
 
         for schema in schemas:
-            # Add them to available options
+            #We add them
             self.SCHEMAS_OPTIONS.append((schema, schema))
 
         for schema in userSchemas:

@@ -1,0 +1,9 @@
+<xs:schema xmlns:ns0="http://mdcs.ns" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="module" type="mod_type" />
+
+    <xs:complexType name="mod_type" ns0:_mod_mdcs_="/examples/positive-integer">
+        <xs:sequence>
+            <xs:element name="child" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

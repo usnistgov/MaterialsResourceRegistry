@@ -1,0 +1,46 @@
+{
+  "tag": "complex_type",
+  "options": {
+    "name": "complex",
+    "ns_prefix": null,
+    "xmlns": null
+  },
+  "children": [
+    {
+      "tag": "attribute",
+      "options": {
+        "xpath": {
+          "xml": "/@id",
+          "xsd": "/xs:schema/xs:complexType/xs:attribute"
+        },
+        "max": 1,
+        "name": "id",
+        "label": "id",
+        "module": null,
+        "min": 1,
+        "ns_prefix": null,
+        "xmlns": null,
+        "schema_location": null
+      },
+      "value": null,
+      "children": [
+        {
+          "tag": "elem-iter",
+          "children": [
+            {
+              "tag": "input",
+              "options": {
+                "placeholder": "",
+                "tooltip": "",
+                "use": ""
+              },
+              "value": ""
+            }
+          ],
+          "value": null
+        }
+      ]
+    }
+  ],
+  "value": null
+}

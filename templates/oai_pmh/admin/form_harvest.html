@@ -1,0 +1,56 @@
+{{harvest_form.id}}
+
+{% block title %}<h1>Edit Harvest</h1>{% endblock %}
+<p>
+    Please select metadata formats and sets you would like to retrieve during the Harvest process for this Data Provider.
+</p>
+
+
+{% if harvest_form.metadataFormats %}
+    <table class="data-table font-medium">
+        <thead>
+            <tr>
+                <th>{{harvest_form.metadataFormats.label}}</th>
+                <th></th>
+            </tr>
+        </thead>
+
+    {% with initial=harvest_form.metadataFormats.field.widget.choices.field.initial %}
+    {% for pk, choice, initial_extra in  harvest_form.metadataFormats.field.widget.choices %}
+        <tr>
+            <td width="70%">{{ choice }}</td>
+            <td id="ButtonSetid_metadataFormats_{{ forloop.counter0 }}" class="ui-buttonset">
+                <input {% if pk in initial %}checked="checked"{% endif %} class="cmn-toggle cmn-toggle-round ui-helper-hidden-accessible" type="checkbox" id="id_metadataFormats_{{ forloop.counter0 }}" value="{{ pk }}" name="metadataFormats" />
+                <label for="id_metadataFormats_{{ forloop.counter0 }}"></label>
+            </td>
+        </tr>
+    {% endfor %}
+    {% endwith %}
+    </table>
+{% else %}
+    No metadata formats available.
+{% endif %}
+
+{% if harvest_form.sets %}
+    <table class="data-table oai-nmrr-table">
+        <thead>
+            <tr>
+                <th>{{harvest_form.sets.label}}</th>
+                <th></th>
+            </tr>
+        </thead>
+    {% with initial=harvest_form.sets.field.widget.choices.field.initial %}
+    {% for pk, choice in  harvest_form.sets.field.widget.choices %}
+        <tr>
+            <td width="70%">{{ choice }}</td>
+            <td id="ButtonSetid_sets_{{ forloop.counter0 }}" class="ui-buttonset">
+                <input {% if pk in initial %}checked="checked"{% endif %} class="cmn-toggle cmn-toggle-round ui-helper-hidden-accessible" type="checkbox" id="id_sets_{{ forloop.counter0 }}" value="{{ pk }}" name="sets" />
+                <label for="id_sets_{{ forloop.counter0 }}"></label>
+            </td>
+        </tr>
+    {% endfor %}
+    {% endwith %}
+    </table>
+{% else %}
+    No sets available.
+{% endif %}

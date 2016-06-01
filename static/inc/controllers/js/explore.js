@@ -1076,7 +1076,7 @@ deleteResult = function(result_id){
  */
 delete_result = function(result_id){
 	$.ajax({
-        url : "/explore/delete_result",
+        url : "/dashboard/delete_result",
         type : "GET",
         dataType: "json",
         data : {
@@ -1087,6 +1087,7 @@ delete_result = function(result_id){
 	    }
     });
 }
+
 
 /**
  * Publish a curated document
@@ -1115,14 +1116,14 @@ updatePublish = function(result_id){
  */
 update_publish = function(result_id){
 	$.ajax({
-        url : "/explore/update_publish",
+        url : "/dashboard/update_publish",
         type : "GET",
         dataType: "json",
         data : {
         	result_id: result_id,
         },
 		success: function(data){
-		    $("#" + result_id).load(document.URL +  " #" + result_id);
+		    location.reload();
 	    }
     });
 }
@@ -1148,13 +1149,36 @@ updateUnpublish = function(result_id){
     });
 }
 
+dialog_detail = function(id){
+	$.ajax({
+        url : "/explore/detail_result_keyword?id=" + id,
+        type : "GET",
+        success: function(data){
+        	$("#result_detail").html(data);
+
+        	$(function() {
+                $( "#dialog-detail-result" ).dialog({
+                    modal: true,
+                    height: 430,
+                    width: 700,
+                    buttons: {
+                        Ok: function() {
+                        $( this ).dialog( "close" );
+                        }
+                    }
+                });
+            });
+        }
+    });
+}
+
 /**
  * AJAX call, update the publish state of a XMLdata
  * @param result_id
  */
 update_unpublish = function(result_id){
 	$.ajax({
-        url : "/explore/update_unpublish",
+        url : "/dashboard/update_unpublish",
         type : "GET",
         dataType: "json",
         data : {
@@ -1347,7 +1371,7 @@ initAutocomplete = function() {
                         }
                  }));}
                 )},
-              minLength: 2,              
+              minLength: 2,
                 select: function( event, ui ) {
                   this.value = ui.item.label;
                   $("#id_search_entry").tagit("createTag", this.value);

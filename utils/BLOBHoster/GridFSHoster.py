@@ -17,6 +17,11 @@ from pymongo import MongoClient
 import gridfs
 from urlparse import urlparse
 from bson.objectid import ObjectId
+import os
+from django.utils.importlib import import_module
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
+MGI_DB = settings.MGI_DB
 
 class GridFSHoster(BLOBHoster):
     
@@ -24,7 +29,7 @@ class GridFSHoster(BLOBHoster):
         BLOBHoster.__init__(self, BLOB_HOSTER_URI, BLOB_HOSTER_USER, BLOB_HOSTER_PSWD)        
         
         self.client = MongoClient(self.BLOB_HOSTER_URI)    
-        self.db = self.client['mgi']
+        self.db = self.client[MGI_DB]
         self.fs = gridfs.GridFS(self.db)
         
         if MDCS_URI is not None:   
@@ -61,8 +66,8 @@ class GridFSHoster(BLOBHoster):
             handles.append(handle)
         return handles
         
-    def save(self, blob, filename=None):            
-        blob_id = self.fs.put(blob, filename=filename)
+    def save(self, blob, filename=None, userid=None):
+        blob_id = self.fs.put(blob, filename=filename, metadata=dict(iduser=userid))
         handle = self.uri + 'rest/blob?id=' + str(blob_id)
         return handle    
     
@@ -77,4 +82,7 @@ class GridFSHoster(BLOBHoster):
             
     def query(self, query):
         BLOBHoster.query(self)
+
+    def find(self, key, value):
+        return self.fs.find({key:value})
         

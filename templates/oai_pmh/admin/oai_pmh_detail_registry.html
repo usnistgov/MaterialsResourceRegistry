@@ -1,0 +1,285 @@
+{% load render_extras %}
+
+<div style="background-color:#fafafa">
+    <table autofocus class="data">
+        <tr style="background-color:#f0f0f0">
+            <td colspan="2">
+            <strong>General</strong>
+            </td>
+            <tr>
+                <td>Base URL</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.baseURL}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.repositoryName}}
+                    </span>
+                </td>
+            </tr>
+            <tr ><td>Number of metadata formats</td>
+                <td>
+                    <span class='value'>
+                       {{metadataformats|length}}
+                    </span>
+                </td>
+            </tr>
+            <tr >
+                <td>Number of sets</td>
+                <td>
+                    <span class='value'>
+                       {{sets|length}}
+                    </span>
+                </td>
+            </tr>
+            <tr >
+                <td>Number of harvested records</td>
+                <td>
+                    <span class='value'>
+                       {{ nbRecords }}
+                    </span>
+                </td>
+            </tr>
+            <tr >
+                <td>Last update</td>
+                <td>
+                    <span class='value'>
+                       {{ registry.lastUpdate }}
+                    </span>
+                </td>
+            </tr>
+        </tr>
+        <tr style="background-color:#f0f0f0">
+            <td colspan="2">
+            <strong>Identify</strong>
+            </td>
+            <tr>
+                <td>Admin Email</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.adminEmail}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Base URL</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.baseURL}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.repositoryName}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Has Deleted Record</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.deletedRecord}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Delimiter</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.delimiter}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.description}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Earliest Datestamp</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.earliestDatestamp}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Granularity</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.granularity}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Oai Identifier</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.oai_identifier}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Protocol Version</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.protocolVersion}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Repository Identifier</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.repositoryIdentifier}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Sample Identifier</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.sampleIdentifier}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>Scheme</td>
+                <td>
+                    <span class='value'>
+                       {{registry.identify.scheme}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="IdentifyHeadingOne">
+                            <h4 class="panel-title">
+                                <a style=""class="collapsed font-medium" role="button" data-toggle="collapse" data-parent="#IdentifyAccordion" href="#Identify" aria-expanded="false" aria-controls="collapseOne">
+                                  RAW
+                                </a>
+                            </h4>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class='value'>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div id="Identify" class="panel-collapse collapse collapse-data" role="tabpanel" aria-labelledby="IdentifyHeadingOne">
+                        <div class="panel-body">
+                            <div id="IdentifyXMLHolder">
+                             {% autoescape off %}
+                                {{ registry.identify.raw|render_xml_as_html }}
+                             {% endautoescape %}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tr>
+        <tr style="background-color:#f0f0f0">
+            <td colspan="2">
+            <strong>Metadata Formats ({{metadataformats|length}})</strong>
+            </td>
+            <tr style="background-color:#f0f0f0">
+                <td style="font-style: italic;">Prefix</td>
+                <td style="font-style: italic;">Namespace</td>
+            </tr>
+            {% for object in metadataformats %}
+            {% with xml=object.raw %}
+                <tr>
+                    <td>
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="MetadataheadingOne{{object.id}}">
+                                <h4 class="panel-title">
+                                    <a class="collapsed font-medium" role="button" data-toggle="collapse" data-parent="#accordion" href="#{{object.id}}" aria-expanded="false" aria-controls="collapseOne">
+                                      {{object.metadataPrefix}}
+                                    </a>
+                                </h4>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class='value'>
+                            {{object.metadataNamespace}}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="{{object.id}}" class="panel-collapse collapse collapse-data" role="tabpanel" aria-labelledby="MetadataheadingOne{{object.id}}">
+                            <div class="panel-body">
+                                <div id="MetadataXMLHolder{{object.id}}">
+                                 {% autoescape off %}
+                                     {{ xml|render_xml_as_html }}
+                                 {% endautoescape %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endwith %}
+            {% endfor %}
+        </tr>
+        <tr style="background-color:#f0f0f0">
+            <td colspan="2">
+            <strong>Sets ({{sets|length}})</strong>
+            </td>
+            <tr style="background-color:#f0f0f0">
+                <td style="font-style: italic;">Spec</td>
+                <td style="font-style: italic;">Name</td>
+            </tr>
+            {% for object in sets %}
+            {% with xml=object.raw %}
+                <tr>
+                    <td>
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="SetHeadingOne{{object.id}}">
+                                <h4 class="panel-title">
+                                    <a class="collapsed font-medium" role="button" data-toggle="collapse" data-parent="#SetAccordion" href="#Set{{object.id}}" aria-expanded="false" aria-controls="collapseOne">
+                                      {{object.setSpec}}
+                                    </a>
+                                </h4>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class='value'>
+                            {{object.setName}}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="Set{{object.id}}" class="panel-collapse collapse collapse-data" role="tabpanel" aria-labelledby="SetHeadingOne{{object.id}}">
+                            <div class="panel-body">
+                                <div id="SetXMLHolder{{object.id}}">
+                                 {% autoescape off %}
+                                    {{ xml|render_xml_as_html }}
+                                 {% endautoescape %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endwith %}
+            {% endfor %}
+        </tr>
+    </table>
+</div>

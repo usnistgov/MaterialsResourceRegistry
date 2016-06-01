@@ -1,0 +1,16 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="id5">
+        <choice>
+            <element name="child0" type="string"/>
+            <element name="child1" type="string"/>
+            <choice>
+                <element name="child2" type="string"/>
+                <element name="child3" type="string"/>
+            </choice>
+            <sequence>
+                <element name="id1" type="string"/>
+                <element name="child4" type="string"/>
+            </sequence>
+        </choice>
+    </complexType>
+</schema>

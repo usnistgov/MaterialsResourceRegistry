@@ -1,0 +1,14 @@
+<schema>
+    <element minOccurs="2" maxOccurs="unbounded" name="id7">
+        <simpleType>
+            <restriction base="integer">
+                <minInclusive value="0"/>
+                <maxInclusive value="100"/>
+            </restriction>
+        </simpleType>
+        <keyref name="dummy" refer="pNumKey">
+            <selector xpath="id4"/>
+            <field xpath="@ref-number"/>
+        </keyref>
+    </element>
+</schema>

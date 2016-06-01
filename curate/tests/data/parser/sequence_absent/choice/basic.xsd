@@ -1,0 +1,10 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="complex">
+        <sequence>
+            <choice>
+                <element name="id20" type="string"/>
+                <element name="id21" type="string"/>
+            </choice>
+        </sequence>
+    </complexType>
+</schema>

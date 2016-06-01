@@ -1,0 +1,7 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="complex">
+        <sequence>
+            <element name="id0" type="string"/>
+        </sequence>
+    </complexType>
+</schema>

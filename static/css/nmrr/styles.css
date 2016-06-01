@@ -7,7 +7,7 @@ body {
 	margin:0;
 	padding:0;
 	font-family: 'Source Sans Pro', 'sans-serif';
-	font-size: 1.2em;
+	font-size: 1.0em;
 	color: #888;
 	font-weight: 300;
 }
@@ -246,7 +246,7 @@ div#changelist-filter ul li a {font-size:14px; line-height:14px;}
 
 nav#nmrr_admin_main_menu a {
     color:#699BBA;
-    font-size: 1.1em;
+    font-size: 1.2em;
 }
 
 nav#nmrr_admin_user_menu a {color:#699BBA}
@@ -349,7 +349,7 @@ nav ul li a {
 	padding: 2px 5px;
     color: #fff;
 	border-bottom: 3px solid #8CB2CA;
-    font-size: 0.8em;
+    font-size: 1.0em;
 	margin: 0 20px;
      border-bottom: none;
 	letter-spacing: 0px;
@@ -922,3 +922,77 @@ input[placeholder]:focus{
 	text-indent: 0;
 	opacity: 1;
 }
+
+.cmn-toggle-round + label {
+  padding: 2px;
+  width: 60px;
+  height: 25px;
+  background-color: #dddddd;
+  border-radius: 25px;
+}
+input.cmn-toggle-round + label:before,
+input.cmn-toggle-round + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 25px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round + label:after {
+  width: 28px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round:checked + label:before {
+  background: #8ce196 no-repeat url('../../resources/img/check.png');
+  background-size:  16px;
+  background-position: 15%;
+}
+input.cmn-toggle-round:checked + label:after {
+  margin-left: 33px;
+}
+.tpl-title {
+	text-align: center;
+	font-size: 22px;
+	margin-bottom: 0.5em;
+	font-weight: bold;
+}
+
+
+/* Tables */
+
+table {margin-bottom: 1.4em; width: 100%;}
+/*th {font-weight: bold;}
+thead th {background: #C3D9FF;}
+th,td,caption {padding: 4px 10px 4px 5px;}
+tr.even td {background: #F2F6FA;}
+tfoot {font-style: italic;}
+caption {background: #EEE;}
+
+table.data-table {
+	border: 1px solid #EEE;
+	margin-bottom: 2em;
+	width: 100%;
+}
+table.data-table th {
+	background: #EEE;
+	border: 1px solid #DDD;
+	color: #555;
+	text-align: left;
+}
+table.data-table tr {border-bottom: 1px solid #EEE;}
+table.data-table td, table th {padding: 8px 10px;}
+table.data-table td {
+	background: #F6F6F6;
+	border: 1px solid #E6E6E6;
+}
+table.data-table tr.even td {background: #FCFCFC;}*/

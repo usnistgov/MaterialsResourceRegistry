@@ -1,0 +1,490 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: oai_pmh_my_infos.html
+# Application: templates/oai_pmh/admin
+# Description:
+#
+# Author: Pierre Francois RIGODIAT
+#		  pierre-francois.rigodiat@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/lib/jquery-duration-picker.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/oai_pmh.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/lib/fSelect.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}<h1>My Server's configuration</h1>{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab6' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/oai-pmh.html' with active_tab='tab3' %}{% endblock %}
+
+{% block content%}
+
+<!-- Nav tabs -->
+  <div class="tabbable tabs-left">
+  <ul class="nav nav-tabs no-decoration" role="tablist">
+  	<li role="presentation" class="active"><a href="#identity"aria-controls="profile" role="tab" data-toggle="tab">My Identity</a></li>
+    <li role="presentation" style="display: block;"><a href="#metadataformats" aria-controls="home" role="tab" data-toggle="tab">My Metadata Prefixes</a></li>
+    <li role="presentation" style="display: block;"><a href="#sets" aria-controls="home" role="tab" data-toggle="tab">My Sets</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+  	<div role="tabpanel" class="tab-pane active"  id="identity">
+    <h3>My Identity</h3>
+    <div class="toolbar">
+        <div class="btn-group pull-right">
+            <span class="btn" onclick="editMyRegistry();" style="text-decoration:none"><i class="fa fa-cogs"></i>&nbsp;&nbsp;Edit my Server’s Identity</span>
+            <span class="btn" onclick="checkStatus('', '{{data_provider.baseURL}}');" style="text-decoration:none"><i class="fa fa-check-circle"></i> Check status</span>
+        </div>
+    </div>
+    <br/><br/><br/>
+    {% if data_provider %}
+    <table id="data-provider-my-info" class="data-table font-medium">
+        <tr>
+            <td>Status</td>
+            <td style="text-align:center;" url="{{data_provider.baseURL}}" id="Status">
+                ---
+            </td>
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.name}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Admin Email</td>
+            <td>
+                <span class='value'>
+                    {% for admin in data_provider.admins %}
+                        {{ admin }}
+                    {% endfor %}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Base URL</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.baseURL}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Has Deleted Record</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.deleted}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Granularity</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.granularity}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Protocol Version</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.protocole_version}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Delimiter</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.identifier_delimiter}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Scheme</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.identifier_scheme}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Repository Identifier</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.repository_identifier}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Sample Identifier</td>
+            <td>
+                <span class='value'>
+                   {{data_provider.sample_identifier}}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>Enable Harvesting</td>
+            <td id="ButtonSet123">
+                {% if data_provider.enable_harvesting == True %}
+                    <input id="56cddd02a530af58332ad554" class="cmn-toggle cmn-toggle-round ui-helper-hidden-accessible" disabled="" type="checkbox" checked="">
+                {% else %}
+                    <input id="56cddd02a530af58332ad554" class="cmn-toggle cmn-toggle-round ui-helper-hidden-accessible" disabled="" type="checkbox">
+                {% endif %}
+                <label for="56cddd02a530af58332ad554">
+                </label>
+            </td>
+        </tr>
+
+    </table>
+
+    <div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-header">
+             <div class="alert alert-warning" style="display: block;">
+                <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        No information available.
+    {% endif %}
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="metadataformats">
+        <h3>My Metadata Prefixes</h3>
+
+        <div class="tpl-title">Metadata Prefixes by Default</div>
+        <p class="font-medium">
+            Metadata Prefixes provided by default along with this instance. You will need to configure an XSLT file for each Template under the Template configuration to perform the mapping between the templates and those metadata prefixes.
+        </p>
+        {% if defaultMetadataFormats %}
+         <table class="data-table myinfos">
+            <tr>
+                <th>Metadata Prefix</th>
+                <th>Schema</th>
+                <th>Namespace</th>
+                <!--<th>Actions</th>-->
+            </tr>
+            {% cycle 'even' '' as rowcolors silent %}
+            {% for metadataFormat in defaultMetadataFormats %}
+            <tr class='{{rowcolors}}'>
+                <td width="100em;">{{metadataFormat.metadataPrefix}}</td>
+                <td width="250em;">{{metadataFormat.schema}}</td>
+                <td width="250em;">{{metadataFormat.metadataNamespace}}</td>
+                <!--<td>-->
+                    <!--<span class="icon legend edit" onclick="editMetadataFormat('{{ metadataFormat.id }}')">Edit</span>-->
+                    <!--<span class="icon legend delete" onclick="deleteMetadataFormat('{{ metadataFormat.id }}')">Delete</span>-->
+                <!--</td>-->
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p class="font-medium">
+                No information available.
+            </p>
+        {% endif %}
+
+        <div class="tpl-title">Other Metadata Prefixes</div>
+        <p class="font-medium">
+            Add other metadata prefixes by providing a URL.
+            You will need to configure an XSLT file for each Template under the Template configuration to perform the mapping between the templates and those metadata prefixes.
+        </p>
+        <div class="toolbar">
+            <div class="btn-group pull-right">
+                <span class="btn" onclick="displayAddMetadataFormat();" style="text-decoration:none"><i class="fa fa-plus-circle"></i> Add Metadata Prefix</span>
+            </div>
+        </div>
+        <br/><br/><br/>
+         {% if metadataFormats %}
+         <table class="data-table myinfos">
+            <tr>
+                <th>Metadata Prefix</th>
+                <th>Schema</th>
+                <th>Namespace</th>
+                <th>Actions</th>
+            </tr>
+            {% cycle 'even' '' as rowcolors silent %}
+            {% for metadataFormat in metadataFormats %}
+            <tr class='{{rowcolors}}'>
+                <td width="100em;">{{metadataFormat.metadataPrefix}}</td>
+                <td width="250em;">{{metadataFormat.schema}}</td>
+                <td width="250em;">{{metadataFormat.metadataNamespace}}</td>
+                <td>
+                    <span class="icon legend edit" onclick="editMetadataFormat('{{ metadataFormat.id }}')">Edit</span>
+                    <span class="icon legend delete" onclick="deleteMetadataFormat('{{ metadataFormat.id }}')">Delete</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p class="font-medium">
+                There are currently no other metadata prefixes. Please click "Add Metadata Prefixe" to the right to add new metadata prefixe.
+            </p>
+        {% endif %}
+
+
+        <div class="tpl-title">Templates as Metadata Prefixes</div>
+        <p class="font-medium">
+           Add templates as metadata prefixes in order to exchange meatdata records directly.<br>
+           Please note metadata prefix will be associated only to the template that you select.<br>
+        </p>
+        <div class="toolbar">
+            <div class="btn-group pull-right">
+                <span class="btn" onclick="displayAddTemplateMetadataFormat();" style="text-decoration:none"><i class="fa fa-plus-circle"></i> Add Metadata Prefix</span>
+            </div>
+        </div>
+        <br/><br/><br/>
+         {% if templateMetadataFormats %}
+         <table class="data-table myinfos">
+            <tr>
+                <th>Metadata Prefix</th>
+                <th>Template</th>
+                <th>Schema</th>
+                <th>Namespace</th>
+                <th>Actions</th>
+            </tr>
+            {% cycle 'even' '' as rowcolors silent %}
+            {% for metadataFormat in templateMetadataFormats %}
+            <tr class='{{rowcolors}}'>
+                <td width="140em;">{{metadataFormat.metadataPrefix}}</td>
+                <td width="250em;">{{metadataFormat.template.title}}</td>
+                <td width="250em;">{{metadataFormat.schema}}</td>
+                <td width="250em;">{{metadataFormat.metadataNamespace}}</td>
+                <td>
+                    <span class="icon legend edit" onclick="editMetadataFormat('{{ metadataFormat.id }}')">Edit</span>
+                    <span class="icon legend delete" onclick="deleteMetadataFormat('{{ metadataFormat.id }}')">Delete</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p class="font-medium">
+                There are currently no templates as metadata prefixes. Please click "Add Metadata Prefix" to the right to add new metadata format.
+                No information available.
+            </p>
+        {% endif %}
+
+    </div>
+    <div role="tabpanel" class="tab-pane" id="sets">
+        <h3>My Sets</h3>
+        <p>
+           Add sets to your server by associating templates to them.
+        </p>
+        <div class="toolbar">
+            <div class="btn-group pull-right">
+                <span class="btn" onclick="displayAddSet();" style="text-decoration:none"><i class="fa fa-plus-circle"></i> Add Set</span>
+            </div>
+        </div>
+        <br><br><br>
+        {% if sets %}
+        <table class="data-table myinfos">
+            <tr>
+                <th>SetSpec</th>
+                <th>SetName</th>
+                <th>Associate Templates</th>
+                <th>Actions</th>
+            </tr>
+            {% cycle 'even' '' as rowcolors silent %}
+            {% for set in sets %}
+            <tr class='{{rowcolors}}'>
+                <td width="100em;">{{set.setSpec}}</td>
+                <td width="250em;">{{set.setName}}</td>
+                <td width="250em;">
+                    {% for template in set.templates %}
+                        {{template.title}} -
+                    {% endfor %}
+                </td>
+                <td>
+                    <span class="icon legend edit" onclick="editSet('{{ set.id }}')">Edit</span>
+                    <span class="icon legend delete" onclick="deleteSet('{{ set.id }}')">Delete</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p class="font-medium">
+                No information available.
+            </p>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}
+
+
+{% block popups %}
+<div id="dialog-detail-registry" title="Data Provider Details" style="display:none;">
+    <div id="registry_detail"></div>
+</div>
+
+<div id="dialog-edit-my-registry" title="Edit my Server’s Identity" style="display:none;">
+    <div class="alert alert-error" id="banner_edit_my_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_edit_errors">
+        </div>
+    </div>
+    <form id="form_edit_my_registry"  enctype="multipart/form-data">
+		{% csrf_token %}
+		<div id="form_edit_current"></div>
+	</form>
+</div>
+
+<div id="dialog-add-metadataformat" title="Add Metadata Format" style="display:none;">
+    <div class="alert alert-error" id="banner_add_MF_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_add_MF_errors">
+        </div>
+    </div>
+    <form id="form_add_MF"  enctype="multipart/form-data">
+		{% csrf_token %}
+    <table>
+        <tr>
+            <td>{{metadataformat_form.metadataPrefix.label}}</td>
+            <td>{{metadataformat_form.metadataPrefix}}</td>
+        </tr>
+        <tr>
+            <td>{{metadataformat_form.schema.label}}</td>
+            <td>{{metadataformat_form.schema}}</td>
+        </tr>
+    </table>
+	</form>
+</div>
+
+<div id="dialog-add-template-metadataformat" title="Add template as Metadata Format" style="display:none;">
+    <div class="alert alert-error" id="banner_add_template_MF_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_add_template_MF_errors">
+        </div>
+    </div>
+    <form id="form_add_template_MF"  enctype="multipart/form-data">
+		{% csrf_token %}
+    <table>
+        <tr>
+            <td>{{template_metadataformat_form.metadataPrefix.label}}</td>
+            <td>{{template_metadataformat_form.metadataPrefix}}</td>
+        </tr>
+        <tr>
+            <td>{{template_metadataformat_form.template.label}}</td>
+            <td>{{template_metadataformat_form.template}}</td>
+        </tr>
+    </table>
+	</form>
+</div>
+
+
+
+<div id="dialog-mf-edit" title="Edit" style="display:none;">
+    <div class="alert alert-error" id="banner_edit_mf_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_edit_mf_errors">
+        </div>
+    </div>
+    <form id="form_edit_mf"  action="/oai_pmh/update/my-metadataFormat" method="put" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="form_edit_mf_current"></div>
+    </form>
+</div>
+
+<div id="dialog-mf-confirm-delete" title="Delete" style="display:none;">
+    <div class="alert alert-warning" id="banner_mf_delete_wait" style="display: none;">
+        <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+    </div>
+    <div class="alert alert-error" id="banner_mf_delete_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_mf_delete_errors">
+        </div>
+    </div>
+    Are you sure you want to delete this metadata format ?
+</div>
+
+
+
+<div id="dialog-add-set" title="Add Set" style="display:none;">
+    <div class="alert alert-warning" id="banner_add_set_wait" style="display: none;">
+        <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+    </div>
+    <div class="alert alert-error" id="banner_add_set_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_add_set_errors">
+        </div>
+    </div>
+    <form id="form_add_set"  enctype="multipart/form-data">
+		{% csrf_token %}
+    <table>
+        <tr>
+            <td>{{set_form.setSpec.label}}</td>
+            <td>{{set_form.setSpec}}</td>
+        </tr>
+        <tr>
+            <td>{{set_form.setName.label}}</td>
+            <td>{{set_form.setName}}</td>
+        </tr>
+        <tr>
+            <td>{{set_form.templates.label}}</td>
+            <td>{{set_form.templates}}</td>
+        </tr>
+        <tr>
+            <td>{{set_form.description.label}}</td>
+            <td>{{set_form.description}}</td>
+        </tr>
+    </table>
+	</form>
+</div>
+
+
+<div id="dialog-set-edit" title="Edit" style="display:none;">
+    <div class="alert alert-warning" id="banner_edit_set_wait" style="display: none;">
+        <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+    </div>
+    <div class="alert alert-error" id="banner_edit_set_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_edit_set_errors">
+        </div>
+    </div>
+    <form id="form_edit_set"  action="/oai_pmh/update/my-set" method="put" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="form_edit_set_current"></div>
+    </form>
+</div>
+
+<div id="dialog-set-confirm-delete" title="Delete" style="display:none;">
+    <div class="alert alert-warning" id="banner_set_delete_wait" style="display: none;">
+        <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>  </i>&nbsp;&nbsp;Please wait ...</h4>
+    </div>
+    <div class="alert alert-error" id="banner_set_delete_errors" style="display: none;">
+        <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+        <div id="form_set_delete_errors">
+        </div>
+    </div>
+    Are you sure you want to delete this set ?
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/oai_pmh.js' %}"></script>
+<script src="{% static 'libs/fSelect/fSelect.js' %}"></script>
+<script>
+	InitOaiPmhMyInfos();
+</script>
+
+{% endblock %}  

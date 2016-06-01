@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="id1"/>
+
+    <xs:complexType name="id1">
+        <xs:choice>
+            <xs:group ref="grp0" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:group name="grp0">
+        <xs:sequence>
+            <xs:element name="id1" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
+</xs:schema>

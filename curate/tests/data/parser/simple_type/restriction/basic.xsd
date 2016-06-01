@@ -1,0 +1,11 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="simple" />
+
+    <xs:simpleType name="simple">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="child_0"/>
+            <xs:enumeration value="child_1"/>
+            <xs:enumeration value="child_2"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

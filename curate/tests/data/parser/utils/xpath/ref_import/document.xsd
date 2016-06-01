@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:test="http://example.com/ref/schema">
+  <xs:import namespace="http://example.com/ref/schema" schemaLocation="reference.xsd" />
+  <xs:complexType name="root">
+    <xs:sequence>
+      <xs:element name="a" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element ref="test:r0" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

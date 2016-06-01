@@ -23,28 +23,12 @@
 	color:#D8D8D8;
 }
 
-.recommended input{ 
-	box-shadow: 0 0 3px blue; 
+input.recommended{
+	box-shadow: 0 0 3px blue;
 }
 
-.required input{ 
-	box-shadow: 0 0 3px red; 
-}
-
-.recommended textarea{ 
-	box-shadow: 0 0 3px blue; 
-}
-
-.required textarea{ 
-	box-shadow: 0 0 3px red; 
-}
-
-.recommended select{ 
-	box-shadow: 0 0 3px blue; 
-}
-
-.required select{ 
-	box-shadow: 0 0 3px red; 
+input.required{
+	box-shadow: 0 0 3px red;
 }
 
 input{

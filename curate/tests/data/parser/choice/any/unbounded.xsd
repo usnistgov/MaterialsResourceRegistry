@@ -1,0 +1,7 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <complexType name="id4">
+        <choice minOccurs="2" maxOccurs="unbounded">
+            <any maxOccurs="unbounded" />
+        </choice>
+    </complexType>
+</schema>

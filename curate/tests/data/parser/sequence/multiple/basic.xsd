@@ -1,0 +1,17 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="complex"/>
+
+    <xs:complexType name="complex">
+        <xs:sequence>
+            <xs:choice>
+                <xs:element name="id500" type="xs:string"/>
+                <xs:element name="id501" type="xs:string"/>
+            </xs:choice>
+            <xs:element name="id51" type="xs:string"/>
+            <xs:sequence>
+                <xs:element name="id520" type="xs:string"/>
+                <xs:element name="id521" type="xs:string"/>
+            </xs:sequence>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

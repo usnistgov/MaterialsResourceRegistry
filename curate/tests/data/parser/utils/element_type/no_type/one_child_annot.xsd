@@ -1,0 +1,7 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="root">
+      <xs:annotation>
+        <xs:documentation>MDCS element type testing</xs:documentation>
+      </xs:annotation>
+  </xs:element>
+</xs:schema>

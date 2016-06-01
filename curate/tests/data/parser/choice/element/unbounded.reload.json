@@ -1,0 +1,192 @@
+{
+  "tag": "choice",
+  "options": {
+    "max": -1,
+    "min": 2,
+    "xpath": {
+      "xml": "/root",
+      "xsd": "/xs:schema/xs:complexType/xs:choice"
+    },
+    "schema_location": null
+  },
+  "value": null,
+  "children": [
+    {
+      "tag": "choice-iter",
+      "value": 0,
+      "children": [
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/root/child0",
+              "xsd": "/xs:schema/xs:complexType/xs:choice/xs:element[1]"
+            },
+            "max": 1,
+            "name": "child0",
+            "label": "child0",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": [
+            {
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "tag": "input",
+                  "options": {
+                    "placeholder": "",
+                    "tooltip": "",
+                    "use": ""
+                  },
+                  "value": "entry1"
+                }
+              ],
+              "value": null
+            }
+          ]
+        },
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/root/child1",
+              "xsd": "/xs:schema/xs:complexType/xs:choice/xs:element[2]"
+            },
+            "max": 1,
+            "name": "child1",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "tag": "choice-iter",
+      "value": 1,
+      "children": [
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/root/child0",
+              "xsd": "/xs:schema/xs:complexType/xs:choice/xs:element[1]"
+            },
+            "max": 1,
+            "name": "child0",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": []
+        },
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/root/child1",
+              "xsd": "/xs:schema/xs:complexType/xs:choice/xs:element[2]"
+            },
+            "max": 1,
+            "name": "child1",
+            "label": "child1",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": [
+            {
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "tag": "input",
+                  "options": {
+                    "placeholder": "",
+                    "tooltip": "",
+                    "use": ""
+                  },
+                  "value": "entry0"
+                }
+              ],
+              "value": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tag": "choice-iter",
+      "value": 1,
+      "children": [
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/root/child0",
+              "xsd": "/xs:schema/xs:complexType/xs:choice/xs:element[1]"
+            },
+            "max": 1,
+            "name": "child0",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": []
+        },
+        {
+          "tag": "element",
+          "options": {
+            "xpath": {
+              "xml": "/root/child1",
+              "xsd": "/xs:schema/xs:complexType/xs:choice/xs:element[2]"
+            },
+            "max": 1,
+            "name": "child1",
+            "label": "child1",
+            "module": null,
+            "min": 1,
+            "ns_prefix": null,
+            "xmlns": null,
+            "schema_location": null
+          },
+          "value": null,
+          "children": [
+            {
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "tag": "input",
+                  "options": {
+                    "placeholder": "",
+                    "tooltip": "",
+                    "use": ""
+                  },
+                  "value": "entry2"
+                }
+              ],
+              "value": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

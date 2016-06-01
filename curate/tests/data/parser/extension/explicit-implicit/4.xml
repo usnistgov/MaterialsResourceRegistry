@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="namespace"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <a attr-1="">
+        <a1>
+        </a1>
+        <a2>
+        </a2>
+    </a>
+</root>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Resource localid="MaterialsData" status="active">
+    <identity>
+        <title>Materialsdata.nist.gov</title>
+    </identity>
+    <curation>
+        <publisher>NIST</publisher>
+        <contact>
+            <name>Casey Hume</name>
+        </contact>
+    </curation>
+    <content>
+        <description>In support of NIST's MGI goals, the NIST materials data repository provides a
+            concrete mechanism for the interchange and re-use of research data on materials systems.
+            The NIST repository is principally a file repository, accepting data in any format. To
+            mitigate the opacity of binary data, and to provide for searchability and
+            discoverability, the repository accepts metadata associated with data files, including
+            title, author, and ownership information, as well as descriptive metadata, where
+            available. The repository is further organized into communities and collections, which
+            helps to promote data re-use within user groups, as well as providing a measure of
+            browsability. The particular technology used to implement the repository, called DSpace,
+            also includes the ability to federate with other repositories, persistent identifiers
+            for deposited data files, and a web accessible API for machine access. Going forward, we
+            expect this repository to become an important component of the MGI data infrastructure,
+            and are committed to evolving it along these lines in response to the needs of the MGI
+            community.</description>
+        <subject>DSpace instance for management and sharing of materials data</subject>
+        <referenceURL>https://mgi.nist.gov/materials-data-repository</referenceURL>
+    </content>
+    <applicability>
+        <materialsScience>
+            <materialType>polymer</materialType>
+            <materialType>organic</materialType>
+            <materialType>composite</materialType>
+            <materialType>metal</materialType>
+            <materialType>oxide</materialType>
+            <materialType>semiconductor</materialType>
+            <materialType>biomaterial</materialType>
+            <materialType>nanomaterials</materialType>
+            <materialType>inorganic</materialType>
+            <materialType>non-specific</materialType>
+            <materialType>superconductor</materialType>
+            <structuralMorphology>2D</structuralMorphology>
+            <structuralMorphology>fiber</structuralMorphology>
+            <structuralMorphology>interfacial</structuralMorphology>
+            <structuralMorphology>interphase</structuralMorphology>
+            <structuralMorphology>composite</structuralMorphology>
+            <structuralMorphology>nanotube</structuralMorphology>
+            <structuralMorphology>amorphous</structuralMorphology>
+            <structuralMorphology>fluid</structuralMorphology>
+            <structuralMorphology>bulk</structuralMorphology>
+            <structuralMorphology>1D</structuralMorphology>
+            <structuralMorphology>line defect</structuralMorphology>
+            <structuralMorphology>point defect</structuralMorphology>
+            <structuralMorphology>non-specific</structuralMorphology>
+            <structuralMorphology>crystalline</structuralMorphology>
+            <structuralMorphology>quasi-periodic</structuralMorphology>
+            <structuralMorphology>film</structuralMorphology>
+            <propertyClass>thermodynamic</propertyClass>
+            <propertyClass>mechanical</propertyClass>
+            <propertyClass>defect</propertyClass>
+            <propertyClass>optical</propertyClass>
+            <propertyClass>simulated</propertyClass>
+            <propertyClass>non-specific</propertyClass>
+            <propertyClass>transport</propertyClass>
+            <propertyClass>structural</propertyClass>
+        </materialsScience>
+    </applicability>
+    <access>
+        <policy>
+            <rights>public</rights>
+        </policy>
+        <download>
+            <accessURL>https://materialsdata.nist.gov/</accessURL>
+        </download>
+    </access>
+</Resource>

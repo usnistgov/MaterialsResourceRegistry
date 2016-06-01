@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="urn:nist.gov/nmrr.res/1.0wd" 
+  xmlns="http://www.w3.org/2001/XMLSchema" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:nr="urn:nist.gov/nmrr.res/1.0wd" 
+  xmlns:am="urn:nist.gov/nmrr.schema.annot" 
+  elementFormDefault="qualified" 
+  attributeFormDefault="unqualified" version="0.4">
 
   <xs:annotation>
     <xs:documentation>
@@ -14,7 +20,7 @@
       </xs:documentation>
   </xs:annotation>
 
-  <xs:element name="Resource" type="Resource">
+  <xs:element name="Resource" type="nr:Resource">
     <xs:annotation>
       <xs:appinfo>
         <label></label>
@@ -31,7 +37,7 @@
     </xs:annotation>
     <xs:sequence>
 
-      <xs:element name="identity" type="Identity">
+      <xs:element name="identity" type="nr:Identity">
         <xs:annotation>
           <xs:appinfo>
             <label>Identity</label>
@@ -50,7 +56,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="curation" type="Curation">
+      <xs:element name="curation" type="nr:Curation">
         <xs:annotation>
           <xs:appinfo>
             <label>Curation</label>
@@ -61,7 +67,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="content" type="Content">
+      <xs:element name="content" type="nr:Content">
         <xs:annotation>
           <xs:appinfo>
             <label>Content</label>
@@ -72,7 +78,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="applicability" type="Applicability" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="applicability" type="nr:Applicability" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Applicability</label>
@@ -87,7 +93,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="access" type="Access" minOccurs="0">
+      <xs:element name="access" type="nr:Access" minOccurs="0">
         <xs:annotation>
           <xs:appinfo>
             <label>Access</label>
@@ -268,7 +274,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="publisher" type="NamePID">
+      <xs:element name="publisher" type="nr:NamePID">
         <xs:annotation>
           <xs:appinfo>
             <label>Publisher</label>
@@ -286,7 +292,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="creator" type="NamePID" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="creator" type="nr:NamePID" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Creator</label>
@@ -304,7 +310,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="contributor" type="NamePID" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="contributor" type="nr:NamePID" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Contributor</label>
@@ -322,7 +328,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="date" type="RelevantDate" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="date" type="nr:RelevantDate" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Date</label>
@@ -345,7 +351,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="contact" type="Contact" maxOccurs="unbounded">
+      <xs:element name="contact" type="nr:Contact" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Contact</label>
@@ -360,7 +366,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="NamePID" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/name-pid">
+  <xs:complexType name="NamePID">
     <xs:annotation>
       <xs:documentation>
          a name or title that can potentially have an associated identifier.
@@ -391,10 +397,9 @@
     </xs:simpleContent>
   </xs:complexType>
 
-  <xs:complexType name="RelevantDate" xmlns:ns0="http://mdcs.ns"
-    ns0:_mod_mdcs_="/registry/relevant-date">
+  <xs:complexType name="RelevantDate">
     <xs:simpleContent>
-      <xs:extension base="Date">
+      <xs:extension base="nr:Date">
 
         <xs:attribute name="role" type="xs:string">
           <xs:annotation>
@@ -434,7 +439,7 @@
        </xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="name" type="NamePID">
+      <xs:element name="name" type="nr:NamePID">
         <xs:annotation>
           <xs:appinfo>
             <label>Name</label>
@@ -484,7 +489,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="timeZone" type="TimeZone" minOccurs="0">
+      <xs:element name="timeZone" type="nr:TimeZone" minOccurs="0">
         <xs:annotation>
           <xs:appinfo>
             <label>Time Zone</label>
@@ -518,7 +523,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="type" type="NamePID" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="type" type="nr:NamePID" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
                <dcterm>Type</dcterm>
@@ -586,7 +591,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="referenceCitation" type="NamePID" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="referenceCitation" type="nr:NamePID" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Reference Citation</label>
@@ -606,7 +611,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="primaryAudience" type="Audience" minOccurs="0">
+      <xs:element name="primaryAudience" type="nr:Audience" minOccurs="0">
         <xs:annotation>
           <xs:appinfo>
             <label>Primary Audience</label>
@@ -669,16 +674,6 @@
          domain.
        </xs:documentation>
     </xs:annotation>
-
-    <xs:sequence>
-      <xs:element name="materialsScience" type="MaterialsScience">
-        <xs:annotation>          
-          <xs:appinfo>
-            <label>Materials Science</label>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="Access">
@@ -691,7 +686,7 @@
 
     <xs:sequence>
 
-      <xs:element name="policy" type="Policy">
+      <xs:element name="policy" type="nr:Policy">
         <xs:annotation>
           <xs:appinfo>
             <label>Policy</label>
@@ -702,7 +697,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="portal" type="Portal" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="portal" type="nr:Portal" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Portal</label>
@@ -714,7 +709,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="serviceAPI" type="ServiceAPI" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="serviceAPI" type="nr:ServiceAPI" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Service API</label>
@@ -726,7 +721,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="download" type="Download" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="download" type="nr:Download" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Download</label>
@@ -893,7 +888,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="title" type="NamePID" minOccurs="0">
+      <xs:element name="title" type="nr:NamePID" minOccurs="0">
         <xs:annotation>
           <xs:appinfo>
             <label>Title</label>
@@ -932,7 +927,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="rights" type="Rights" minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="rights" type="nr:Rights" minOccurs="1" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <label>Rights</label>
@@ -1019,9 +1014,11 @@
          Information describing a resource's applicability to Materials Science
        </xs:documentation>
     </xs:annotation>
-
+    
+    <xs:complexContent>
+      <xs:extension base="nr:Applicability">
     <xs:sequence>
-      <xs:element name="materialType" type="MaterialType" minOccurs="0" maxOccurs="unbounded"
+      <xs:element name="materialType" type="nr:MaterialType" minOccurs="0" maxOccurs="unbounded"
         xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/materialType">
         <xs:annotation>
           <xs:appinfo>
@@ -1039,7 +1036,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="structuralMorphology" type="StructuralMorphology" minOccurs="0"
+      <xs:element name="structuralMorphology" type="nr:StructuralMorphology" minOccurs="0"
         maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns"
         ns0:_mod_mdcs_="/registry/structuralMorphology">
         <xs:annotation>
@@ -1059,7 +1056,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="propertyClass" type="PropertyClass" minOccurs="0" maxOccurs="unbounded"
+      <xs:element name="propertyClass" type="nr:PropertyClass" minOccurs="0" maxOccurs="unbounded"
         xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/propertyClass">
         <xs:annotation>
           <xs:appinfo>
@@ -1075,7 +1072,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="experimentalDataAcquisitionMethod" type="ExperimentalDataAcquisitionMethod" minOccurs="0"
+      <xs:element name="experimentalDataAcquisitionMethod" type="nr:ExperimentalDataAcquisitionMethod" minOccurs="0"
         maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/experimentalDataAcquisitionMethod">
         <xs:annotation>
           <xs:appinfo>
@@ -1102,7 +1099,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="computationalDataAcquisitionMethod" type="ComputationalDataAcquisitionMethod" minOccurs="0"
+      <xs:element name="computationalDataAcquisitionMethod" type="nr:ComputationalDataAcquisitionMethod" minOccurs="0"
         maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/computationalDataAcquisitionMethod">
         <xs:annotation>
           <xs:appinfo>
@@ -1129,7 +1126,7 @@
         </xs:annotation>
       </xs:element>
 
-      <xs:element name="sampleProcessing" type="SampleProcessing" minOccurs="0" maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/sampleProcessing">
+      <xs:element name="sampleProcessing" type="nr:SampleProcessing" minOccurs="0" maxOccurs="unbounded" xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/sampleProcessing">
         <xs:annotation>
           <xs:appinfo>
             <label>Sample Processing Methods</label>
@@ -1149,6 +1146,8 @@
       </xs:element>
 
     </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:simpleType name="MaterialType">

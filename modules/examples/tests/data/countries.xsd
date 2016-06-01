@@ -1,0 +1,48 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="Countries">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element xmlns:ns0="http://mdcs.ns" name="country" type="countryType" maxOccurs="unbounded"/>				
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="countryType">
+		<xsd:sequence>
+			<xsd:element xmlns:ns0="http://mdcs.ns" name="name" type="countryNameType"
+						 ns0:_mod_mdcs_="/examples/countries-module"/>
+			<xsd:element name="country_code" type="xsd:string"/>
+			<xsd:element name="details" type="countryDetailsType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+		
+	<xsd:complexType name="countryDetailsType">
+		<xsd:sequence>
+			<xsd:element name="capital" type="xsd:string"/>
+			<xsd:element name="anthem" type="xsd:string"/>
+			<xsd:element name="language" type="languageType"/>
+			<xsd:element name="flag" type="flagType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:simpleType name="countryNameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FRANCE"/>
+			<xsd:enumeration value="UNITED STATES OF AMERICA"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="languageType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ENGLISH"/>
+			<xsd:enumeration value="FRENCH"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType xmlns:ns0="http://mdcs.ns" name="flagType" ns0:_mod_mdcs_="/examples/flag-module">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="The Stars and Stripes"/>
+			<xsd:enumeration value="Tricolour"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

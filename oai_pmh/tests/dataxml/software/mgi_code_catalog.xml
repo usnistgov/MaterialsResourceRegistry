@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Resource localid="MGI Code Catalog" status="active">
+    <identity>
+        <title>MGI Code Catalog</title>
+        <shortName/>
+    </identity>
+    <curation>
+        <publisher>NIST</publisher>
+        <creator/>
+        <contributor>Kimberly Tryka</contributor>
+        <contributor>Jim Warren</contributor>
+        <contact>
+            <name/>
+        </contact>
+    </curation>
+    <content>
+        <description>The MGI Code Catalog (link is external) is an attempt to build a comprehensive
+            list of available codes relevant to computational materials science and materials data
+            analysis. It is built on the NIST developed Materials Data Curation
+            System.</description>
+        <subject>materials science software index</subject>
+        <referenceURL>https://mgi.nist.gov/mgi-code-catalog</referenceURL>
+        <distributionURL>http://141.142.209.106:8181/</distributionURL>
+    </content>
+    <applicability>
+        <materialsScience>
+            <materialType>polymer</materialType>
+            <materialType>organic</materialType>
+            <materialType>composite</materialType>
+            <materialType>metal</materialType>
+            <materialType>oxide</materialType>
+            <materialType>semiconductor</materialType>
+            <materialType>biomaterial</materialType>
+            <materialType>nanomaterials</materialType>
+            <materialType>inorganic</materialType>
+            <materialType>non-specific</materialType>
+            <structuralMorphology>2D</structuralMorphology>
+            <structuralMorphology>interfacial</structuralMorphology>
+            <structuralMorphology>interphase</structuralMorphology>
+            <structuralMorphology>composite</structuralMorphology>
+            <structuralMorphology>amorphous</structuralMorphology>
+            <structuralMorphology>fluid</structuralMorphology>
+            <structuralMorphology>bulk</structuralMorphology>
+            <structuralMorphology>line defect</structuralMorphology>
+            <structuralMorphology>point defect</structuralMorphology>
+            <structuralMorphology>non-specific</structuralMorphology>
+            <structuralMorphology>crystalline</structuralMorphology>
+            <propertyClass>thermodynamic</propertyClass>
+            <propertyClass>mechanical</propertyClass>
+            <propertyClass>defect</propertyClass>
+            <propertyClass>simulated</propertyClass>
+            <propertyClass>non-specific</propertyClass>
+            <propertyClass>transport</propertyClass>
+            <propertyClass>structural</propertyClass>
+        </materialsScience>
+    </applicability>
+    <access>
+        <policy>
+            <rights>public</rights>
+        </policy>
+    </access>
+</Resource>
+
+

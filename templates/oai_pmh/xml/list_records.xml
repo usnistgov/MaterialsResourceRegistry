@@ -1,0 +1,22 @@
+{% extends "oai_pmh/xml/base.xml" %}
+
+{% block content %}
+  <ListRecords>
+    {% for i in items %}
+    <record>
+        <header>
+            <identifier>{{ i.identifier }}</identifier>
+            <datestamp>{{ i.last_modified }}</datestamp>
+            {% for set in i.sets %}
+                <setSpec>{{ set.setSpec }}</setSpec>
+            {% endfor %}
+        </header>
+        <metadata>
+            {% autoescape off %}
+            {{ i.XML|safe }}
+            {% endautoescape %}
+        </metadata>
+    </record>
+    {% endfor %}
+  </ListRecords>
+{% endblock %}

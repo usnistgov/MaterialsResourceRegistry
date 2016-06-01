@@ -1,0 +1,27 @@
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: submenu-user.html
+# Application: templates/admin
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Xavier SCHMITT
+#		  xavier.schmitt@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+<ul class="tabbed">
+	<li class="{% if active_tab == 'tab0' %} current_page_item {% endif %}"><a href="/dashboard/my-profile">My Profile</a></li>
+	<li class="{% if active_tab == 'tab1' %} current_page_item {% endif %}"><a href="/dashboard/resources">Resources</a></li>
+	<li class="{% if active_tab == 'tab2' %} current_page_item {% endif %}"><a href="/dashboard/forms">Forms</a></li>
+	<li class="{% if active_tab == 'tab3' %} current_page_item {% endif %}"><a href="/dashboard/templates">Templates</a></li>
+    <li class="{% if active_tab == 'tab4' %} current_page_item {% endif %}"><a href="/dashboard/types">Types</a></li>
+	<li class="{% if active_tab == 'tab5' %} current_page_item {% endif %}"><a href="/dashboard/files">Files</a></li>
+</ul>

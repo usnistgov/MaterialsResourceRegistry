@@ -1,0 +1,12 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="complex"/>
+
+    <xs:complexType name="complex">
+        <xs:sequence>
+            <xs:element name="child0" type="xs:string"/>
+            <xs:element name="child1" type="xs:string"/>
+        </xs:sequence>
+        <xs:attribute name="child2" type="xs:string"/>
+        <xs:attribute name="child3" type="xs:string"/>
+    </xs:complexType>
+</xs:schema>

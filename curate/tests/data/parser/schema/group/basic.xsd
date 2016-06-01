@@ -1,0 +1,8 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <group name="group0">
+        <sequence>
+            <element name="firstname" type="string"/>
+            <element name="lastname" type="string"/>
+        </sequence>
+    </group>
+</schema>

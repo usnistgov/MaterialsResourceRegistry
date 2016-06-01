@@ -1,0 +1,14 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element minOccurs="2" maxOccurs="unbounded" name="id6">
+        <simpleType>
+            <restriction base="integer">
+                <minInclusive value="0"/>
+                <maxInclusive value="100"/>
+            </restriction>
+        </simpleType>
+        <key name="ky6">
+            <selector xpath="id6"/>
+            <field xpath="@id6"/>
+        </key>
+    </element>
+</schema>

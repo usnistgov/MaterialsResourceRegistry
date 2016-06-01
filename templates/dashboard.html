@@ -23,41 +23,41 @@
 ################################################################################
 -->
 {% endcomment %}
-
 {% block title %}<h3>Dashboard</h3>{% endblock %}
-
 {% block content %}
 
 <div id="body">
-	
 	<div class="width">
-
-	<section id="content" class="one-column">
-
-        <article>
-
-<div class="article-info"></div>
-
-<ul>
-<li><a href="/my-profile">My Profile</a>
-<li><a href="/my-profile/resources">My Resources</a>
-<!-- <li><a href="/my-profile/favorites">My Favorites</a> -->
-</ul>
-
-
-<div class="clearer">&nbsp;</div>
-<br/><br/>
-
-
-
-</article>
-
-        </section>
-        
-        
+		<section id="content" class="one-column">
+			<article>
+				<div class="article-info"></div>
+				<table>
+					<tr>
+						<td align="center">
+							<a href="/dashboard/my-profile">
+							<div align="center"><img width="100" src="/static/img/myprofile.png"><br>
+							My Profile</div>
+							</a>
+						</td>
+						<td align="center">
+							<a href="/dashboard/resources">
+							<div align="center"><img width="100" src="/static/img/allresources.png"><br>
+							My Resources</div>
+							</a>
+						</td>
+						<td align="center">
+							<a href="/dashboard/drafts">
+							<div align="center"><img width="100" src="/static/img/draft.png"><br>
+							My Drafts</div>
+							</a>
+						</td>
+					</tr>
+				</table>
+				<div class="clearer">&nbsp;</div>
+				<br/><br/>
+			</article>
+		</section>
     	<div class="clear"></div>
     </div>
-	</div>
-
-
+</div>
 {% endblock %}

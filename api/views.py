@@ -20,17 +20,32 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 # Models
-from mgi.models import SavedQuery, XMLdata, Template, TemplateVersion, Type, TypeVersion, Instance, MetaSchema, Exporter, ExporterXslt
+from mgi.common import LXML_SCHEMA_NAMESPACE
+from mgi.models import SavedQuery, XMLdata, Template, TemplateVersion, Type, TypeVersion, Instance, Exporter, \
+    ExporterXslt, create_template_version, create_template, create_type_version, create_type
 from exporter.builtin.models import XSLTExporter
 from django.contrib.auth.models import User
 # Serializers
-from api.serializers import exporterSerializer, exporterXSLTSerializer, jsonExportSerializer, jsonExportResSerializer, jsonXSLTSerializer, savedQuerySerializer, jsonDataSerializer, querySerializer, schemaSerializer, templateSerializer, typeSerializer, resTypeSerializer, TemplateVersionSerializer, TypeVersionSerializer, instanceSerializer, resInstanceSerializer, UserSerializer, insertUserSerializer, resSavedQuerySerializer, updateUserSerializer, newInstanceSerializer
+from api.serializers import exporterSerializer, exporterXSLTSerializer, jsonExportSerializer, jsonExportResSerializer,\
+    jsonXSLTSerializer, savedQuerySerializer, jsonDataSerializer, querySerializer, schemaSerializer, \
+    templateSerializer, typeSerializer, resTypeSerializer, TemplateVersionSerializer, TypeVersionSerializer, \
+    instanceSerializer, resInstanceSerializer, UserSerializer, insertUserSerializer, resSavedQuerySerializer,\
+    updateUserSerializer, newInstanceSerializer
 from lxml import etree
 from django.conf import settings
 import os
 from mongoengine import *
 from pymongo import MongoClient
-from mgi.settings import MONGODB_URI
+from django.utils.importlib import import_module
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
+MONGODB_URI = settings.MONGODB_URI
+MGI_DB = settings.MGI_DB
+BLOB_HOSTER = settings.BLOB_HOSTER
+BLOB_HOSTER_URI = settings.BLOB_HOSTER_URI
+BLOB_HOSTER_USER = settings.BLOB_HOSTER_USER
+BLOB_HOSTER_PSWD = settings.BLOB_HOSTER_PSWD
+MDCS_URI = settings.MDCS_URI
 from bson.objectid import ObjectId
 import re
 import requests
@@ -42,14 +57,14 @@ import xmltodict
 from collections import OrderedDict
 from StringIO import StringIO
 from django.http.response import HttpResponse
+
+from utils.XMLValidation.xml_schema import validate_xml_schema
 from utils.XSDhash import XSDhash
 from io import BytesIO
 from utils.APIschemaLocator.APIschemaLocator import getSchemaLocation
-from utils.XSDflattenerMDCS.XSDflattenerMDCS import XSDFlattenerMDCS
 from datetime import datetime
 from datetime import timedelta
 from mgi import common
-from mgi.settings import BLOB_HOSTER, BLOB_HOSTER_URI, BLOB_HOSTER_USER, BLOB_HOSTER_PSWD, MDCS_URI
 from utils.BLOBHoster.BLOBHosterFactory import BLOBHosterFactory
 from mimetypes import guess_type
 from exporter import get_exporter
@@ -108,7 +123,7 @@ def select_savedquery(request):
         # create a connection
         client = MongoClient(MONGODB_URI)
         # connect to the db 'mgi'
-        db = client['mgi']
+        db = client[MGI_DB]
         # get the xmldata collection
         savedQueries = db['saved_query']
         query = dict()
@@ -555,13 +570,13 @@ def curate(request):
         docID = None
         try:
             try:
-                common.validateXMLDocument(schema.id, xmlStr)
+                common.validateXMLDocument(xmlStr, schema.content)
             except etree.XMLSyntaxError, xse:
                 #xmlParseEntityRef exception: use of & < > forbidden
                 content= {'message': "Validation Failed. May be caused by : Syntax problem, use of forbidden symbols like '&' or '<' or '>'"}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
             except Exception, e:
-                content = {'message':e.message}
+                content = {'message': e.message}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
             jsondata = XMLdata(schemaID = request.DATA['schema'], xml = xmlStr, title = request.DATA['title'], iduser=str(request.user.id))
             docID = jsondata.save()            
@@ -587,12 +602,8 @@ def curate(request):
 def add_schema(request):
     """
     POST http://localhost/rest/templates/add
-    POST data title="title", filename="filename", content="<xsd:schema>...</xsd:schema>" templateVersion="id", dependencies[]="id,id"
+    POST data title="title", filename="filename", content="<xsd:schema>...</xsd:schema>" templateVersion="id", dependencies{}="id,id"
     """
-    # if request.user.is_staff is True:
-    xsdContent = None
-    xsdFlatContent = None
-    xsdAPIContent = None
 
     sSerializer = schemaSerializer(data=request.DATA)
     if sSerializer.is_valid():
@@ -611,7 +622,7 @@ def add_schema(request):
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
         # manage the dependencies
-        includes = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}include")
+        includes = xmlTree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
         idxInclude = 0
         dependencies = []
 
@@ -625,22 +636,20 @@ def add_schema(request):
                 # replace includes/imports by API calls
                 for dependency in dependencies:
                     if dependency in listTypesId:
-                        includes[idxInclude].attrib['schemaLocation'] = getSchemaLocation(request, str(dependency))
+                        includes[idxInclude].attrib['schemaLocation'] = getSchemaLocation(str(dependency))
                         idxInclude += 1
                     else:
                         content = {'message':'One or more dependencies can not be found in the database.'}
                         return Response(content, status=status.HTTP_400_BAD_REQUEST)
-                flattener = XSDFlattenerMDCS(etree.tostring(xmlTree))
-                flatStr = flattener.get_flat()
-                flatTree = etree.fromstring(flatStr)
-                # is this a valid XML schema?
-                try:
-                    xmlSchema = etree.XMLSchema(flatTree)
-                    xsdFlatContent = flatStr
-                    xsdAPIContent = etree.tostring(xmlTree)
-                except Exception, e:
-                    content = {'message':'This is not a valid XML schema.' + e.message.replace("'","")}
+
+                # validate the schema
+                error = validate_xml_schema(xmlTree)
+
+                if error is not None:
+                    content = {'message':'This is not a valid XML schema.' + error.replace("'","")}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    xsdContent = etree.tostring(xmlTree)
             else:
                 content = {'message':'The number of given dependencies (' + str(len(dependencies)) + ')  is different from the actual number of dependencies found in the uploaded template (' + str(len(includes)) + ').'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
@@ -649,11 +658,11 @@ def add_schema(request):
                 content = {'message':'The template that you are trying to upload has some dependencies. Use the "dependencies" keyword to register a template with its dependencies.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
             else:
-                # is this a valid XML schema?
-                try:
-                    xmlSchema = etree.XMLSchema(xmlTree)
-                except Exception, e:
-                    content = {'message':'This is not a valid XML schema.' + e.message.replace("'","")}
+                # validate the schema
+                error = validate_xml_schema(xmlTree)
+
+                if error is not None:
+                    content = {'message':'This is not a valid XML schema.' + error.replace("'","")}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
         # a template version is provided: if it exists, add the schema as a new version and manage the version numbers
@@ -663,35 +672,17 @@ def add_schema(request):
                 if templateVersions.isDeleted == True:
                     content = {'message':'This template version belongs to a deleted template. You are not allowed to add a template to it.'}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
-                templateVersions.nbVersions = templateVersions.nbVersions + 1
-                hash = XSDhash.get_hash(xsdContent)
-                newTemplate = Template(title=request.DATA['title'], filename=request.DATA['filename'], content=xsdContent, templateVersion=request.DATA['templateVersion'], version=templateVersions.nbVersions, hash=hash, dependencies=dependencies).save()
-                templateVersions.versions.append(str(newTemplate.id))
-                templateVersions.save()
-                # Save Meta schema
-                if xsdFlatContent is not None and xsdAPIContent is not None:
-                    MetaSchema(schemaId=str(newTemplate.id), flat_content=xsdFlatContent, api_content=xsdAPIContent).save()
+                new_template = create_template_version(xsdContent, request.DATA['filename'], str(templateVersions.id))
             except:
                 content = {'message':'No template version found with the given id.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
         else:
-            templateVersion = TemplateVersion(nbVersions=1, isDeleted=False).save()
-            hash = XSDhash.get_hash(xsdContent)
-            newTemplate = Template(title=request.DATA['title'], filename=request.DATA['filename'], content=xsdContent, version=1, templateVersion=str(templateVersion.id), hash=hash, dependencies=dependencies).save()
-            templateVersion.versions = [str(newTemplate.id)]
-            templateVersion.current=str(newTemplate.id)
-            templateVersion.save()
-            newTemplate.save()
-            # Save Meta schema
-            if xsdFlatContent is not None and xsdAPIContent is not None:
-                MetaSchema(schemaId=str(newTemplate.id), flat_content=xsdFlatContent, api_content=xsdAPIContent).save()
+            new_template = create_template(xsdContent, request.DATA['title'], request.DATA['filename'], dependencies)
 
-        return Response(eval(newTemplate.to_json()), status=status.HTTP_201_CREATED)
+        return Response(eval(new_template.to_json()), status=status.HTTP_201_CREATED)
     return Response(sSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # else:
-    #     content = {'message':'Only an administrator can use this feature.'}
-    #     return Response(content, status=status.HTTP_401_UNAUTHORIZED)
+
 ################################################################################
 # 
 # Function Name: select_schema(request)
@@ -726,16 +717,15 @@ def select_schema(request):
     hash = request.QUERY_PARAMS.get('hash', None)
     
     try:        
-        # create a connection                                                                                                                                                                                                 
+        # create a connection
         client = MongoClient(MONGODB_URI)
         # connect to the db 'mgi'
-        db = client['mgi']
+        db = client[MGI_DB]
         # get the xmldata collection
         template = db['template']
         query = dict()
-        if id is not None:            
-            query['_id'] = ObjectId(id)
-            # query['id'] = ObjectId(id)
+        if id is not None:
+            query['id'] = ObjectId(id)
         if filename is not None:
             if len(filename) >= 2 and filename[0] == '/' and filename[-1] == '/':
                 query['filename'] = re.compile(filename[1:-1])
@@ -763,27 +753,20 @@ def select_schema(request):
                 query['hash'] = re.compile(hash[1:-1])
             else:
                 query['hash'] = hash
-        if len(query.keys()) == 0:
-            content = {'message':'No parameters given.'}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        q_list = {Q(**({key:value})) for key, value in query.iteritems()}
+        if len(q_list) > 0:
+            try:
+                templates = Template.objects(reduce(operator.and_, q_list)).all()
+                #If no templates available
+                if len(templates) == 0:
+                    content = {'message':'No template found with the given parameters.'}
+                    return Response(content, status=status.HTTP_404_NOT_FOUND)
+            except Exception, e:
+                content = {'message':'No template found with the given parameters.'}
+                return Response(content, status=status.HTTP_404_NOT_FOUND)
         else:
-            cursor = template.find(query)
-            templates = []
-            for resultTemplate in cursor:
-                resultTemplate['id'] = resultTemplate['_id']
-                del resultTemplate['_id']
-                templates.append(resultTemplate)
-
-        # q_list = {Q(**({key:value})) for key, value in query.iteritems()}
-        # if len(q_list) > 0:
-        #     try:
-        #         templates = Template.objects.get(reduce(operator.and_, q_list))
-        #     except Exception, e:
-        #         content = {'message':'No template found with the given parameters.'}
-        #         return Response(content, status=status.HTTP_404_NOT_FOUND)
-        # else:
-        #    content = {'message':'No parameters given.'}
-        #    return Response(content, status=status.HTTP_400_BAD_REQUEST)
+           content = {'message':'No parameters given.'}
+           return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 
         serializer = templateSerializer(templates)
@@ -1058,9 +1041,6 @@ def add_type(request):
     POST http://localhost/rest/types/add
     POST data title="title", filename="filename", content="..." typeVersion="id" dependencies[]="id,id"
     """
-    xsdContent = None
-    xsdFlatContent = None
-    xsdAPIContent = None
 
     oSerializer = typeSerializer(data=request.DATA)
     if oSerializer.is_valid():
@@ -1080,7 +1060,7 @@ def add_type(request):
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
         # manage the dependencies
-        includes = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}include")
+        includes = xmlTree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
         idxInclude = 0
         dependencies = []
 
@@ -1094,38 +1074,34 @@ def add_type(request):
                 # replace includes/imports by API calls
                 for dependency in dependencies:
                     if dependency in listTypesId:
-                        includes[idxInclude].attrib['schemaLocation'] = getSchemaLocation(request, str(dependency))
+                        includes[idxInclude].attrib['schemaLocation'] = getSchemaLocation(str(dependency))
                         idxInclude += 1
                     else:
                         content = {'message':'One or more dependencies can not be found in the database.'}
                         return Response(content, status=status.HTTP_400_BAD_REQUEST)
-                flattener = XSDFlattenerMDCS(etree.tostring(xmlTree))
-                flatStr = flattener.get_flat()
-                flatTree = etree.fromstring(flatStr)
-                # is this a valid XML schema?
-                try:
-                    xmlSchema = etree.XMLSchema(flatTree)
-                    xsdFlatContent = flatStr
-                    xsdAPIContent = etree.tostring(xmlTree)
-                except Exception, e:
-                    content = {'message':'This is not a valid XML schema.' + e.message.replace("'","")}
+
+                # validate the schema
+                error = validate_xml_schema(xmlTree)
+
+                if error is not None:
+                    content = {'message':'This is not a valid XML schema.' + error.replace("'","")}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    xsdContent = etree.tostring(xmlTree)
             else:
-                content = {'message':'The number of given dependencies (' + str(len(dependencies)) + ')  is different from the actual number of dependencies found in the uploaded template (' + str(len(includes)) + ').'}
+                content = {'message':'The number of given dependencies (' + str(len(dependencies)) + ') is different from the actual number of dependencies found in the uploaded template (' + str(len(includes)) + ').'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
         else:
             if len(includes) > 0:
                 content = {'message':'The template that you are trying to upload has some dependencies. Use the "dependencies" keyword to register a template with its dependencies.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
             else:
-                # is this a valid XML schema?
-                try:
-                    xmlSchema = etree.XMLSchema(xmlTree)
-                except Exception, e:
-                    content = {'message':'This is not a valid XML schema.' + e.message.replace("'","")}
+                # validate the schema
+                error = validate_xml_schema(xmlTree)
+
+                if error is not None:
+                    content = {'message':'This is not a valid XML schema.' + error.replace("'","")}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-
 
         # a type version is provided: if it exists, add the type as a new version and manage the version numbers
         if "typeVersion" in request.DATA:
@@ -1134,29 +1110,15 @@ def add_type(request):
                 if typeVersions.isDeleted == True:
                     content = {'message':'This type version belongs to a deleted type. You can not add a type to it.'}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
-                typeVersions.nbVersions = typeVersions.nbVersions + 1
-                hash = XSDhash.get_hash(xsdContent)
-                newType = Type(title=request.DATA['title'], filename=request.DATA['filename'], content=request.DATA['content'], typeVersion=request.DATA['typeVersion'], version=typeVersions.nbVersions, hash=hash, dependencies=dependencies).save()
-                typeVersions.versions.append(str(newType.id))
-                typeVersions.save()
-                # Save Meta schema
-                if xsdFlatContent is not None and xsdAPIContent is not None:
-                    MetaSchema(schemaId=str(newType.id), flat_content=xsdFlatContent, api_content=xsdAPIContent).save()
+
+                new_type = create_type_version(xsdContent, request.DATA['filename'], str(typeVersions.id))
             except:
                 content = {'message':'No type version found with the given id.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
         else:
-            typeVersion = TypeVersion(nbVersions=1, isDeleted=False).save()
-            hash = XSDhash.get_hash(xsdContent)
-            newType = Type(title=request.DATA['title'], filename=request.DATA['filename'], content=request.DATA['content'], version=1, typeVersion=str(typeVersion.id), hash=hash, dependencies=dependencies).save()
-            typeVersion.versions = [str(newType.id)]
-            typeVersion.current=str(newType.id)
-            typeVersion.save()
-            newType.save()
-            # Save Meta schema
-            if xsdFlatContent is not None and xsdAPIContent is not None:
-                MetaSchema(schemaId=str(newType.id), flat_content=xsdFlatContent, api_content=xsdAPIContent).save()
-        return Response(eval(newType.to_json()), status=status.HTTP_201_CREATED)
+            new_type = create_type(xsdContent, request.DATA['title'], request.DATA['filename'], [], dependencies)
+
+        return Response(eval(new_type.to_json()), status=status.HTTP_201_CREATED)
     return Response(oSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 ################################################################################
@@ -1193,7 +1155,7 @@ def select_type(request):
         # create a connection                                                                                                                                                                                                 
         client = MongoClient(MONGODB_URI)
         # connect to the db 'mgi'
-        db = client['mgi']
+        db = client[MGI_DB]
         # get the xmldata collection
         type = db['type']
         query = dict()
@@ -1542,7 +1504,7 @@ def select_repository(request):
         # create a connection                                                                                                                                                                                                 
         client = MongoClient(MONGODB_URI)
         # connect to the db 'mgi'
-        db = client['mgi']
+        db = client[MGI_DB]
         # get the xmldata collection
         instance = db['instance']
         query = dict()
@@ -1943,12 +1905,12 @@ def get_dependency(request):
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
     else:
         try:
-            if id in MetaSchema.objects.all().values_list('schemaId'):
-                meta = MetaSchema.objects.get(schemaId=id)
-                content = meta.api_content
-            else:
+            try:
                 type = Type.objects.get(pk=str(id))
                 content = type.content
+            except:
+                template = Template.objects.get(pk=str(id))
+                content = template.content
             
             xsdEncoded = content.encode('utf-8')
             fileObj = StringIO(xsdEncoded)
@@ -2006,7 +1968,7 @@ def blob(request):
                 bh_factory = BLOBHosterFactory(BLOB_HOSTER, BLOB_HOSTER_URI, BLOB_HOSTER_USER, BLOB_HOSTER_PSWD, MDCS_URI)
                 blob_hoster = bh_factory.createBLOBHoster()
                 try:
-                    handle = blob_hoster.save(blob=blob, filename=blob.name)
+                    handle = blob_hoster.save(blob=blob, filename=blob.name, userid=str(request.user.id))
                     content={'handle': handle}
                     return Response(content, status=status.HTTP_201_CREATED)
                 except:

@@ -1,0 +1,6 @@
+<xs:complexType xmlns:xs="http://www.w3.org/2001/XMLSchema" name="root">
+    <xs:sequence>
+        <xs:element name="child" type="xs:string"/>
+    </xs:sequence>
+</xs:complexType>
+  

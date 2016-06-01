@@ -1,0 +1,15 @@
+<!-- no occurs in root -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element minOccurs="2" maxOccurs="unbounded" name="id8">
+        <complexType>
+            <sequence>
+                <element name="child0" type="string"/>
+                <element name="child1" type="string"/>
+            </sequence>
+        </complexType>
+        <unique name="test">
+            <selector xpath="test"/>
+            <field xpath="@CustomerID"/>
+        </unique>
+    </element>
+</schema>

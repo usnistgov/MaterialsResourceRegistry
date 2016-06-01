@@ -28,40 +28,39 @@
 {% endblock %}
 
 {% block content %}
-
 <table>
 <tr>
-<td align="center">
-<a href="/curate/start_curate?template=organization">
-<img width="100" src="/static/img/organization.png"><br>
-Organization
-</a>
-</td>
-<td align="center">
-<a href="/curate/start_curate?template=datacollection">
-<img width="100" src="/static/img/datacollection.png"><br>
-Data Collection
-</a>
-</td>
-<td align="center">
-<a href="/curate/start_curate?template=dataset">
-<img width="100" src="/static/img/dataset.png"><br>
-Dataset
-</a>
-</td>
-<td align="center">
-<a href="/curate/start_curate?template=service">
-<img width="100" src="/static/img/service.png"><br>
-Service
-</a>
-</td>
-<td align="center">
-<a href="/curate/start_curate?template=informational">
-<img width="100" src="/static/img/informational.png"><br>
-Informational
-</a>
-</td>
-<td align="center">
+    <td align="center">
+    <a href="/curate/start_curate?template=organization">
+    <img width="100" src="/static/img/organization.png"><br>
+    Organization
+    </a>
+    </td>
+    <td align="center">
+    <a href="/curate/start_curate?template=datacollection">
+    <img width="100" src="/static/img/datacollection.png"><br>
+    Data Collection
+    </a>
+    </td>
+    <td align="center">
+    <a href="/curate/start_curate?template=dataset">
+    <img width="100" src="/static/img/dataset.png"><br>
+    Dataset
+    </a>
+    </td>
+    <td align="center">
+    <a href="/curate/start_curate?template=service">
+    <img width="100" src="/static/img/service.png"><br>
+    Service
+    </a>
+    </td>
+    <td align="center">
+    <a href="/curate/start_curate?template=informational">
+    <img width="100" src="/static/img/informational.png"><br>
+    Informational
+    </a>
+    </td>
+    <td align="center">
 <a href="/curate/start_curate?template=software">
 <img width="100" src="/static/img/software.jpg"><br>
 Software
@@ -91,13 +90,13 @@ a set of data (can be one or more separate files or other digital objects) that 
 <a href="/curate/start_curate?template=software">Software</a> - A software tool or library.
 <br><br>
 </td>
+</tr>
 </table>
 {% endblock %}
 
-    <div class="alert alert-danger" id="banner_errors" style="display: none;">
-        <a href="#" class="close" data-hide="alert" aria-label="close">&times;</a>
-     	<h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
-        <div id="form_start_errors">
-        </div>
+<div class="alert alert-danger" id="banner_errors" style="display: none;">
+    <a href="#" class="close" data-hide="alert" aria-label="close">&times;</a>
+    <h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+    <div id="form_start_errors">
     </div>
-    initBanner();
+</div>

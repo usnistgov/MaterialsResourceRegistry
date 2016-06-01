@@ -1,0 +1,5 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+           elementFormDefault="qualified" vc:minVersion="1.1">
+    <xs:element xmlns:ns0="http://mdcs.ns" name="Integer" type="xs:integer"
+                ns0:_mod_mdcs_="/examples/positive-integer"/>
+</xs:schema>

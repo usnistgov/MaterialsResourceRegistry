@@ -1,0 +1,15 @@
+{% extends "oai_pmh/xml/base.xml" %}
+
+{% block content %}
+  <ListIdentifiers>
+    {% for i in items %}
+    <header>
+        <identifier>{{ i.identifier }}</identifier>
+        <datestamp>{{ i.last_modified }}</datestamp>
+        {% for set in i.sets %}
+        <setSpec>{{ set.setSpec }}</setSpec>
+        {% endfor %}
+    </header>
+    {% endfor %}
+  </ListIdentifiers>
+{% endblock %}

@@ -1,9 +1,13 @@
-<!-- 
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
 ################################################################################
 #
 # File Name: manage_versions.html
 # Application: templates/admin
-# Description: 
+# Description:
 #
 # Author: Sharief Youssef
 #         sharief.youssef@nist.gov
@@ -15,55 +19,72 @@
 #
 ################################################################################
 -->
-{% load staticfiles %}
+{% endcomment %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'resources/css/lib/bootstrap.min.css' %}"  media="screen" />
-<link rel="stylesheet" type="text/css" href="{% static 'css/mdcs/style.css' %}" media="screen" />
-<link rel="stylesheet" type="text/css" href="{% static 'resources/css/icons.css' %}" media="screen" />
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" media="screen" />
+{% endblock %}
 
-<!-- JQuery & JQuery UI -->
-<script src="{% static 'resources/lib/jquery/jquery-1.11.1.min.js' %}"></script>
-<script src="{% static 'resources/js/bootstrap.min.js' %}"></script>
-<link rel="stylesheet" type="text/css" href="{% static 'resources/lib/jquery-ui/themes/smoothness/jquery-ui.css' %}"/>        
-<script src="{% static 'resources/lib/jquery-ui/themes/smoothness/jquery-ui.js' %}"></script>
-<script src="{% static 'inc/controllers/js/xsd_mgr.js' %}"></script>
-<script src="{% static 'inc/controllers/js/csrf.js' %}"></script>
-	
-<div id="model_version">		
-	<p><b>upload new version:</b>
-	{% if objectType == "Template" %}
-	<input type='file' id='fileVersion' name='files[]' onchange="handleSchemaVersionUpload(event)"></input>
-	{% else %}
-	<input type='file' id='fileVersion' name='files[]' onchange="handleTypeVersionUpload(event)"></input>
-	{% endif %}
-	<span class='btn' id='updateVersionBtn' versionid='{{ objectVersions.id }}' objectType='{{ objectType }}' onclick='uploadVersion()'>upload</span></p>
-	<div id='objectUploadErrorMessage'></div>
-	
+{% block title %}<h1>Upload {{ object_type }} Version</h1>{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab3' %}{% endblock %}
+{% block admin_submenu %}
+    {% if object_type == "Template" %}
+        {% include 'admin/menu/submenu/template.html' with active_tab='tab1' %}
+    {% elif object_type == "Type" %}
+        {% include 'admin/menu/submenu/template.html' with active_tab='tab2' %}
+    {% else %}
+        {% include 'admin/menu/submenu/template.html' with active_tab='tab3' %}
+    {% endif %}
+{% endblock %}
+
+
+{% block content%}
+
+
+<form id="form_start" action="/admin/manage_versions?type={{object_type}}&id={{object_id}}" method="post" enctype=multipart/form-data>
+	{% csrf_token %}
+	{{upload_form}}
+	<div id="upload_errors" style="color:red;">
+		{{errors}}
+	</div>
+	<br/>
+	<input type="submit" class="btn" value="Upload {{object_type}}"/>
+</form>
+
+{% if dependency_resolver %}
+<hr>
+<div id="dependencies">
+    {{dependency_resolver}}
+</div>
+{% endif %}
+
+<hr>
+<div id="model_version">
 	<table>
 	{% for version, datetime in versions.items %}
 	   <tr>
 	       <td>Version {{version.version}} </td>	       
-	       {% if version.id|stringformat:"s" == objectVersions.current|stringformat:"s" %}
+	       {% if version.id|stringformat:"s" == object_versions.current|stringformat:"s" %}
 	       <td style='font-weight:bold;color:green'>Current</td>
-	       <td><span class='icon legend delete' id='delete{{version.version}}' objectid='{{version.id}}' objectType='{{ objectType }}' onclick='deleteVersion("delete{{version.version}}")'>Delete</span></td>
-	       {% elif version.id|stringformat:"s" in objectVersions.deletedVersions %}
+	       <td><span class='icon legend delete' id='delete{{version.version}}' objectid='{{version.id}}' objectType='{{ object_type }}' onclick='deleteVersion("delete{{version.version}}")'>Delete</span></td>
+	       {% elif version.id|stringformat:"s" in object_versions.deletedVersions %}
 	       <td style='color:red'>Deleted</td>
-	       <td><span class='icon legend retrieve' id='restore{{version.version}}' objectid='{{version.id}}' objectType='{{ objectType }}' onclick='restoreVersion("restore{{version.version}}")'>Restore</span></td>
+	       <td><span class='icon legend retrieve' id='restore{{version.version}}' objectid='{{version.id}}' objectType='{{ object_type }}' onclick='restoreVersion("restore{{version.version}}")'>Restore</span></td>
 	       {% else %}
-	       <td><span class='icon legend long' id='setcurrent{{version.version}}' objectid='{{version.id}}' objectType='{{ objectType }}' onclick='setCurrentVersion("setcurrent{{version.version}}")'>Set Current</span></td>
-	       <td><span class='icon legend delete' id='delete{{version.version}}' objectid='{{version.id}}' objectType='{{ objectType }}' onclick='deleteVersion("delete{{version.version}}")'>Delete</span></td>        
+	       <td><span class='icon legend long' id='setcurrent{{version.version}}' objectid='{{version.id}}' objectType='{{ object_type }}' onclick='setCurrentVersion("setcurrent{{version.version}}")'>Set Current</span></td>
+	       <td><span class='icon legend delete' id='delete{{version.version}}' objectid='{{version.id}}' objectType='{{ object_type }}' onclick='deleteVersion("delete{{version.version}}")'>Delete</span></td>
 	       {% endif %}
 	       <td> {{ datetime|safe }} </td>
        </tr>
    {% endfor %}
    </table>
 </div>  
-<style>
-body{
-background: white;
-}
-</style>
 
+
+{%endblock%}
+
+{% block popups %}
 <div id="dialog-deleteversion-message" title="Confirm Delete" style="display:none;">
 <p></p>
   <p>
@@ -72,10 +93,8 @@ background: white;
     <p id="delete_custom_message"></p>
   </p>
 </div>
+{%endblock%}
 
-<div id="dialog-error-edit" title="Error Edit Information" style="display:none;">
-<p></p>
-  <p>
-    A type with this filename already exists.
-  </p>
-</div>
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/xsd_mgr.js' %}"></script>
+{% endblock %}

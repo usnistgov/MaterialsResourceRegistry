@@ -1,0 +1,18 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="root">
+    <xs:annotation>
+      <xs:documentation>MDCS element type testing</xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="child00"/>
+        <xs:enumeration value="child01"/>
+        <xs:enumeration value="child02"/>
+      </xs:restriction>
+    </xs:simpleType>
+    <xs:unique name="unique">
+      <xs:selector xpath="root" />
+      <xs:field xpath="root" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>

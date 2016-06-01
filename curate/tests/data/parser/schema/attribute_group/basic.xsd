@@ -1,0 +1,6 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <attributeGroup name="ag0">
+        <attribute name="child0" type="string"/>
+        <attribute name="child1" type="integer"/>
+    </attributeGroup>
+</schema>

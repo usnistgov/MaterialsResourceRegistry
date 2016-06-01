@@ -1,0 +1,16 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="complex"/>
+
+    <xs:complexType name="complex">
+        <xs:sequence>
+            <xs:element minOccurs="2" maxOccurs="unbounded" name="id3">
+        <xs:key name="ky">
+            <xs:selector xpath="id3"/>
+            <xs:field xpath="@id3"/>
+        </xs:key>
+    </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
+
+

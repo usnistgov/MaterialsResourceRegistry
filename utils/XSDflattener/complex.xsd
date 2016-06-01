@@ -1,0 +1,13 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"	elementFormDefault="qualified">
+	<xsd:include schemaLocation="time-type2.xsd"/>
+	<xsd:include schemaLocation="uncertainty.xsd"/>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!--  Time  -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xsd:complexType name="Complex">
+		<xsd:sequence>
+			<xsd:element name="time" type="TimeType"/>
+			<xsd:element name="uncertainty" type="Uncertainty"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

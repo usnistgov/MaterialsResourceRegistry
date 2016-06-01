@@ -1,0 +1,19 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+    <element name="test0">
+        <simpleType>
+            <restriction base="string">
+                <enumeration value="child0" />
+                <enumeration value="child1" />
+            </restriction>
+        </simpleType>
+    </element>
+
+    <element name="test1">
+        <simpleType>
+            <restriction base="string">
+                <enumeration value="child1" />
+                <enumeration value="child2" />
+            </restriction>
+        </simpleType>
+    </element>
+</schema>

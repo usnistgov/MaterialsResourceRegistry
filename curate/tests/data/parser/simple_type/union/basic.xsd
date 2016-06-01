@@ -1,0 +1,20 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:simpleType name="id2">
+        <xs:union memberTypes="int0 st0"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="int0">
+        <xs:restriction base="xs:integer">
+            <xs:maxInclusive value="10"/>
+            <xs:minInclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="st0">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="child0"/>
+            <xs:enumeration value="child1"/>
+            <xs:enumeration value="child2"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Resource status="active">
+    <identity>
+        <title>AFLOW</title>
+        <shortName>Aflow</shortName>
+        <version>v31014</version>
+    </identity>
+    <curation>
+        <publisher>AFLOW Consortium</publisher>
+        <contact>
+            <name>Stefano Curtarolo</name>
+            <emailAddress>stefano@duke.edu</emailAddress>
+        </contact>
+    </curation>
+    <content>
+        <type>Repository</type>
+        <description>Aflow is a globally available database of 647,815 material compounds (including metal alloys) - with over 58,303,350 calculated properties (and growing). The Aflow portal provides interactive search applications as well as a REST interface for programmatic access.</description>
+        <subject>metal</subject>
+        <subject>semiconductor</subject>
+        <subject>organic</subject>
+        <referenceURL>http://aflowlib.org/</referenceURL>
+        <primaryAudience>research</primaryAudience>
+    </content>
+    <applicability>
+        <materialsScience>
+            <materialType>non-specific</materialType>
+            <structuralMorphology>crystalline</structuralMorphology>
+            <structuralMorphology>bulk</structuralMorphology>
+            <propertyClass>thermodynamic</propertyClass>
+            <computationalDataAcquisitionMethod>density functional theory calculation</computationalDataAcquisitionMethod>
+
+        </materialsScience>
+    </applicability>
+    <access>
+        <policy>
+            <rights>public</rights>
+        </policy>
+        <portal>
+            <homeURL>http://www.aflowlib.org/</homeURL>
+        </portal>
+    </access>
+</Resource>

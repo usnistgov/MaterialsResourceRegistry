@@ -98,7 +98,7 @@ returnProfile = function()
 {
 	console.log('BEGIN [returnProfile]');
 
-	window.location = '/my-profile'
+	window.location = '/dashboard/my-profile'
 
 	console.log('END [returnProfile]');
 }

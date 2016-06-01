@@ -1,0 +1,69 @@
+{
+  "value": null,
+  "tag": "extension",
+  "children": [
+    {
+      "value": null,
+      "tag": "complex_type",
+      "children": [
+        {
+          "value": null,
+          "tag": "attribute",
+          "children": [
+            {
+              "value": null,
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "value": "",
+                  "tag": "input",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": null,
+      "tag": "sequence",
+      "children": [
+        {
+          "value": null,
+          "tag": "element",
+          "children": [
+            {
+              "value": null,
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "value": "",
+                  "tag": "input",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "value": null,
+          "tag": "element",
+          "children": [
+            {
+              "value": null,
+              "tag": "elem-iter",
+              "children": [
+                {
+                  "value": "",
+                  "tag": "input",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

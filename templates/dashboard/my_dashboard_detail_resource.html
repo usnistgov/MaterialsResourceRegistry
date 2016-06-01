@@ -1,0 +1,53 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load render_extras %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: my_dashboard_detail_resource.html
+# Application: profile/dashboard
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Xavier SCHMITT
+#		  xavier.schmitt@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology
+#
+################################################################################
+-->
+{% endcomment %}
+{% block title %}<h1><span>My {% if type == "record" %}{{type}} {%else%} draft {% endif%}: {{title}}</span></h1>{% endblock %}
+{% block menu %}{% include 'nmrr/menus/main.html' with active_tab='profile' %}{% endblock %}
+
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}" media="screen" />
+{% endblock %}
+
+
+{% block content %}
+<div class="toolbar">
+	<div class="btn-group pull-right">
+    	<span class="btn" onclick="backToResults();" style="text-decoration:none">Back to {% if type == "record" %}{{type}}s {%else%} drafts {% endif%}</span>
+  	</div>
+	<br/><br/>
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+<div id="XMLHolder">
+        {% autoescape off %}
+    	{% render_as_template XMLHolder %}
+    	{% endautoescape %} </div>
+<br/><br/>
+
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/explore.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,22 @@
+<div class="alert alert-info" id="banner_results_wait">
+    <h4><i class='fa fa-info fa-2x'></i></h4>
+        Enabling Harvesting makes your {{CUSTOM_TITLE}} be a Data Provider.
+            In order to share your data records with others, please enable harvesting.
+</div>
+
+<table id="edit">
+    {{registry_form.id}}
+    <tr>
+        <td>{{registry_form.name.label}}</td>
+        <td>{{registry_form.name}}</td>
+    </tr>
+    <tr>
+        <td>{{registry_form.enable_harvesting.label}}</td>
+        <td id="ButtonSetEditMyRepo">
+            {{registry_form.enable_harvesting}}
+            <label for="{{registry_form.enable_harvesting.id_for_label}}">
+
+            </label>
+        </td>
+    </tr>
+</table>

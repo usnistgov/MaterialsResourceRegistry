@@ -19,8 +19,9 @@
 # Sponsor: National Institute of Standards and Technology (NIST)
 #
 ################################################################################
-
 import os
+import sys
+from mongoengine import connect
 
 VERSION = "alpha"
 
@@ -30,19 +31,17 @@ DEBUG = True
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
-if DEBUG == True:
+if DEBUG:
     SECRET_KEY = 'ponq)(gd8hm57799)$lup4g9kyvp0l(9)k-3!em7dddn^(y)!5'
     
     ALLOWED_HOSTS = ['*']
     
     DATABASES = {
-    'default': {
-         'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-         }
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-    
 else:
     pass
     # Uncomment and set all parameters, delete pass instruction
@@ -54,7 +53,7 @@ else:
     # https://docs.djangoproject.com/en/1.7/ref/settings/#allowed-hosts
     # ALLOWED_HOSTS = ['<domain>','<server_ip>']
     
-    #os.environ['HTTPS'] = "on"
+    # os.environ['HTTPS'] = "on"
     # https://docs.djangoproject.com/en/1.7/ref/settings/#csrf-cookie-secure
     # CSRF_COOKIE_SECURE = True
     # https://docs.djangoproject.com/en/1.7/ref/settings/#session-cookie-secure
@@ -71,11 +70,11 @@ else:
     # }
 
 # Replace by your own values
-from mongoengine import connect
 MONGO_MGI_USER = "mgi_user"
 MONGO_MGI_PASSWORD = "mgi_password"
-MONGODB_URI = "mongodb://" + MONGO_MGI_USER + ":" + MONGO_MGI_PASSWORD + "@localhost/mgi"
-connect("mgi", host=MONGODB_URI)
+MGI_DB = "mgi"
+MONGODB_URI = "mongodb://" + MONGO_MGI_USER + ":" + MONGO_MGI_PASSWORD + "@localhost/" + MGI_DB
+connect(MGI_DB, host=MONGODB_URI)
 
 # BLOB Hoster module parameters
 BLOB_HOSTER = 'GridFS'
@@ -83,6 +82,13 @@ BLOB_HOSTER_URI = MONGODB_URI
 BLOB_HOSTER_USER = MONGO_MGI_USER
 BLOB_HOSTER_PSWD = MONGO_MGI_PASSWORD
 MDCS_URI = 'http://127.0.0.1:8000'
+
+#Celery configuration
+BROKER_URL = 'redis://localhost:6379/0'
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+BROKER_TRANSPORT_OPTIONS = {'fanout_prefix': True}
+BROKER_TRANSPORT_OPTIONS = {'fanout_patterns': True}
 
 # Handle system module parameters
 HANDLE_SERVER_URL = ''
@@ -92,14 +98,37 @@ HANDLE_SERVER_PSWD = ''
 
 # Customization: Registry
 CUSTOM_TITLE = 'Materials Resource Registry'
+CUSTOM_ORGANIZATION = ''
+CUSTOM_NAME = 'NMRR'
 CUSTOM_SUBTITLE = 'Part of the Materials Genome Initiative'
-CUSTOM_DATA = 'Materials Data' 
-CUSTOM_CURATE = 'Add your resource' 
+CUSTOM_DATA = 'Materials Data'
+CUSTOM_CURATE = 'Add your resource'
 CUSTOM_EXPLORE = 'Search for resources'
+CUSTOM_URL = '#'
+
+# OAI_PMH parameters
+OAI_ADMINS = (
+    ('Administrator', 'admin@nmrr.com'),
+)
+HOST = '127.0.0.1'
+OAI_HOST_URI = MDCS_URI
+OAI_USER = 'admin'
+OAI_PASS = 'admin'
+OAI_NAME = CUSTOM_NAME + ' ' + HOST
+OAI_DELIMITER = ':'
+OAI_DESCRIPTION = 'OAI-PMH ' + CUSTOM_NAME
+OAI_GRANULARITY = 'YYYY-MM-DDThh:mm:ssZ' #the finest harvesting granularity supported by the repository
+OAI_PROTOCOLE_VERSION = '2.0' #the version of the OAI-PMH supported by the repository
+OAI_SCHEME = 'oai'
+OAI_REPO_IDENTIFIER = 'server-' + HOST
+OAI_SAMPLE_IDENTIFIER = OAI_SCHEME+OAI_DELIMITER+OAI_REPO_IDENTIFIER+OAI_DELIMITER+'id/12345678a123aff6ff5f2d9e'
+OAI_DELETED_RECORD = 'no' #no ; transient ; persistent
 
 #CURATE
 CURATE_MIN_TREE = True
 CURATE_COLLAPSE = False
+AUTO_KEY_KEYREF = True
+IMPLICIT_EXTENSION_BASE = False
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 
@@ -109,15 +138,17 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.eggs.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
-"django.core.context_processors.debug",
-"django.core.context_processors.request",
-"django.core.context_processors.i18n",
-"django.core.context_processors.media",
-"django.core.context_processors.static",
-"django.core.context_processors.tz",
-"django.contrib.messages.context_processors.messages",
-"utils.custom_context_processors.domain_context_processor")
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.request",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "utils.custom_context_processors.domain_context_processor"
+)
 
 # Application definition
 
@@ -128,7 +159,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mongoengine.django.mongo_auth',
+    # 'mongoengine.django.mongo_auth',
     'rest_framework',
     'rest_framework_swagger',
     'oauth2_provider',
@@ -139,6 +170,9 @@ INSTALLED_APPS = (
     'explore',
     'compose',
     'modules',
+    'user_dashboard',
+    'oai_pmh',
+    'testing'
 )
 
 OAUTH2_PROVIDER = {
@@ -160,7 +194,7 @@ REST_FRAMEWORK = {
 }
 
 SWAGGER_SETTINGS = {
-    "exclude_namespaces": ['error_redirect','ping'], # List URL namespaces to ignore
+    "exclude_namespaces": ['error_redirect', 'ping'],  # List URL namespaces to ignore
     "api_version": '1.1',  # Specify your API's version
     "api_path": "/",  # Specify the path to your API not a root level
     "enabled_methods": [  # Specify which methods to enable in Swagger UI
@@ -170,7 +204,7 @@ SWAGGER_SETTINGS = {
         'patch',
         'delete'
     ],
-    "api_key": '', # An API key
+    "api_key": '',  # An API key
     "is_authenticated": False,  # Set to True to enforce user authentication,
     "is_superuser": False,  # Set to True to enforce admin only access
 }
@@ -180,15 +214,16 @@ SWAGGER_SETTINGS = {
 # right after you log in by default. This setting changes that.
 LOGIN_REDIRECT_URL = '/'
 
-SESSION_SAVE_EVERY_REQUEST=True
-SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.RemoteUserMiddleware',  # https://docs.djangoproject.com/en/dev/howto/auth-remote-user/
+    # https://docs.djangoproject.com/en/dev/howto/auth-remote-user/
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -239,34 +274,34 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
         },
     },
     'handlers': {
         'null': {
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
         },
         'logfile': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': SITE_ROOT + "/logfile",
             'maxBytes': 50000,
             'backupCount': 2,
             'formatter': 'standard',
         },
-        'console':{
-            'level':'INFO',
-            'class':'logging.StreamHandler',
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
     },
     'loggers': {
         'django': {
-            'handlers':['console'],
+            'handlers': ['console'],
             'propagate': True,
-            'level':'WARN',
+            'level': 'WARN',
         },
         'django.db.backends': {
             'handlers': ['console'],

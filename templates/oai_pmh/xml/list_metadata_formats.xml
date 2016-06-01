@@ -1,0 +1,13 @@
+{% extends "oai_pmh/xml/base.xml" %}
+
+{% block content %}
+  <ListMetadataFormats>
+    {% for i in items %}
+    <metadataFormat>
+        <metadataNamespace>{{ i.metadataNamespace }}</metadataNamespace>
+        <metadataPrefix>{{ i.metadataPrefix }}</metadataPrefix>
+        <schema>{{ i.schema }}</schema>
+    </metadataFormat>
+    {% endfor %}
+  </ListMetadataFormats>
+{% endblock %}

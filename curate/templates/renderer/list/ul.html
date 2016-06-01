@@ -1,0 +1,3 @@
+<ul{% if element_id %} id="{{ element_id }}"{% endif %}{% if is_hidden %} class="hidden"{% endif %}>
+    {{ content | safe }}
+</ul>

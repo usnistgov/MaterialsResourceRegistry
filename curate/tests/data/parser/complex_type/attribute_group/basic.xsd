@@ -1,0 +1,10 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:complexType name="id7">
+        <xs:attributeGroup ref="ag0"/>
+    </xs:complexType>
+
+    <xs:attributeGroup name="ag0">
+        <xs:attribute name="attr1" type="xs:string"/>
+        <xs:attribute name="attr2" type="xs:integer"/>
+    </xs:attributeGroup>
+</xs:schema>

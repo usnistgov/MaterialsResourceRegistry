@@ -73,8 +73,9 @@ ul.tree ul li:last-child:before {
 
 				
 .element-wrapper {
-	position: relative;
-	left: 1em;
+	/*position: relative;
+	left: 1em;*/
+	padding-left: 0.7em;
 }
 
 .element {

@@ -161,7 +161,7 @@ class AutoCompleteModule(Module):
 
 
 class CheckboxesModule(Module):
-    def __init__(self, scripts=list(), styles=list(), label=None, name=None, options=None, selected=list()):
+    def __init__(self, scripts=list(), styles=list(), label=None, name=None, options=None, selected=[]):
         scripts = [os.path.join(SCRIPTS_PATH, 'checkboxes.js')] + scripts
         styles = [os.path.join(STYLES_PATH, 'checkboxes.css')] + styles
         Module.__init__(self, scripts=scripts, styles=styles)

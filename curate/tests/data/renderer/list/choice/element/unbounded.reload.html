@@ -1,0 +1,32 @@
+<ul>
+    <li class='choice' id='element0'>
+        Choose
+        <select id='choice0' onchange="changeChoice(this);">
+            <option value='child0' selected='selected'>child0</option>
+            <option value='child1' selected='selected'>child1</option>
+        </select>
+
+        <span id='add0' class="icon add" onclick="changeHTMLForm('add',0);"></span>
+        <span id='remove0' class="icon remove" style="display:none;" onclick="changeHTMLForm('remove',0);"></span>
+
+        <ul id="choice0-0" >
+            <li class='element  ' id='element1' tag='child0'>
+                child0 <input type='text' value='entry1'/>
+            </li>
+        </ul>
+        <ul id="choice0-1" >
+            <li class='element  ' id='element2' tag='child1'>
+                child1 <input type='text' value='entry0'/>
+
+                <span id='add2' class="icon add" style="display:none;" onclick="changeHTMLForm('add',2);"></span>
+                <span id='remove2' class="icon remove" onclick="changeHTMLForm('remove',2);"></span>
+            </li>
+            <li class='element   ' id='element3' tag='child1'>
+                child1 <input type='text' value='entry2'/>
+
+                <span id='add3' class="icon add" style="display:none;" onclick="changeHTMLForm('add',3);"></span>
+                <span id='remove3' class="icon remove" onclick="changeHTMLForm('remove',3);"></span>
+            </li>
+        </ul>
+    </li>
+</ul>

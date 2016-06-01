@@ -1,56 +1,75 @@
-from mgi.models import FormData, FormElement
+from curate.models import SchemaElement
 from abc import ABCMeta, abstractmethod
 
-class XPathAccessor():
-    
+
+class XPathAccessor(object):
     __metaclass__ = ABCMeta
     
     def __init__(self, request):
         try:
-            # get id of form data
             self._form_data_id = request.session['curateFormData']
-            # get the form data
-            form_data = FormData.objects().get(pk=self._form_data_id) 
-            # get the html id of the module
-            html_id = request.POST['htmlId']
-            # get the id (mongo) of the form element at this id (html)
-            form_element_id = form_data.elements[html_id]
-            # get the form element from db
-            form_element = FormElement.objects().get(pk=form_element_id)
+            element = SchemaElement.objects.get(pk=request.POST['module_id'])
+
             # get xml xpath of the element
-            self.xpath = form_element.xml_xpath
+            # self.xpath = form_element.xml_xpath
+            self.xpath = element.options['xpath']['xml']
             self.values = {}
             self.set_XpathAccessor(request)
         except:
-            raise XPathAccessorError('Unable to get form data information. Please check session is still valid and that HTTP request is correctly sent to the Siblings Accessor system.')
-
+            message = 'Unable to get form data information. Please check session is still valid and that HTTP request'
+            message += ' is correctly sent to the Siblings Accessor system.'
+            raise XPathAccessorError(message)
 
     def get_xpath(self):
         return self.xpath
-        
 
-    def set_xpath_value(self, xpath, value):        
-        form_element = self._get_element(xpath)
-        html_id = form_element.html_id
-        if xpath in self.values.keys():
-            raise XPathAccessorError('Same XPath set more than once.')
-        else:
-            self.values[html_id] = value
+    def set_xpath_value(self, form_id, xpath, value):
+        form_element = self._get_element(form_id, xpath)
+        input_element = self.get_input(form_element)
 
-    
-    def _get_element(self, xpath):
-        if self.xpath != xpath:
-            # get data about the current form
-            form_data = FormData.objects().get(pk=self._form_data_id)
-            # get all elements from the current form
-            form_elements = FormElement.objects.filter(id__in=form_data.elements.values())          
-            # check if the provided xpath is one of an element of the current form
-            if xpath in form_elements.values_list('xml_xpath'):
-                return form_elements.get(xml_xpath=xpath)
-            else:
-                raise XPathAccessorError('No element found for the given xpath.')
-        else:
-            raise XPathAccessorError('Xpath provided is the same as reference element.')
+        if input_element.tag != 'module':
+            input_element.update(set__value=value)
+        else:  # Element is a module
+            options = input_element.options
+
+            if 'data' in value:
+                options['data'] = value['data']
+
+            if 'attriubtes' in value:
+                options['attributes'] = value['attributes']
+
+            input_element.update(set__options=options)
+
+        input_element.reload()
+
+    def get_input(self, element):
+        input_elements = ['input', 'restriction', 'choice', 'module']
+
+        if element.tag in input_elements:
+            return element
+
+        for child in element.children:
+            return self.get_input(child)
+
+    def _get_element(self, form_id, xpath):
+        form_root = SchemaElement.objects.get(pk=form_id)
+
+        if self.element_has_xpath(form_root, xpath):
+            return form_root
+
+        if len(form_root.children) == 0:
+            return None
+
+        for child in form_root.children:
+            element = self._get_element(child.pk, xpath)
+
+            if element is not None:
+                return element
+
+
+    @staticmethod
+    def element_has_xpath(element, xpath):
+        return 'xpath' in element.options and element.options['xpath']['xml'] == xpath
     
     @abstractmethod
     def set_XpathAccessor(self, request):
@@ -64,6 +83,7 @@ class XPathAccessor():
     
     def get_XpathAccessor(self):
         return {'xpath_accessor': self.values}
+
 
 class XPathAccessorError(Exception):
     """

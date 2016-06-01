@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:include schemaLocation="5_inc.xsd"/>
+    <xs:element name="root">
+        <xs:complexType>
+           <xs:attribute ref="inc"/>
+        </xs:complexType>
+    </xs:element>    
+</xs:schema>

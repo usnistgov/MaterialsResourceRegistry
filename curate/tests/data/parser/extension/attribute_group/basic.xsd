@@ -1,0 +1,16 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:attributeGroup name="ag0">
+        <xs:attribute name="child0" type="xs:string"/>
+        <xs:attribute name="child1" type="xs:integer"/>
+    </xs:attributeGroup>
+
+    <xs:element name="test5">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attributeGroup ref="ag0"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

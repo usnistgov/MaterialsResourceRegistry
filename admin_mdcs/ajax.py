@@ -13,166 +13,24 @@
 # Sponsor: National Institute of Standards and Technology (NIST)
 #
 ################################################################################
+from urlparse import urlparse
 
 from django.http import HttpResponse
 import lxml.etree as etree
 import json
 from io import BytesIO
-from mgi.models import Template, TemplateVersion, Instance, Request, Module, Type, TypeVersion, Message, Bucket, MetaSchema, Exporter, ExporterXslt, ResultXslt
+
+from mgi.common import LXML_SCHEMA_NAMESPACE, update_dependencies
+from mgi.models import create_template, create_type, create_template_version, create_type_version
+
+from rest_framework.status import HTTP_404_NOT_FOUND
+from mgi.models import Template, TemplateVersion, Instance, Request, Module, Type, TypeVersion, Message, Bucket, \
+    Exporter, ExporterXslt, ResultXslt
 from django.contrib.auth.models import User
-from utils.XSDflattenerMDCS.XSDflattenerMDCS import XSDFlattenerMDCS
-from utils.XSDhash import XSDhash
+
+from utils.XMLValidation.xml_schema import validate_xml_schema
 import random
-from utils.APIschemaLocator.APIschemaLocator import getSchemaLocation
-from mgi import common
-
-
-################################################################################
-# 
-# Function Name: upload_object(request)
-# Inputs:        request - 
-# Outputs:       JSON data 
-# Exceptions:    None
-# Description:   Upload of an object (template or type)
-# 
-################################################################################
-def upload_object(request):
-    print 'BEGIN def upload_object(request)'
-
-    object_name = request.POST['objectName']
-    object_filename = request.POST['objectFilename']
-    object_content = request.POST['objectContent']
-    object_type = request.POST['objectType']
-    
-    # Save all parameters
-    request.session['uploadObjectName'] = object_name
-    request.session['uploadObjectFilename'] = object_filename
-    request.session['uploadObjectContent'] = object_content
-    request.session['uploadObjectType'] = object_type
-    request.session['uploadObjectValid'] = False
-    
-    xmlTree = None
-
-    response_dict = {}
-    # is it a valid XML document ?
-    try:            
-        xmlTree = etree.parse(BytesIO(object_content.encode('utf-8')))
-    except Exception, e:
-        response_dict['errors'] = "Not a valid XML document."
-        response_dict['message'] = e.message.replace("'","")
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-    
-    # is it supported by the MDCS ?
-    errors = common.getValidityErrorsForMDCS(xmlTree, object_type)
-    if len(errors) > 0:
-        errorsStr = ""
-        for error in errors:
-            errorsStr += error + "<br/>"
-        response_dict['errors'] = errorsStr
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-    
-    # get the imports
-    imports = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}import")
-    # get the includes
-    includes = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}include")
-    
-    if len(imports) != 0 or len(includes) != 0:
-        # Display array to resolve dependencies
-        htmlString = generateHtmlDependencyResolver(imports, includes)
-        response_dict['errors'] = htmlString
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-    else:
-        try:
-            # is it a valid XML schema ?
-            xmlSchema = etree.XMLSchema(xmlTree)
-        except Exception, e:
-            response_dict['errors'] = "Not a valid XML schema."
-            response_dict['message'] = e.message.replace("'","")
-            return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-        
-        request.session['uploadObjectValid'] = True
-        return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-
-################################################################################
-# 
-# Function Name: save_object(request)
-# Inputs:        request - 
-# Outputs:       JSON data 
-# Exceptions:    None
-# Description:   Save an object (template or type) in mongodb
-# 
-################################################################################
-def save_object(request):
-    print 'BEGIN def save_object(request)'
-    
-    objectName = None
-    objectFilename = None 
-    objectContent = None
-    objectType = None
-    objectFlat = None
-    objectApiurl = None
-    
-    if ('uploadObjectValid' in request.session and request.session['uploadObjectValid'] == True and
-        'uploadObjectName' in request.session and request.session['uploadObjectName'] is not None and
-        'uploadObjectFilename' in request.session and request.session['uploadObjectFilename'] is not None and
-        'uploadObjectContent' in request.session and request.session['uploadObjectContent'] is not None and
-        'uploadObjectType' in request.session and request.session['uploadObjectType'] is not None):    
-        objectName = request.session['uploadObjectName']
-        objectFilename = request.session['uploadObjectFilename'] 
-        objectContent = request.session['uploadObjectContent']
-        objectType = request.session['uploadObjectType']      
-        if 'uploadObjectFlat' in request.session and request.session['uploadObjectFlat'] is not None:
-            objectFlat = request.session['uploadObjectFlat']
-        else:
-            objectFlat = None
-        if 'uploadObjectAPIurl' in request.session and request.session['uploadObjectAPIurl'] is not None:
-            objectApiurl = request.session['uploadObjectAPIurl']
-        else:
-            objectApiurl = None
-        if 'uploadDependencies' in request.session and request.session['uploadDependencies'] is not None:
-            dependencies = request.session['uploadDependencies']
-        else:
-            dependencies = None
-            
-        hash = XSDhash.get_hash(objectContent)
-        # save the object
-        if objectType == "Template":
-            objectVersions = TemplateVersion(nbVersions=1, isDeleted=False).save()
-            object = Template(title=objectName, filename=objectFilename, content=objectContent, version=1, templateVersion=str(objectVersions.id), hash=hash).save()
-            #We add default exporters
-            try:
-                exporters = Exporter.objects.filter(available_for_all=True)
-                object.exporters = exporters
-            except:
-                pass
-        elif objectType == "Type":                                                                                    
-            objectVersions = TypeVersion(nbVersions=1, isDeleted=False).save()
-            object = Type(title=objectName, filename=objectFilename, content=objectContent, version=1, typeVersion=str(objectVersions.id), hash=hash).save()
-            buckets = request.POST.getlist('buckets[]')
-            for bucket_id in buckets:
-                bucket = Bucket.objects.get(pk=bucket_id)
-                bucket.types.append(str(objectVersions.id))
-                bucket.save()
-        
-        objectVersions.versions = [str(object.id)]
-        objectVersions.current = str(object.id)
-        objectVersions.save()    
-        object.save()
-        
-        if objectFlat is not None and objectApiurl is not None and dependencies is not None:
-            MetaSchema(schemaId=str(object.id), flat_content=objectFlat, api_content=objectApiurl).save()
-            object.dependencies = dependencies
-            object.save()
-            
-        clear_object(request)      
-    else:
-        response_dict = {'errors': 'True'}
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
+from django.contrib import messages
 
 
 ################################################################################
@@ -186,168 +44,60 @@ def save_object(request):
 ################################################################################
 def resolve_dependencies(request):
     print 'BEGIN def resolveDependencies(request)'
+    schema_locations = request.POST.getlist('schemaLocations[]')
     dependencies = request.POST.getlist('dependencies[]')
-     
-    objectContent = None
-    
-    response_dict = {}
+
     if ('uploadObjectName' in request.session and request.session['uploadObjectName'] is not None and
         'uploadObjectFilename' in request.session and request.session['uploadObjectFilename'] is not None and
         'uploadObjectContent' in request.session and request.session['uploadObjectContent'] is not None and
-        'uploadObjectType' in request.session and request.session['uploadObjectType'] is not None):    
-        objectContent = request.session['uploadObjectContent']
-#         contentSession = 'uploadObjectContent'
-        validSession = 'uploadObjectValid'
-        flatSession = 'uploadObjectFlat'
-        apiSession = 'uploadObjectAPIurl'
-        saveBtn = "<span class='btn' onclick='saveObject()'>Save</span>"
-    elif ('uploadVersionFilename' in request.session and request.session['uploadVersionFilename'] is not None and
-        'uploadVersionContent' in request.session and request.session['uploadVersionContent'] is not None):
-        objectContent = request.session['uploadVersionContent']
-#         contentSession = 'uploadVersionContent'
-        validSession = 'uploadVersionValid'
-        flatSession = 'uploadVersionFlat'
-        apiSession = 'uploadVersionAPIurl'
-        saveBtn = "<span class='btn' onclick='saveVersion()'>Save</span>"
-    else:
-        response_dict= {'errors': "Please upload a file first."}
+        'uploadObjectType' in request.session and request.session['uploadObjectType'] is not None):
+        object_content = request.session['uploadObjectContent']
+        name = request.session['uploadObjectName']
+        filename = request.session['uploadObjectFilename']
+        object_type = request.session['uploadObjectType']
+
+    # Load a parser able to clean the XML from blanks, comments and processing instructions
+    clean_parser = etree.XMLParser(remove_blank_text=True, remove_comments=True, remove_pis=True)
+    # set the parser
+    etree.set_default_parser(parser=clean_parser)
+
+    xsd_tree = etree.XML(str(object_content.encode('utf-8')))
+
+    # replace includes/imports by API calls (get dependencies starting by the imports)
+    update_dependencies(xsd_tree, dict(zip(schema_locations, dependencies)))
+
+    # validate the schema
+    error = validate_xml_schema(xsd_tree)
+
+    if error is None:
+        object_content = etree.tostring(xsd_tree)
+        # create a new version
+        if 'uploadVersion' in request.session and request.session['uploadVersion'] is not None:
+            object_versions_id = request.session['uploadVersion']
+            if object_type == 'Template':
+                new_template = create_template_version(object_content, filename, object_versions_id)
+                redirect = '/admin/manage_versions?type={0}&id={1}'.format(object_type, str(new_template.id))
+            elif object_type == 'Type':
+                new_type = create_type_version(object_content, filename, object_versions_id)
+                redirect = '/admin/manage_versions?type={0}&id={1}'.format(object_type, str(new_type.id))
+        # create new object
+        else:
+            # save the object
+            if object_type == "Template":
+                create_template(object_content, name, filename, dependencies)
+                redirect = '/admin/xml-schemas/manage-schemas'
+            elif object_type == "Type":
+                if 'uploadBuckets' in request.session and request.session['uploadBuckets'] is not None:
+                    buckets = request.session['uploadBuckets']
+                create_type(object_content, name, filename, buckets, dependencies)
+                redirect = '/admin/xml-schemas/manage-types'
+
+        response_dict = {'redirect': redirect}
+        messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
         return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-         
-    xmlTree = etree.parse(BytesIO(objectContent.encode('utf-8')))        
-    # get the imports
-#     imports = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}import")
-     
-    # get the includes
-    includes = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}include")
-     
-    idxInclude = 0        
-    # replace includes/imports by API calls
-    for dependency in dependencies:
-        includes[idxInclude].attrib['schemaLocation'] = getSchemaLocation(request, str(dependency))
-        idxInclude += 1            
-     
-#         flattener = XSDFlattenerURL(etree.tostring(xmlTree),'admin','admin')
-    flattener = XSDFlattenerMDCS(etree.tostring(xmlTree))
-    flatStr = flattener.get_flat()
-    flatTree = etree.fromstring(flatStr)
-    
-    try:
-        # is it a valid XML schema ?
-        xmlSchema = etree.XMLSchema(flatTree)
-#         request.session[contentSession] = etree.tostring(xmlTree)
-        request.session[validSession] = True
-        
-        request.session[flatSession] = flatStr
-        request.session[apiSession] = etree.tostring(xmlTree)
-        request.session["uploadDependencies"] = dependencies
-        message = "The uploaded template is valid. You can now save it." + saveBtn
-        response_dict = {'message': message}
-    except Exception, e:
-        response_dict = {'errorDependencies': e.message.replace("'", "")}
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')      
-
-    return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
-
-################################################################################
-# 
-# Function Name: clear_object(request)
-# Inputs:        request - 
-# Outputs:       JSON data 
-# Exceptions:    None
-# Description:   Clear variables in the session
-# 
-################################################################################
-def clear_object(request):
-    print 'BEGIN def clearObject(request)'
-    
-    if 'uploadObjectName' in request.session:
-        del request.session['uploadObjectName']
-    if 'uploadObjectFilename' in request.session:
-        del request.session['uploadObjectFilename']
-    if 'uploadObjectContent' in request.session: 
-        del request.session['uploadObjectContent']
-    if 'uploadObjectType' in request.session:
-        del request.session['uploadObjectType']
-    if 'uploadObjectValid' in request.session:
-        del request.session['uploadObjectValid']
-    if 'uploadObjectFlat' in request.session:
-        del request.session['uploadObjectFlat']
-    if 'uploadObjectAPIurl' in request.session:
-        del request.session['uploadObjectAPIurl']
-    if 'uploadDependencies' in request.session: 
-        del request.session['uploadDependencies']
-        
-    print 'END def clearObject(request)'
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-
-################################################################################
-# 
-# Function Name: clearVersion(request)
-# Inputs:        request - 
-# Outputs:       JSON data 
-# Exceptions:    None
-# Description:   Clear variables in the session
-# 
-################################################################################
-def clearVersion(request):
-    print 'BEGIN def clearVersion(request)'
-    
-    if 'uploadVersionValid' in request.session:
-        del request.session['uploadVersionValid']
-    if 'uploadVersionID' in request.session:
-        del request.session['uploadVersionID']
-    if 'uploadVersionType' in request.session: 
-        del request.session['uploadVersionType']
-    if 'uploadVersionFilename' in request.session:
-        del request.session['uploadVersionFilename']
-    if 'uploadVersionContent' in request.session:
-        del request.session['uploadVersionContent']
-    if 'uploadVersionFlat' in request.session:
-        del request.session['uploadVersionFlat']
-    if 'uploadVersionAPIurl' in request.session:
-        del request.session['uploadVersionAPIurl']
-    if 'uploadDependencies' in request.session: 
-        del request.session['uploadDependencies']
-
-    print 'END def clearVersion(request)'
-
-
-################################################################################
-# 
-# Function Name: generateHtmlDependencyResolver(imports, includes)
-# Inputs:        request - 
-#                imports -
-#                includes - 
-# Outputs:       JSON data 
-# Exceptions:    None
-# Description:   Generate an HTML form to resolve dependencies of an uploaded schema
-# 
-################################################################################
-def generateHtmlDependencyResolver(imports, includes):
-    # there are includes or imports, need to resolve them
-    htmlString = "Please choose a file from the database to resolve each import/include."
-    htmlString += "<table id='dependencies'>"
-    htmlString += "<tr><th>Import/Include</th><th>Value</th><th>Dependency</th></tr>"
-    
-    selectDependencyStr = "<select class='dependency'>"
-    for type in Type.objects:
-        selectDependencyStr += "<option objectid='" + str(type.id) + "'>" + type.title + "</option>"
-    selectDependencyStr += "</select>"
-    
-    for el_include in includes:
-        htmlString += "<tr>"
-        htmlString += "<td>Include</td>"
-        htmlString += "<td><textarea readonly>" + el_include.attrib['schemaLocation'] + "</textarea></td>"
-        htmlString += "<td>"+ selectDependencyStr + "</td>"
-        htmlString += "</tr>"
-        
-    htmlString += "</table>"   
-    htmlString += "<span class='btn resolve' onclick='resolveDependencies();'>Resolve</span>"
-    htmlString += "<div id='errorDependencies'></div>"
-    
-    return htmlString
+    else:
+        response_dict = {'errorDependencies': error.replace("'", "")}
+        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
 
 
 ################################################################################
@@ -381,26 +131,6 @@ def delete_object(request):
 
 ################################################################################
 # 
-# Function Name: set_schema_version_content(request)
-# Inputs:        request - 
-# Outputs:       
-# Exceptions:    None
-# Description:   Save the name and content of uploaded schema before save
-#
-################################################################################
-def set_schema_version_content(request):
-    version_content = request.POST['versionContent']
-    version_filename = request.POST['versionFilename']
-    
-    request.session['uploadVersionContent'] = version_content
-    request.session['uploadVersionFilename'] = version_filename 
-    request.session['uploadVersionValid'] = False
-    
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-
-################################################################################
-# 
 # Function Name: set_type_version_content(request)
 # Inputs:        request - 
 # Outputs:       
@@ -416,141 +146,6 @@ def set_type_version_content(request):
     request.session['uploadVersionFilename'] = version_filename
     request.session['uploadVersionValid'] = False
     
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-
-################################################################################
-# 
-# Function Name: upload_version(request)
-# Inputs:        request - 
-# Outputs:       
-# Exceptions:    None
-# Description:   Upload the object (template or type)
-#
-################################################################################
-def upload_version(request):
-    object_version_id = request.POST['objectVersionID']
-    object_type = request.POST['objectType']
-    
-    response_dict = {}
-    
-    versionContent = None
-    if ('uploadVersionFilename' in request.session and request.session['uploadVersionFilename'] is not None and
-        'uploadVersionContent' in request.session and request.session['uploadVersionContent'] is not None):    
-        request.session['uploadVersionID'] = object_version_id
-        request.session['uploadVersionType'] = object_type
-        
-        versionContent = request.session['uploadVersionContent'] 
-        
-        xmlTree = None
-        # is it a valid XML document ?
-        try:            
-            xmlTree = etree.parse(BytesIO(versionContent.encode('utf-8')))
-        except Exception, e:
-            response_dict['errors'] = "Not a valid XML document."
-            response_dict['message'] = e.message.replace("'","")
-            return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-        
-        # is it supported by the MDCS ?
-        errors = common.getValidityErrorsForMDCS(xmlTree, object_type)
-        if len(errors) > 0:
-            errorsStr = ""
-            for error in errors:
-                errorsStr += error + "<br/>"            
-            response_dict['errors'] = errorsStr
-            return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-        
-        # get the imports
-        imports = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}import")
-        # get the includes
-        includes = xmlTree.findall("{http://www.w3.org/2001/XMLSchema}include")
-        
-        if len(imports) != 0 or len(includes) != 0:
-            # Display array to resolve dependencies
-            htmlString = generateHtmlDependencyResolver(imports, includes)
-            response_dict['errors'] = htmlString
-            return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-        else:
-            try:
-                # is it a valid XML schema ?
-                xmlSchema = etree.XMLSchema(xmlTree)
-            except Exception, e:
-                response_dict['errors'] = "Not a valid XML schema."
-                response_dict['message'] = e.message.replace("'","")
-                return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-            
-            request.session['uploadVersionValid'] = True
-            return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-    else:
-        response_dict['errors'] = "Please select a document first."
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
-
-################################################################################
-# 
-# Function Name: save_version(request)
-# Inputs:        request - 
-# Outputs:       JSON data 
-# Exceptions:    None
-# Description:   Save a version of an object (template or type) in mongodb
-# 
-################################################################################
-def save_version(request):
-    print 'BEGIN def saveVersion(request, objectType)'
-    
-    versionFilename = None 
-    versionContent = None
-    objectVersionID = None
-    objectType = None
-    
-    if ('uploadVersionValid' in request.session and request.session['uploadVersionValid'] == True and
-        'uploadVersionID' in request.session and request.session['uploadVersionID'] is not None and
-        'uploadVersionType' in request.session and request.session['uploadVersionType'] is not None and
-        'uploadVersionFilename' in request.session and request.session['uploadVersionFilename'] is not None and
-        'uploadVersionContent' in request.session and request.session['uploadVersionContent'] is not None):    
-        versionFilename = request.session['uploadVersionFilename']
-        versionContent = request.session['uploadVersionContent'] 
-        objectVersionID = request.session['uploadVersionID']
-        objectType = request.session['uploadVersionType']
-        if 'uploadVersionFlat' in request.session and request.session['uploadVersionFlat'] is not None:
-            versionFlat = request.session['uploadVersionFlat']
-        else:
-            versionFlat = None
-        if 'uploadVersionAPIurl' in request.session and request.session['uploadVersionAPIurl'] is not None:
-            versionApiurl = request.session['uploadVersionAPIurl']
-        else:
-            versionApiurl = None  
-        if 'uploadDependencies' in request.session and request.session['uploadDependencies'] is not None:
-            dependencies = request.session['uploadDependencies']
-        else:
-            dependencies = None
-            
-        hash = XSDhash.get_hash(versionContent)
-        # save the object
-        if objectType == "Template":
-            objectVersions = TemplateVersion.objects.get(pk=objectVersionID)
-            objectVersions.nbVersions += 1
-            object = Template.objects.get(pk=objectVersions.current)            
-            newObject = Template(title=object.title, filename=versionFilename, content=versionContent, version=objectVersions.nbVersions, templateVersion=objectVersionID, hash=hash).save()
-        elif objectType == "Type":    
-            objectVersions = TypeVersion.objects.get(pk=objectVersionID)
-            objectVersions.nbVersions += 1
-            object = Type.objects.get(pk=objectVersions.current)                                                                                
-            newObject = Type(title=object.title, filename=versionFilename, content=versionContent, version=objectVersions.nbVersions, typeVersion=objectVersionID, hash=hash).save()
-        
-        objectVersions.versions.append(str(newObject.id))
-        objectVersions.save()
-        
-        if versionFlat is not None and versionApiurl is not None and dependencies is not None:
-            MetaSchema(schemaId=str(newObject.id), flat_content=versionFlat, api_content=versionApiurl).save()
-            object.dependencies = dependencies
-            object.save()
-           
-        clearVersion(request)
-    else:    
-        response_dict = {'errors': 'True'}
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
     return HttpResponse(json.dumps({}), content_type='application/javascript')
 
 
@@ -960,19 +555,19 @@ def insert_module(request):
     xpath = request.POST['xpath']
     
     defaultPrefix = request.session['moduleDefaultPrefix']
-    namespace = request.session['moduleNamespaces'][defaultPrefix]
+    namespace = LXML_SCHEMA_NAMESPACE
     template_content = request.session['moduleTemplateContent']
     
     dom = etree.parse(BytesIO(template_content.encode('utf-8')))
     
     # set the element namespace
-    xpath = xpath.replace(defaultPrefix +":", namespace)
+    xpath = xpath.replace(defaultPrefix + ":", namespace)
     # add the element to the sequence
     element = dom.find(xpath)
     
     module = Module.objects.get(pk=module_id)
         
-    element.attrib['{http://mdcs.ns}_mod_mdcs_'] =  module.url
+    element.attrib['{http://mdcs.ns}_mod_mdcs_'] = module.url
         
     # save the tree in the session
     request.session['moduleTemplateContent'] = etree.tostring(dom) 
@@ -994,7 +589,7 @@ def remove_module(request):
     xpath = request.POST['xpath']
     
     defaultPrefix = request.session['moduleDefaultPrefix']
-    namespace = request.session['moduleNamespaces'][defaultPrefix]
+    namespace = LXML_SCHEMA_NAMESPACE
     template_content = request.session['moduleTemplateContent']
     
     dom = etree.parse(BytesIO(template_content.encode('utf-8')))
@@ -1015,7 +610,7 @@ def remove_module(request):
             break
     
     # create a new element to replace the previous one (can't replace directly the nsmap using lxml)
-    element = etree.Element(element.tag, nsmap = nsmap);
+    element = etree.Element(element.tag, nsmap = nsmap)
     
     # save the tree in the session
     request.session['moduleTemplateContent'] = etree.tostring(dom) 
@@ -1034,12 +629,19 @@ def remove_module(request):
 #
 ################################################################################
 def save_modules(request):
-    template_content = request.session['moduleTemplateContent']
-    template_id = request.session['moduleTemplateID']
+    object_content = request.session['moduleTemplateContent']
+    object_id = request.session['moduleTemplateID']
+    object_type = request.POST['type'] if 'type' in request.POST else None
 
-    template = Template.objects.get(pk=template_id)
-    template.content = template_content
-    template.save()
+    if object_type == 'Template':
+        db_object = Template.objects.get(pk=object_id)
+    elif object_type == 'Type':
+        db_object = Type.objects.get(pk=object_id)
+    else:
+        return HttpResponse(status=HTTP_404_NOT_FOUND)
+
+    db_object.content = object_content
+    db_object.save()
 
     return HttpResponse(json.dumps({}), content_type='application/javascript')
 
@@ -1106,23 +708,4 @@ def save_result_xslt(request):
     if idXsltShort or idXsltDetailed:
         template.save()
 
-    return HttpResponse(json.dumps({}), content_type='application/javascript')
-
-
-################################################################################
-#
-# Function Name: check_name(request)
-# Inputs:        request -
-# Outputs:
-# Exceptions:    None
-# Description:   Check the name of the template.
-#
-################################################################################
-def check_name(request):
-    name = request.POST['name']
-    # check that the name is unique
-    names = Template.objects.all().values_list('title')
-    if name in names:
-        response_dict = {'errors': 'True'}
-        return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
     return HttpResponse(json.dumps({}), content_type='application/javascript')

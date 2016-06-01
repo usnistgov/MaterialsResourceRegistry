@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    elementFormDefault="qualified"
+    targetNamespace="namespace" 
+    xmlns:ns="namespace"> 
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="a" type="ns:to-extend"/>                                   
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:complexType name="to-extend">
+        <xs:sequence>
+            <xs:element name="a1"/>
+            <xs:element name="a2"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="extension1">
+        <xs:complexContent>
+            <xs:extension base="ns:to-extend">
+                <xs:attribute name="attr-1" type="xs:string"/>
+            </xs:extension>            
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="extension2">
+        <xs:complexContent>
+            <xs:extension base="ns:to-extend">
+                <xs:attribute name="attr-2" type="xs:string"/>
+            </xs:extension>            
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>

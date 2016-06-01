@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="namespace"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="namespace file:/C:/Users/GAS2/workspace_git/mgi-mdcs/curate/tests/data/parser/extension/explicit-implicit/7.xsd">
+    <a>
+        <a1>
+        </a1>
+        <a2>
+        </a2>
+    </a>
+</root>

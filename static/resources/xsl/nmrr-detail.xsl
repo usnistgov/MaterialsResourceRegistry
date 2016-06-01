@@ -12,7 +12,8 @@
 #
 ################################################################################ 
  -->
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:nr="urn:nist.gov/nmrr.res/1.0wd">
 	<xsl:output method="html" indent="yes" encoding="UTF-8" />	
 	
 	<xsl:template match="/">		
@@ -20,13 +21,13 @@
 			<table>
 				<tr style="background-color:#f0f0f0">
 					<td style="width:180px" colspan="2">
-						<xsl:variable name="url" select="//Resource/content/referenceURL" />
+						<xsl:variable name="url" select="//nr:Resource/nr:content/nr:referenceURL" />
 						<xsl:choose>
-							<xsl:when test="//Resource/content/referenceURL!=''">
-								<a target="_blank" href="{$url}"><xsl:value-of select="//Resource/identity/title"/></a>	
+							<xsl:when test="//nr:Resource/nr:content/nr:referenceURL!=''">
+								<a target="_blank" href="{$url}"><xsl:value-of select="//nr:Resource/nr:identity/nr:title"/></a>	
 							</xsl:when>
 							<xsl:otherwise>
-								<xsl:value-of select="//Resource/identity/title"/>
+								<xsl:value-of select="//nr:Resource/nr:identity/nr:title"/>
 							</xsl:otherwise>
 						</xsl:choose>
 					</td>

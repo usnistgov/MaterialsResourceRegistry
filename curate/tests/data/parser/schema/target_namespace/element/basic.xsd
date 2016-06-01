@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    xmlns:myns="my-ns" 
+    targetNamespace="my-ns" > 
+    <xs:element name="root" type="myns:rootType"/>
+    <xs:complexType name="rootType">
+        <xs:sequence>
+            <xs:element name="a" type="myns:aType"/>
+            <xs:element name="id" type="xs:float"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="aType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="a1"/>
+            <xs:enumeration value="a2"/>
+            <xs:enumeration value="a3"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

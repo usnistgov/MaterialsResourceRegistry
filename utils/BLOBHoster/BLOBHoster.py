@@ -48,4 +48,9 @@ class BLOBHoster(object):
     def delete(self, handle):
         # deletes data pointed by the handle
         raise NotImplementedError("This method is not implemented.")
+
+    @abstractmethod
+    def find(self, key, value):
+        # returns a list of files filtered
+        raise NotImplementedError("This method is not implemented.")
         

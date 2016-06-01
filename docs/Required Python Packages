@@ -1,6 +1,6 @@
 Required Python Packages
 
-This document provides a list of all python packages that are required to make the MRR run well. 
+This document provides a list of all python packages that are required to make the MRR run well.
 To install a specific version of a package, the following command can be used:
 pip install <PACKAGE_NAME>==<PACKAGE_VERSION>
 
@@ -12,7 +12,7 @@ pip install django-rest-framework-mongoengine==1.3 (https://pypi.python.org/pypi
 pip install django-rest-swagger==0.1.14 (http://django-rest-swagger.readthedocs.org/en/latest/)
 pip install xlrd==0.9.3 (https://pypi.python.org/pypi/xlrd)
 pip install xmltodict==0.8.7 (https://github.com/martinblech/xmltodict)
-pip install lxml==3.4.1 (http://lxml.de/)
+pip install lxml==3.6 (http://lxml.de/)
 pip install python-dateutil==2.2 (https://pypi.python.org/pypi/python-dateutil)
 pip install requests==2.3.0 (http://docs.python-requests.org/en/latest/)
 

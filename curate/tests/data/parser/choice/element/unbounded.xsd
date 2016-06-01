@@ -1,0 +1,10 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root" type="id0" />
+
+    <xs:complexType name="id0">
+        <xs:choice minOccurs="2" maxOccurs="unbounded">
+            <xs:element name="child0" type="xs:string"/>
+            <xs:element name="child1" type="xs:string"/>
+        </xs:choice>
+    </xs:complexType>
+</xs:schema>

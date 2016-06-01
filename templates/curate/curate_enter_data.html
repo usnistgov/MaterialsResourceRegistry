@@ -71,25 +71,25 @@ Add New Software
 <div class="toolbar">
 	<div class="btn-group pull-right">
 		{% if template_name == 'organization' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=organization';"><i class="icon-file"></i> My Organizations </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=organization';"><i class="icon-file"></i> My Organizations </button>
 		{% elif template_name == 'datacollection' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Data Collections </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=datacollection';"><i class="icon-file"></i> My Data Collections </button>
 		{% elif template_name == 'repository' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Repositories </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=datacollection';"><i class="icon-file"></i> My Repositories </button>
 		{% elif template_name == 'projectarchive' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Project Archives </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=datacollection';"><i class="icon-file"></i> My Project Archives </button>
 		{% elif template_name == 'database' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=datacollection';"><i class="icon-file"></i> My Databases </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=datacollection';"><i class="icon-file"></i> My Databases </button>
 		{% elif template_name == 'dataset' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=dataset';"><i class="icon-file"></i> My Datasets </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=dataset';"><i class="icon-file"></i> My Datasets </button>
 		{% elif template_name == 'service' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=service';"><i class="icon-file"></i> My Services </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=service';"><i class="icon-file"></i> My Services </button>
 		{% elif template_name == 'informational' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=informational';"><i class="icon-file"></i> My Informational Sites </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=informational';"><i class="icon-file"></i> My Informational Sites </button>
 		{% elif template_name == 'software' %}
-		<button class="btn" onclick="location.href='/my-profile/resources?template=software';"><i class="icon-file"></i> My Software </button>
+		<button class="btn" onclick="location.href='/dashboard/resources?template=software';"><i class="icon-file"></i> My Software </button>
 		{% endif %}
-    	<button class="btn" onclick="location.href='/my-profile/resources?template=all';"><i class="icon-hdd"></i> My Resources </button>
+    	<button class="btn" onclick="location.href='/dashboard/resources';"><i class="icon-hdd"></i> My Resources </button>
 	</div>
 <br/><br/>
 <div id="xsdForm">
@@ -98,22 +98,37 @@ Please wait while the form is loading...
 </div>
 </div>
 <div style="float:left;">
-{% if not edit %}
-<a class="button save-to-repo">REVIEW AND ADD RESOURCE</a>
-{% else %}
-<a class="button save-to-repo">REVIEW AND SAVE CHANGES</a>
-{% endif %}
+<a class="button save-to-repo">REVIEW DRAFT</a>
+<p style="font-size:14px;">Upon Review, you will then be able to add your resource.</p>
 </div>
 <div style="float:right;">
 {% if not edit %}
-<a class="button save-form">Save Form </a>
+<a class="button save-form">Save Draft </a>
 {% endif %}
+<a class="button button-reversed cancel-changes">Cancel Changes </a>
 <a class="button button-reversed clear-fields">Clear Form</a>
-<a class="button button-reversed cancel">Cancel Form</a>
 </div>
 {% endblock %}
 
 {% block popups %}
+<div id="dialog-cancel-changes-message" title="Cancel Changes" style="display:none;">
+    Please choose one of the following options:
+    <br/>
+    <style>
+        th{
+            background: white;
+            padding: 0px;
+        }
+        td{
+            border-bottom:none;
+        }
+    </style>
+    <form id="cancel-form" action="/curate/start_curate" method="post">
+    {% csrf_token %}
+    {{cancel_form}}
+    </form>
+</div>
+
 <div id="dialog-cleared-message" title="Clear Form" style="display:none;">
 <p></p>
   <p>
@@ -128,15 +143,15 @@ Please wait while the form is loading...
   </p>
 </div>
 
-<div id="dialog-save-form-message" title="Save Form" style="display:none;">
-  Are you sure you want to save the form? If you are editing an existing form, this will replace the previous version of the form.
+<div id="dialog-save-form-message" title="Save Draft" style="display:none;">
+  Are you sure you want to save the draft? If you are editing an existing draft, its content will be updated.
 </div>
 
 <div id="dialog-saved-message" title="Form Saved" style="display:none;">
 <p></p>
   <p>
     <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 10px 0;"></span>
-    Form saved with success.
+    Draft saved with success.
   </p>
 </div>
 
@@ -155,15 +170,6 @@ Some <span style="color:red;">required</span> or <span style="color:blue;">recom
  <p>Edit the form or proceed to review page.</p> 
 </div>
 
-<div id="dialog-use-message" title="Validation Warning" style="display:none;">
-<p>
-Some <span style="color:red;">required</span> or <span style="color:blue;">recommended</span> fields are empty:
-</p>
-  <div id="useErrorMessage">
-  </div>
- <p>Edit the form or proceed to review page.</p> 
-</div>
-
 {% endblock %}
 
 {% block extrajs %}
@@ -171,12 +177,16 @@ Some <span style="color:red;">required</span> or <span style="color:blue;">recom
 <script src="{% static 'inc/controllers/js/modules.js' %}"></script>
 <script src="{% static 'inc/controllers/js/curate.js' %}"></script>
 <script src="{% static 'inc/controllers/js/nmrr/nmrr_curate.js' %}"></script>
+<script src="{% static 'js/form/buttons.js' %}"></script>
+<script src="{% static 'js/form/autosave.js' %}"></script>
+<script src="{% static 'js/form/choice.js' %}"></script>
+<script src="{% static 'js/toolbar.js' %}"></script>
 <script>
 generate_xsd_form();
 $('.button.save-to-repo').on('click', validateXML);
 $('.button.clear-fields').on('click', clearFields);
-$('.button.cancel').on('click', cancelForm);
-$('.button.save-form').on('click', saveForm);
+$('.button.cancel-changes').on('click', cancelChanges);
+check_leaving_page();
 </script>
 {% endblock %}
 

@@ -1,0 +1,67 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: manage_uploads.html
+# Application: templates/admin
+# Description:
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#		  Guillaume SOUSA AMARAL
+#		  guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+{% endcomment %}
+
+{% block extrastyle %}
+{% if object_type == "Type" %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/bucket.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}"  media="screen" />
+{% endif %}
+{% endblock %}
+
+{% block title %}<h1>Upload {{ object_type }}</h1>{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab3' %}{% endblock %}
+{% block admin_submenu %}
+    {% if object_type == "Template" %}
+        {% include 'admin/menu/submenu/template.html' with active_tab='tab1' %}
+    {% elif object_type == "Type" %}
+        {% include 'admin/menu/submenu/template.html' with active_tab='tab2' %}
+    {% else %}
+        {% include 'admin/menu/submenu/template.html' with active_tab='tab3' %}
+    {% endif %}
+{% endblock %}
+
+
+{% block content%}
+
+<form id="form_start" action="/admin/upload_xsd?type={{object_type}}" method="post" enctype=multipart/form-data>
+    {% csrf_token %}
+    {{upload_form}}
+    <div id="upload_errors" style="color:red;">
+        {{errors}}
+    </div>
+    <br/>
+    <input type="submit" class="btn" value="Upload {{object_type}}"/>
+</form>
+
+{% if dependency_resolver %}
+<hr>
+<div id="dependencies">
+    {{dependency_resolver}}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/xsd_mgr.js' %}"></script>
+{% endblock %}

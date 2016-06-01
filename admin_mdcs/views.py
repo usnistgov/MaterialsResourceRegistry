@@ -18,9 +18,15 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest
 from django.template import RequestContext, loader
 from django.shortcuts import redirect
+from requests import status_codes
+
+from mgi.common import LXML_SCHEMA_NAMESPACE, SCHEMA_NAMESPACE
 from mgi.models import Request, Message, PrivacyPolicy, TermsOfUse, Help, Template, TemplateVersion, Type, \
-    TypeVersion, Module, Bucket, Instance, Exporter, ExporterXslt, ResultXslt
-from forms import UploadResultXSLTForm, PrivacyPolicyForm, TermsOfUseForm, HelpForm, RepositoryForm, RefreshRepositoryForm, UploadXSLTForm, UploadResultXSLTForm
+    TypeVersion, Module, Bucket, Instance, Exporter, ExporterXslt, ResultXslt, create_template, create_type, \
+    create_template_version, create_type_version, OaiXslt
+from forms import UploadResultXSLTForm, PrivacyPolicyForm, TermsOfUseForm, HelpForm, RepositoryForm, \
+    RefreshRepositoryForm, UploadXSLTForm, UploadResultXSLTForm, UploadTemplateForm, UploadTypeForm, \
+    UploadVersionForm
 from django.contrib import messages
 import os
 from django.conf import settings
@@ -37,6 +43,12 @@ from mgi import common
 import json
 from mongoengine import NotUniqueError, OperationError
 from django.contrib.admin.views.decorators import staff_member_required
+import xmltodict
+#TODO Move to OAI-PMH
+from oai_pmh.admin.forms import UploadOaiPmhXSLTForm
+from django import utils
+from utils.XMLValidation.xml_schema import validate_xml_schema
+
 
 ################################################################################
 #
@@ -87,7 +99,6 @@ def contact_messages(request):
 # Description:   Page that allows to edit website pages
 #
 ################################################################################
-
 def website(request):
     template = loader.get_template('admin/website.html')
 
@@ -95,7 +106,6 @@ def website(request):
     })
 
     return HttpResponse(template.render(context))
-
 
 
 ################################################################################
@@ -148,8 +158,8 @@ def terms_of_use_admin(request):
             for terms in TermsOfUse.objects:
                 terms.delete()
 
-            if (request.POST['content'] != ""):
-                newTerms = TermsOfUse(content = request.POST['content'])
+            if request.POST['content'] != "":
+                newTerms = TermsOfUse(content=request.POST['content'])
                 newTerms.save()
             messages.add_message(request, messages.INFO, 'Terms of Use saved with success.')
             return redirect('/admin/website')
@@ -162,7 +172,6 @@ def terms_of_use_admin(request):
             form = TermsOfUseForm()
 
     return render(request, 'admin/terms_of_use.html', {'form':form})
-
 
 
 ################################################################################
@@ -218,12 +227,13 @@ def manage_schemas(request):
         currentTemplates = dict()
         for tpl_version in currentTemplateVersions:
             tpl = Template.objects.get(pk=tpl_version)
-            templateVersions = TemplateVersion.objects.get(pk=tpl.templateVersion)
-            currentTemplates[tpl] = templateVersions.isDeleted
+            if tpl.user is None:
+                templateVersions = TemplateVersion.objects.get(pk=tpl.templateVersion)
+                currentTemplates[tpl] = templateVersions.isDeleted
 
         context = RequestContext(request, {
             'objects':currentTemplates,
-            'objectType': "Template"
+            'objectType': "Template",
         })
         return HttpResponse(template.render(context))
 
@@ -248,16 +258,429 @@ def manage_types(request):
     currentTypes = dict()
     for type_version in currentTypeVersions:
         type = Type.objects.get(pk=type_version)
-        typeVersions = TypeVersion.objects.get(pk=type.typeVersion)
-        currentTypes[type] = typeVersions.isDeleted
+        if type.user is None:
+            typeVersions = TypeVersion.objects.get(pk=type.typeVersion)
+            currentTypes[type] = typeVersions.isDeleted
 
     context = RequestContext(request, {
         'objects':currentTypes,
         'objectType': "Type",
-        'buckets': Bucket.objects
-
+        'buckets': Bucket.objects,
     })
     return HttpResponse(template.render(context))
+
+
+################################################################################
+#
+# Function Name: check_unique_name(request)
+# Inputs:        request -
+# Outputs:
+# Exceptions:    None
+# Description:   Check that the name of the template is unique
+#
+################################################################################
+def check_unique_name(name):
+    # check that the name is unique
+    names = Template.objects.all().values_list('title')
+    if name in names:
+        return False
+    return True
+
+
+################################################################################
+#
+# Function Name: upload_xsd(request)
+# Inputs:        request -
+# Outputs:       View to upload XSD (template or type)
+# Exceptions:    None
+# Description:   Form that allows to upload new XSD templates and types
+#
+################################################################################
+@staff_member_required
+def upload_xsd(request):
+    # get the type of object in param: Template or Type
+    object_type = request.GET['type'] if 'type' in request.GET else None
+
+    request.session['uploadObjectContent'] = None
+    request.session['uploadObjectName'] = None
+    request.session['uploadObjectFilename'] = None
+    request.session['uploadObjectType'] = None
+    request.session['uploadVersion'] = None
+
+    # check if object type is set
+    if object_type is not None:
+        # load the html template to upload xsd
+        template = loader.get_template('admin/upload_xsd.html')
+        # check the parameters are correct
+        if object_type in ['Template', 'Type']:
+            # method is POST
+            if request.method == 'POST':
+                if object_type == 'Template':
+                    form = UploadTemplateForm(request.POST,  request.FILES)
+                elif object_type == 'Type':
+                    form = UploadTypeForm(request.POST, request.FILES)
+
+                if form.is_valid():
+                    # check that the name is unique
+                    if object_type == 'Template':
+                        names = Template.objects.all().values_list('title')
+                    elif object_type == 'Type':
+                        names = Type.objects.all().values_list('title')
+                    name = request.POST['name']
+                    if name in names:
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'object_type':  object_type,
+                            'errors': 'A {} with the same name already exists.'.format(object_type),
+                        })
+                        return HttpResponse(template.render(context))
+
+                    # get the file from the form
+                    xsd_file = request.FILES['xsd_file']
+                    # put the cursor at the beginning of the file
+                    xsd_file.seek(0)
+                    # read the content of the file
+                    xsd_data = xsd_file.read()
+
+                    # is it a valid XML document ?
+                    try:
+                        xsd_tree = etree.parse(BytesIO(xsd_data.encode('utf-8')))
+                    except Exception, e:
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'object_type':  object_type,
+                            'errors': 'Uploaded file is not well formatted XML.',
+                        })
+                        return HttpResponse(template.render(context))
+
+                    # is it supported by the MDCS ?
+                    errors = common.getValidityErrorsForMDCS(xsd_tree, object_type)
+                    if len(errors) > 0:
+                        errors_str = ", ".join(errors)
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'object_type':  object_type,
+                            'errors': errors_str,
+                        })
+                        return HttpResponse(template.render(context))
+
+                    # is it a valid XML schema?
+
+                    error = validate_xml_schema(xsd_tree)
+
+                    if error is not None:
+                        # a problem with includes/imports has been detected
+                        # get the imports
+                        imports = xsd_tree.findall("{}import".format(LXML_SCHEMA_NAMESPACE))
+                        # get the includes
+                        includes = xsd_tree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
+                        if len(includes) > 0 or len(imports) > 0:
+                        # if "{}include".format(LXML_SCHEMA_NAMESPACE) in e.message \
+                        #         or "{}import".format(LXML_SCHEMA_NAMESPACE) in e.message:
+
+                            # build the list of dependencies
+                            list_dependencies_template = loader.get_template('admin/list_dependencies.html')
+                            context = RequestContext(request, {
+                                'templates': Template.objects(user=None),
+                                'types':  Type.objects(user=None),
+                            })
+                            list_dependencies_html = list_dependencies_template.render(context)
+
+                            imports = xsd_tree.findall("{}import".format(LXML_SCHEMA_NAMESPACE))
+                            includes = xsd_tree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
+
+                            # build the dependency resolver form
+                            dependency_resolver_template = loader.get_template('admin/dependency_resolver.html')
+                            context = RequestContext(request, {
+                                'imports': imports,
+                                'includes': includes,
+                                'xsd_content': utils.html.escape(xsd_data),
+                                'dependencies': list_dependencies_html,
+                            })
+                            dependency_resolver_html = dependency_resolver_template.render(context)
+
+                            context = RequestContext(request, {
+                                'upload_form': form,
+                                'object_type':  object_type,
+                                'dependency_resolver': dependency_resolver_html,
+                            })
+
+                            # TODO: use a better method to store schema information
+                            # TODO: can create an entry in db
+                            request.session['uploadObjectName'] = name
+                            request.session['uploadObjectFilename'] = xsd_file.name
+                            request.session['uploadObjectContent'] = xsd_data
+                            request.session['uploadObjectType'] = object_type
+                            if object_type == 'Type':
+                                request.session['uploadBuckets'] = request.POST.getlist('buckets')
+                            return HttpResponse(template.render(context))
+                        else:
+                            context = RequestContext(request, {
+                                'upload_form': form,
+                                'object_type':  object_type,
+                                'errors': utils.html.escape(error),
+                            })
+                            return HttpResponse(template.render(context))
+                    else:
+                        # XML schema loaded with success
+                        messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
+                        if object_type == 'Template':
+                            create_template(xsd_data, name, xsd_file.name)
+                            return redirect('/admin/xml-schemas/manage-schemas')
+                        elif object_type == 'Type':
+                            buckets = request.POST.getlist('buckets')
+                            create_type(xsd_data, name, xsd_file.name, buckets)
+                            return redirect('/admin/xml-schemas/manage-types')
+                else:
+                    context = RequestContext(request, {
+                        'upload_form': form,
+                        'object_type':  object_type,
+                    })
+                    return HttpResponse(template.render(context))
+            # method is GET
+            else:
+                # if the param is Template
+                if object_type == 'Template':
+                    # render the form to upload a template
+                    context = RequestContext(request, {
+                        'upload_form': UploadTemplateForm(),
+                        'object_type':  object_type,
+                    })
+                    return HttpResponse(template.render(context))
+                # if the param is Type
+                elif object_type == 'Type':
+                    # render the form to upload a type
+                    context = RequestContext(request, {
+                        'upload_form': UploadTypeForm(),
+                        'object_type':  object_type,
+                    })
+                    return HttpResponse(template.render(context))
+        else:
+            return HttpResponse(status=400, reason='Expected type parameter: Template, Type.')
+
+    else:
+        return HttpResponse(status=400, reason='Expecting get parameter: type.')
+
+
+################################################################################
+#
+# Function Name: upload_xsd(request)
+# Inputs:        request -
+# Outputs:       View to upload XSD (template or type)
+# Exceptions:    None
+# Description:   Form that allows to upload new XSD templates and types
+#
+################################################################################
+@staff_member_required
+def manage_versions(request):
+    # get the type of object in param: Template or Type
+    object_type = request.GET['type'] if 'type' in request.GET else None
+    object_id = request.GET['id'] if 'id' in request.GET else None
+
+    request.session['uploadObjectContent'] = None
+    request.session['uploadObjectName'] = None
+    request.session['uploadObjectFilename'] = None
+    request.session['uploadObjectType'] = None
+    request.session['uploadVersion'] = None
+
+    # check if object type is set
+    if object_type is not None and object_id is not None:
+        # load the html template to upload xsd
+        template = loader.get_template('admin/manage_versions.html')
+        # check the parameters are correct
+        if object_type in ['Template', 'Type']:
+            # method is POST
+            if request.method == 'POST':
+                # get the form
+                if object_type == 'Template':
+                    form = UploadVersionForm(request.POST,  request.FILES)
+                elif object_type == 'Type':
+                    form = UploadVersionForm(request.POST, request.FILES)
+
+                # build the versions to render again in case of an error
+                if object_type == "Template":
+                    object = Template.objects.get(pk=object_id)
+                    object_versions = TemplateVersion.objects.get(pk=object.templateVersion)
+                else:
+                    object = Type.objects.get(pk=object_id)
+                    object_versions = TypeVersion.objects.get(pk=object.typeVersion)
+
+                versions = get_versions(object_versions, object_type)
+
+                if form.is_valid():
+                    # get the file from the form
+                    xsd_file = request.FILES['xsd_file']
+                    # put the cursor at the beginning of the file
+                    xsd_file.seek(0)
+                    # read the content of the file
+                    xsd_data = xsd_file.read()
+
+                    # is it a valid XML document ?
+                    try:
+                        xsd_tree = etree.parse(BytesIO(xsd_data.encode('utf-8')))
+                    except Exception, e:
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'versions': versions,
+                            'object_versions': object_versions,
+                            'object_type': object_type,
+                            'object_id': object_id,
+                            'errors': 'Uploaded file is not well formatted XML.',
+                        })
+                        return HttpResponse(template.render(context))
+
+                    # is it supported by the MDCS ?
+                    errors = common.getValidityErrorsForMDCS(xsd_tree, object_type)
+                    if len(errors) > 0:
+                        errors_str = ", ".join(errors)
+
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'versions': versions,
+                            'object_versions': object_versions,
+                            'object_type': object_type,
+                            'object_id': object_id,
+                            'errors': errors_str,
+                        })
+                        return HttpResponse(template.render(context))
+
+                    # is it a valid XML schema?
+
+                    error = validate_xml_schema(xsd_tree)
+
+                    if error is not None:
+                        # a problem with includes/imports has been detected
+                        # get the imports
+                        imports = xsd_tree.findall("{}import".format(LXML_SCHEMA_NAMESPACE))
+                        # get the includes
+                        includes = xsd_tree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
+                        if len(includes) > 0 or len(imports) > 0:
+                        # if "{}include".format(LXML_SCHEMA_NAMESPACE) in e.message \
+                        #         or "{}import".format(LXML_SCHEMA_NAMESPACE) in e.message:
+
+                            # build the list of dependencies
+                            list_dependencies_template = loader.get_template('admin/list_dependencies.html')
+                            context = RequestContext(request, {
+                                'templates': Template.objects(user=None),
+                                'types':  Type.objects(user=None),
+                            })
+                            list_dependencies_html = list_dependencies_template.render(context)
+
+                            imports = xsd_tree.findall("{}import".format(LXML_SCHEMA_NAMESPACE))
+                            includes = xsd_tree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
+
+                            # build the dependency resolver form
+                            dependency_resolver_template = loader.get_template('admin/dependency_resolver.html')
+                            context = RequestContext(request, {
+                                'imports': imports,
+                                'includes': includes,
+                                'xsd_content': utils.html.escape(xsd_data),
+                                'dependencies': list_dependencies_html,
+                            })
+                            dependency_resolver_html = dependency_resolver_template.render(context)
+
+                            context = RequestContext(request, {
+                                'upload_form': form,
+                                'versions': versions,
+                                'object_versions': object_versions,
+                                'object_type': object_type,
+                                'object_id': object_id,
+                                'dependency_resolver': dependency_resolver_html,
+                            })
+
+                            # TODO: use a better method to store schema information
+                            # TODO: can create an entry in db
+                            request.session['uploadObjectFilename'] = xsd_file.name
+                            request.session['uploadObjectName'] = xsd_file.name
+                            request.session['uploadObjectContent'] = xsd_data
+                            request.session['uploadObjectType'] = object_type
+                            request.session['uploadVersion'] = str(object_versions.id)
+                            if object_type == 'Type':
+                                request.session['uploadBuckets'] = request.POST.getlist('buckets')
+                            return HttpResponse(template.render(context))
+                        else:
+                            context = RequestContext(request, {
+                                'upload_form': form,
+                                'versions': versions,
+                                'object_versions': object_versions,
+                                'object_type':  object_type,
+                                'object_id': str(object_id),
+                                'errors': utils.html.escape(error),
+                            })
+                            return HttpResponse(template.render(context))
+                    else:
+                        # XML schema loaded with success
+                        messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
+                        if object_type == 'Template':
+                            new_object = create_template_version(xsd_data, xsd_file.name, object_versions.id)
+                            object_versions = TemplateVersion.objects.get(pk=new_object.templateVersion)
+                            versions = get_versions(object_versions, object_type)
+                        elif object_type == 'Type':
+                            new_object = create_type_version(xsd_data, xsd_file.name, object_versions.id)
+                            object_versions = TypeVersion.objects.get(pk=new_object.typeVersion)
+                            versions = get_versions(object_versions, object_type)
+
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'versions': versions,
+                            'object_versions': object_versions,
+                            'object_type': object_type,
+                            'object_id': str(new_object.id),
+                        })
+                        return HttpResponse(template.render(context))
+                else:
+                    context = RequestContext(request, {
+                        'upload_form': form,
+                        'versions': versions,
+                        'object_versions': object_versions,
+                        'object_type': object_type,
+                        'object_id': object_id,
+                    })
+                    return HttpResponse(template.render(context))
+            # method is GET
+            else:
+                if object_type == "Template":
+                    object = Template.objects.get(pk=object_id)
+                    object_versions = TemplateVersion.objects.get(pk=object.templateVersion)
+                else:
+                    object = Type.objects.get(pk=object_id)
+                    object_versions = TypeVersion.objects.get(pk=object.typeVersion)
+
+                versions = get_versions(object_versions, object_type)
+
+                context = RequestContext(request, {
+                    'upload_form': UploadVersionForm(),
+                    'versions': versions,
+                    'object_versions': object_versions,
+                    'object_type': object_type,
+                    'object_id': object_id,
+                })
+                return HttpResponse(template.render(context))
+        else:
+            return HttpResponse(status=400, reason='Expected type parameter: Template, Type.')
+
+    else:
+        return HttpResponse(status=400, reason='Expecting get parameters: type, id.')
+
+
+def get_versions(object_versions, object_type):
+    versions = OrderedDict()
+    reversed_versions = list(reversed(object_versions.versions))
+    for version_id in reversed_versions:
+        if object_type == "Template":
+            version = Template.objects.get(pk=version_id)
+        else:
+            version = Type.objects.get(pk=version_id)
+        object_id = ObjectId(version.id)
+        from_zone = tz.tzutc()
+        to_zone = tz.tzlocal()
+        datetimeUTC = object_id.generation_time
+        datetimeUTC = datetimeUTC.replace(tzinfo=from_zone)
+        datetimeLocal = datetimeUTC.astimezone(to_zone)
+        datetime = datetimeLocal.strftime('%m/%d/%Y %H&#58;%M&#58;%S')
+        versions[version] = datetime
+
+    return versions
 
 
 ################################################################################
@@ -423,59 +846,6 @@ def refresh_repository(request):
 
     return render(request, 'admin/refresh_repository.html', {'form':form})
 
-################################################################################
-#
-# Function Name: manage_versions(request)
-# Inputs:        request -
-# Outputs:       Manage Version Page
-# Exceptions:    None
-# Description:   Redirects to the version manager of a given object
-#
-################################################################################
-@staff_member_required
-def manage_versions(request):
-    template = loader.get_template('admin/manage_versions.html')
-
-    id = request.GET.get('id', None)
-    objectType = request.GET.get('type', None)
-
-    if id is not None and objectType is not None:
-        try:
-            if objectType == "Template":
-                object = Template.objects.get(pk=id)
-                objectVersions = TemplateVersion.objects.get(pk=object.templateVersion)
-            else:
-                object = Type.objects.get(pk=id)
-                objectVersions = TypeVersion.objects.get(pk=object.typeVersion)
-
-            versions = OrderedDict()
-            reversedVersions = list(reversed(objectVersions.versions))
-            for version_id in reversedVersions:
-                if objectType == "Template":
-                    version = Template.objects.get(pk=version_id)
-                else:
-                    version = Type.objects.get(pk=version_id)
-                objectid = ObjectId(version.id)
-                from_zone = tz.tzutc()
-                to_zone = tz.tzlocal()
-                datetimeUTC = objectid.generation_time
-                datetimeUTC = datetimeUTC.replace(tzinfo=from_zone)
-                datetimeLocal = datetimeUTC.astimezone(to_zone)
-                datetime = datetimeLocal.strftime('%m/%d/%Y %H&#58;%M&#58;%S')
-                versions[version] = datetime
-
-
-            context = RequestContext(request, {
-                'versions': versions,
-                'objectVersions': objectVersions,
-                'objectType': objectType,
-            })
-            return HttpResponse(template.render(context))
-        except:
-            return redirect('/')
-    else:
-        return redirect('/')
-
 
 ################################################################################
 #
@@ -489,35 +859,44 @@ def manage_versions(request):
 @staff_member_required
 def modules(request):
     template = loader.get_template('admin/modules.html')
-    id = request.GET.get('id', None)
-    if id is not None:
+
+    object_id = request.GET.get('id', None)
+    object_type = request.GET.get('type', None)
+
+    if object_id is not None:
         try:
-            object = Template.objects.get(pk=id)
-            xsltPath = os.path.join(settings.SITE_ROOT, 'static', 'resources', 'xsl', 'xsd2html4modules.xsl')
-            xslt = etree.parse(xsltPath)
+            if object_type == 'Template':
+                db_object = Template.objects.get(pk=object_id)
+            elif object_type == 'Type':
+                db_object = Type.objects.get(pk=object_id)
+            else:
+                raise AttributeError('Type parameter unrecognized')
+
+            xslt_path = os.path.join(settings.SITE_ROOT, 'static', 'resources', 'xsl', 'xsd2html4modules.xsl')
+            xslt = etree.parse(xslt_path)
             transform = etree.XSLT(xslt)
 
-            dom = etree.parse(BytesIO(object.content.encode('utf-8')))
-            annotations = dom.findall(".//{http://www.w3.org/2001/XMLSchema}annotation")
+            dom = etree.parse(BytesIO(db_object.content.encode('utf-8')))
+            annotations = dom.findall(".//{}annotation".format(LXML_SCHEMA_NAMESPACE))
             for annotation in annotations:
                 annotation.getparent().remove(annotation)
             newdom = transform(dom)
-            xsdTree = str(newdom)
+            xsd_tree = str(newdom)
 
-            request.session['moduleTemplateID'] = id
-            request.session['moduleTemplateContent'] = object.content
+            request.session['moduleTemplateID'] = object_id
+            request.session['moduleTemplateContent'] = db_object.content
 
-            request.session['moduleNamespaces'] = common.get_namespaces(BytesIO(str(object.content)))
-            for prefix, url in request.session['moduleNamespaces'].items():
-                if (url == "{http://www.w3.org/2001/XMLSchema}"):
+            namespaces = common.get_namespaces(BytesIO(str(db_object.content)))
+            for prefix, url in namespaces.iteritems():
+                if url == SCHEMA_NAMESPACE:
                     request.session['moduleDefaultPrefix'] = prefix
                     break
 
             context = RequestContext(request, {
-                'xsdTree': xsdTree,
-                'modules': Module.objects
+                'xsdTree': xsd_tree,
+                'modules': Module.objects,
+                'object_type': object_type
             })
-
 
             return HttpResponse(template.render(context))
         except:
@@ -630,13 +1009,20 @@ def manage_xslt(request, id=None):
         template = loader.get_template('admin/manage_xslt.html')
         upload_xslt_Form = UploadXSLTForm()
         upload_result_xslt_Form = UploadResultXSLTForm()
+        #TODO Move to OAI-PMH
+        upload_oai_pmh_xslt_Form = UploadOaiPmhXSLTForm()
         xslt_files = ExporterXslt.objects.all()
         result_xslt_files = ResultXslt.objects.all()
+        #TODO Move to OAI-PMH
+        oai_pmh_xslt = OaiXslt.objects.all()
         context = RequestContext(request, {
             'upload_xslt_Form': upload_xslt_Form,
             'upload_result_xslt_Form': upload_result_xslt_Form,
+            'upload_oai_pmh_xslt_Form': upload_oai_pmh_xslt_Form,
             'xslt_files': xslt_files,
             'result_xslt_files': result_xslt_files,
+            #TODO Move to OAI-PMH
+            'oai_pmh_xslt': oai_pmh_xslt,
         })
 
         return HttpResponse(template.render(context))

@@ -1,0 +1,94 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
+{% load dictionary_extras %}
+
+{% comment %}
+<!--
+################################################################################
+#
+# File Name: oai_pmh_conf_xslt.html
+# Application: templates/oai_pmh/admin
+# Description:
+#
+# Author: Pierre Francois RIGODIAT
+#		  pierre-francois.rigodiat@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################
+-->
+
+{% endcomment %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/oai_pmh.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/exporters.css' %}" media="screen" />
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/admin.css' %}" />
+{% endblock %}
+
+{% block title %}
+<h1>OAI-PMH XSLT Manager</h1>
+<h3>Template: {{templateName}}</h3>
+<p>
+Select Metadata Formats you want to associate with the template and provide an XSLT for the transformation.
+</p>
+{% endblock %}
+
+{% block admin_menu %}{% include 'admin/menu/main.html' with active_tab='tab3' %}{% endblock %}
+{% block admin_submenu %}{% include 'admin/menu/submenu/template.html' with active_tab='tab1' %}{% endblock %}
+
+{% block content%}
+<div class="alert alert-error" id="banner_errors" style="display: none;">
+	<h4><i class="fa fa-exclamation-circle fa-1x"></i> Error</h4>
+	<div id="form_start_errors">
+	</div>
+</div>
+
+<form id="form_start" action="" method="post">
+	<div id="dialog-xslt" title="Manage XSLT">
+		<table class="data-table">
+			<tr>
+				<th>Metadata Format</th>
+				<th>XSLT File</th>
+				<th>Activated</th>
+			</tr>
+			{{ formSet.management_form }}
+			{% for form in formSet %}
+				<tr>
+					{{ form.template_id }}
+					{{ form.oai_my_mf_id }}
+					<td>{{ form.oai_name }}</td>
+					<td>{{ form.oai_pmh_xslt_file }}</td>
+					<td id="ButtonSet{{form.oai_my_mf_id.value}}">
+						{{form.activated}}<label for="{{form.activated.id_for_label}}"></label>
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+</form>
+<div class="btn-group pull-right">
+	<span class="btn" onclick="window.location = '/admin/xml-schemas/manage-schemas'" style="text-decoration:none"><i class="icon-hdd"></i> Return</span>
+	<span class="btn" onclick="saveMyTemplate();" style="text-decoration:none"><i class="icon-hdd"></i> Save Template</span>
+</div>
+<div class="clearer">&nbsp;</div>
+{% autoescape off %}
+{% endautoescape %}
+{% endblock %}
+
+{% block popups %}
+<div id="dialog-save" title="Template" style="display:none;">
+	<p>
+		Template saved with success!
+	</p>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/oai_pmh_xslt_mgr.js' %}"></script>
+<script>
+InitConfXSLT();
+</script>
+{% endblock %}

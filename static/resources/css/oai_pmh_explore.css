@@ -1,0 +1,138 @@
+/*
+################################################################################
+#
+# File Name: oai_pmh.css
+# Purpose:   For explore app
+#
+# Author: Sharief Youssef
+#         sharief.youssef@nist.gov
+#
+#         Guillaume SOUSA AMARAL
+#         guillaume.sousa@nist.gov
+#
+# Sponsor: National Institute of Standards and Technology (NIST)
+#
+################################################################################ 
+*/
+
+div#registries ul {
+	list-style:none;
+}
+
+div#metadataFormats ul {
+	list-style:none;
+}
+
+#dataQueryForm li{
+	white-space: nowrap;
+}
+
+.notchosen{
+	display: none;
+}
+
+#searchContainer {
+    width: 75%;
+    height: 75%;
+    overflow: auto;
+    margin: auto;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+
+/* Style the search input field. */
+#id_search_entry {
+	float:left;
+	width:30em;
+	height:2em;
+
+	font-family:arial, sans-serif;
+	font-size:1em;
+	color:#333;
+	background: #fff;
+	border:solid 1px #d9d9d9;
+	border-top:solid 1px #c0c0c0;
+	border-right:none;
+}
+
+/* Syle the search button. Settings of line-height, font-size, text-indent used to hide submit value in IE */
+#submit {
+	float: right;
+	cursor:pointer;
+	width:1.8em;
+	height:3.2em;
+	text-indent:-999px;
+	color: transparent;
+	background: url(../img/search.png) no-repeat #4d90fe center;
+	border: 1px solid #3079ED;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+}
+/* Style the search button hover state */
+#submit:hover {
+	background: url(../img/search.png) no-repeat center #357AE8;
+	border: 1px solid #2F5BB7;
+}
+
+#submit:disabled {
+	float: right;
+	cursor:pointer;
+	width:1.8em;
+	height:3.2em;
+	text-indent:-999px;
+	color: transparent;
+	background: url(../img/search.png) no-repeat #4d90fe center;
+	border: 1px solid #3079ED;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	opacity: 0.6;
+}
+
+.ui-widget-content:disabled {
+	opacity: 0.6;
+}
+/* Clear floats */
+.fclear {clear:both}
+
+#results, #results_local {
+    min-height: 20em;
+}
+
+h1.search {
+    font-size: 10;
+}
+
+#loading.isloading {
+    background:url('../img/indicator.gif') no-repeat right center;
+}
+
+.loading {
+	float:right;
+    display: inline-block;
+    vertical-align: middle;
+    width:4em;
+	height:2em;
+}
+
+li.tagit-new {
+    width: 100%;
+}
+
+div#form_start_current ul {
+	list-style:none;
+}
+
+#metadataFormats span {
+	float: right;
+	color:grey;
+	font-style: italic;
+	margin-right: 1.5em;
+}
+
+.no-decoration a:link
+{
+ text-decoration:none;
+}
+
+.local {
+	color: red;
+}
