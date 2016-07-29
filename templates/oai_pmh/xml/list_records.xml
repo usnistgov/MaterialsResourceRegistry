@@ -4,18 +4,20 @@
   <ListRecords>
     {% for i in items %}
     <record>
-        <header>
+        <header{% if i.deleted %} status="deleted"{% endif %}>
             <identifier>{{ i.identifier }}</identifier>
             <datestamp>{{ i.last_modified }}</datestamp>
             {% for set in i.sets %}
                 <setSpec>{{ set.setSpec }}</setSpec>
             {% endfor %}
         </header>
+        {% if not i.deleted %}
         <metadata>
             {% autoescape off %}
             {{ i.XML|safe }}
             {% endautoescape %}
         </metadata>
+        {% endif %}
     </record>
     {% endfor %}
   </ListRecords>

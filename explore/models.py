@@ -15,6 +15,11 @@
 ################################################################################
 from django.db import models
 import mgi.rights as RIGHTS
+from mongoengine import *
+
+from curate.models import SchemaElement
+from mgi.models import Template
+
 
 class Explore(models.Model):
     # model stuff here
@@ -25,3 +30,9 @@ class Explore(models.Model):
             (RIGHTS.explore_save_query, RIGHTS.get_description(RIGHTS.explore_save_query)),
             (RIGHTS.explore_delete_query, RIGHTS.get_description(RIGHTS.explore_delete_query)),
         )
+
+
+class CustomTemplate(Document):
+    user = StringField(required=True)
+    template = ReferenceField(Template, required=True, unique_with=['user'])
+    root = ReferenceField(SchemaElement)

@@ -1,76 +1,54 @@
 # import XSDflattener
-# import unittest
 # import lxml.etree as etree
 # from io import BytesIO
-
-# class TestSimpleXSD(unittest.TestCase):
-# 	def setUp(self):
-# 		print "In method", self._testMethodName
 #
-# 	def test_one_file(self):
-# 		# makes sure that a file without includes provides the same file
-# 		file = open('time-unit-type.xsd','r')
-# 		content = file.read()
+# from mgi.settings import BASE_DIR
+# from os.path import join
 #
-# 		flatenner = XSDflattener.XSDFlattenerURL(content)
-# 		flat = flatenner.get_flat()
+# from testing.models import RegressionTest
 #
-# 		print flat
-#
-# 		# try to build the schema, would throw an exception if incorrect
-# 		xmlTree = etree.parse(BytesIO(flat.encode('utf-8')))
-# 		xmlSchema = etree.XMLSchema(xmlTree)
-#
-# 		# 1 simple type
-# 		self.assertEquals(len(xmlTree.getroot().getchildren()), 1)
+# RESOURCES_PATH = join(BASE_DIR, 'utils', 'XSDflattener')
 #
 #
-# # 	def test_includes_URL(self):
-# # 		# file with includes using URLs
-# # 		file = open('time-type.xsd','r')
-# # 		content = file.read()
-# #
-# # 		flatenner = XSDflattener.XSDFlattenerURL(content)
-# # 		flat = flatenner.get_flat()
-# #
-# # 		print flat
-# #
-# # 		# try to build the schema, would throw an exception if incorrect
-# # 		xmlTree = etree.parse(BytesIO(flat.encode('utf-8')))
-# # 		xmlSchema = etree.XMLSchema(xmlTree)
-# #
-# # 		# 2 types from includes + 1 type in the file
-# # 		self.assertEquals(len(xmlTree.getroot().getchildren()), 3)
+# class TestSimpleXSD(RegressionTest):
 #
-# 	def test_includes_local(self):
-# 		# file with includes using path
-# 		file = open('time-type2.xsd','r')
-# 		content = file.read()
+#     def test_one_file(self):
+#         # makes sure that a file without includes provides the same file
+#         file = open(join(RESOURCES_PATH, 'time-unit-type.xsd'), 'r')
+#         content = file.read()
 #
-# 		flatenner = XSDflattener.XSDFlattenerLocal(content)
-# 		flat = flatenner.get_flat()
+#         flatenner = XSDflattener.XSDFlattenerURL(content)
+#         flat = flatenner.get_flat()
 #
-# 		print flat
+#         # try to build the schema, would throw an exception if incorrect
+#         xml_tree = etree.parse(BytesIO(flat.encode('utf-8')))
+#         etree.XMLSchema(xml_tree)
 #
-# 		xmlTree = etree.parse(BytesIO(flat.encode('utf-8')))
-# 		xmlSchema = etree.XMLSchema(xmlTree)
+#         # 1 simple type
+#         self.assertEquals(len(xml_tree.getroot().getchildren()), 1)
 #
-# 		self.assertEquals(len(xmlTree.getroot().getchildren()), 3)
+#     def test_includes_local(self):
+#         # file with includes using path
+#         file = open(join(RESOURCES_PATH, 'time-type2.xsd'), 'r')
+#         content = file.read()
 #
-# 	def test_multiple_includes_local(self):
-# 		# file with includes using path
-# 		file = open('complex.xsd','r')
-# 		content = file.read()
+#         flatenner = XSDflattener.XSDFlattenerLocal(content)
+#         flat = flatenner.get_flat()
 #
-# 		flatenner = XSDflattener.XSDFlattenerLocal(content)
-# 		flat = flatenner.get_flat()
+#         xml_tree = etree.parse(BytesIO(flat.encode('utf-8')))
+#         etree.XMLSchema(xml_tree)
 #
-# 		print flat
+#         self.assertEquals(len(xml_tree.getroot().getchildren()), 3)
 #
-# 		xmlTree = etree.parse(BytesIO(flat.encode('utf-8')))
-# 		xmlSchema = etree.XMLSchema(xmlTree)
+#     def test_multiple_includes_local(self):
+#         # file with includes using path
+#         file = open(join(RESOURCES_PATH, 'complex.xsd'), 'r')
+#         content = file.read()
 #
-# 		self.assertEquals(len(xmlTree.getroot().getchildren()), 4)
+#         flatenner = XSDflattener.XSDFlattenerLocal(content)
+#         flat = flatenner.get_flat()
 #
-# if __name__ == '__main__':
-#     unittest.main()
+#         xml_tree = etree.parse(BytesIO(flat.encode('utf-8')))
+#         etree.XMLSchema(xml_tree)
+#
+#         self.assertEquals(len(xml_tree.getroot().getchildren()), 4)

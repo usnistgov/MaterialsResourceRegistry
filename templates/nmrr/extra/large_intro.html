@@ -37,6 +37,20 @@
 
 {% block container %}
 <section id="content" class="two-column with-right-sidebar">
+    {% block messages %}
+        {% if messages %}
+            <ul class="messagelist">
+                {% for message in messages %}
+                <li style="display:block">
+                    <div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <i class="fa fa-check"></i> {{message}}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endblock messages %}
 <article>
     {% block title %}{% endblock %}
     {% block content %}{% endblock %}

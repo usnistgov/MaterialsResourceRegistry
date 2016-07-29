@@ -14,6 +14,7 @@
 
 from abc import ABCMeta, abstractmethod
 
+
 class BLOBHoster(object):
     
     __metaclass__ = ABCMeta

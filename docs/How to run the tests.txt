@@ -1,0 +1,39 @@
+How to run the tests.
+
+First of all, you need to create a new database on your computer. This database is meant for running the tests. It will be cleaned up for each test.
+
+Start your mongo server and run these commands:
+
+mongo --port 27017 -u admin_user -p admin_password --authenticationDatabase admin
+use mgi_test
+db.createUser(
+{
+user: "mgi_user",
+pwd: "mgi_password",
+roles: ["readWrite"]
+}
+)
+exit
+
+This will create the new mongo database and allows you to run the tests on it.
+
+If your are developing some tests, you can inherits from testing/models.RegressionTest. This class gives you some API that can help you during your development.
+
+Go to the working directory. From there, you can run this command (Windows, Mac, Linux):
+
+python manage.py test <path to the app> --liveserver=localhost:8082
+
+You can also use the scripts you can find at /scripts/tests/ but there are meant for Linux and Mac only for the moment. Again from the working directory, you can run the tests with the scripts.
+./scripts/tests/launch_tests_coverage.sh <path to the app>
+If you don't specify a path to an app, the script will run the tests of the apps where we have written some tests. So if you have developed your own tests, you can either add them to the script or just put the path when you call the script.
+
+There is also two other scripts. One for the coverage and another for code quality.
+You may need to install some library (pylint, coverage) before running these scripts. If you have developed your own test, you need to add the app to the scripts in order to get the result for your development.
+
+For the coverage, once the script is run, in a terminal and from the working directory, you need to run this:
+coverage htlm
+firefox htmlcov/index.html
+
+The first one will generate the result of the coverage to html pages.
+The second command is not mandatory. It will open Firefox to the main page. You can also go the folder htmlcov and open index.html with your favorite browser.
+

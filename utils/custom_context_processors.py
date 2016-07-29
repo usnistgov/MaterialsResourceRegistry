@@ -12,4 +12,6 @@ def domain_context_processor(request):
         'CUSTOM_EXPLORE': settings.CUSTOM_EXPLORE if hasattr(settings, 'CUSTOM_EXPLORE') else '',
         'CUSTOM_COMPOSE': settings.CUSTOM_COMPOSE if hasattr(settings, 'CUSTOM_COMPOSE') else '',
         'CUSTOM_URL': settings.CUSTOM_URL if hasattr(settings, 'CUSTOM_URL') else '',
+        'USE_EMAIL': settings.USE_EMAIL == True if hasattr(settings, 'USE_EMAIL') else False,
+
     }

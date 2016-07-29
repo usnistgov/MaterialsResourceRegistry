@@ -16,7 +16,6 @@
 
 # REST Framework
 from rest_framework.decorators import api_view
-from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 # Models
@@ -36,6 +35,7 @@ from django.conf import settings
 import os
 from mongoengine import *
 from pymongo import MongoClient
+from mgi.settings import MONGODB_URI, MGI_DB
 from django.utils.importlib import import_module
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
@@ -49,17 +49,13 @@ MDCS_URI = settings.MDCS_URI
 from bson.objectid import ObjectId
 import re
 import requests
-from django.db.models import Q as QDJ
 from mongoengine.queryset.visitor import Q
 import operator
 import json
-import xmltodict
 from collections import OrderedDict
 from StringIO import StringIO
 from django.http.response import HttpResponse
-
 from utils.XMLValidation.xml_schema import validate_xml_schema
-from utils.XSDhash import XSDhash
 from io import BytesIO
 from utils.APIschemaLocator.APIschemaLocator import getSchemaLocation
 from datetime import datetime
@@ -72,6 +68,7 @@ import zipfile
 import mongoengine.errors as MONGO_ERRORS
 from admin_mdcs.models import api_permission_required, api_staff_member_required
 import mgi.rights as RIGHTS
+
 
 ################################################################################
 # 
@@ -265,7 +262,7 @@ def explore(request):
     
     if dataformat== None or dataformat=="xml":
         for jsonDoc in jsonData:
-            jsonDoc['content'] = xmltodict.unparse(jsonDoc['content'])  
+            jsonDoc['content'] = XMLdata.unparse(jsonDoc['content'])
         serializer = jsonDataSerializer(jsonData)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif dataformat == "json":
@@ -321,7 +318,7 @@ def explore_detail(request):
         
             if dataformat== None or dataformat=="xml":
                 for jsonDoc in jsonData:
-                    jsonDoc['content'] = xmltodict.unparse(jsonDoc['content'])
+                    jsonDoc['content'] = XMLdata.unparse(jsonDoc['content'])
                 serializer = jsonDataSerializer(jsonData)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             elif dataformat == "json":
@@ -369,7 +366,7 @@ def explore_detail_data_download(request):
             filename = os.path.splitext(jsonData['title'])[0]
 
             if dataformat== None or dataformat=="xml":
-                jsonData['content'] = xmltodict.unparse(jsonData['content'])
+                jsonData['content'] = XMLdata.unparse(jsonData['content'])
                 contentEncoded = jsonData['content'].encode('utf-8')
                 fileObj = StringIO(contentEncoded)
                 response = HttpResponse(fileObj, content_type='application/xml')
@@ -503,7 +500,7 @@ def query_by_example(request):
             
                 if dataformat== None or dataformat=="xml":
                     for jsonDoc in instanceResults:
-                        jsonDoc['content'] = xmltodict.unparse(jsonDoc['content'])  
+                        jsonDoc['content'] = XMLdata.unparse(jsonDoc['content'])
                     serializer = jsonDataSerializer(instanceResults)
                     return Response(serializer.data, status=status.HTTP_200_OK)
                 elif dataformat == "json":
@@ -520,7 +517,7 @@ def query_by_example(request):
             
                 if dataformat== None or dataformat=="xml":
                     for jsonDoc in results:
-                        jsonDoc['content'] = xmltodict.unparse(jsonDoc['content'])  
+                        jsonDoc['content'] = XMLdata.unparse(jsonDoc['content'])
                     serializer = jsonDataSerializer(results)
                     return Response(serializer.data, status=status.HTTP_200_OK)
                 elif dataformat == "json":
@@ -717,12 +714,6 @@ def select_schema(request):
     hash = request.QUERY_PARAMS.get('hash', None)
     
     try:        
-        # create a connection
-        client = MongoClient(MONGODB_URI)
-        # connect to the db 'mgi'
-        db = client[MGI_DB]
-        # get the xmldata collection
-        template = db['template']
         query = dict()
         if id is not None:
             query['id'] = ObjectId(id)
@@ -2203,7 +2194,7 @@ def export(request):
 
             #Retrieve the XML content
             for file in files:
-                xmlStr = xmltodict.unparse(file['content'])
+                xmlStr = XMLdata.unparse(file['content'])
                 dataXML.append({'title':file['title'], 'content': str(xmlStr)})
 
             #Transformation

@@ -26,15 +26,16 @@ from lxml.etree import XMLSyntaxError
 import json
 import xmltodict
 from django.contrib import messages
+from curate.ajax import load_config
 
 from curate.models import SchemaElement
-from curate.renderer.xml import XmlRenderer
 from mgi.models import Template, TemplateVersion, XML2Download, FormData, XMLdata
 from curate.forms import NewForm, OpenForm, UploadForm, SaveDataForm, CancelChangesForm
 from django.http.response import HttpResponseBadRequest
 from admin_mdcs.models import permission_required
 import mgi.rights as RIGHTS
 from mgi.exceptions import MDCSError
+
 
 
 ################################################################################
@@ -46,6 +47,10 @@ from mgi.exceptions import MDCSError
 # Description:   Page that allows to select a template to start curating         
 #
 ################################################################################
+from utils.XSDParser.parser import delete_branch_from_db, generate_form
+from utils.XSDParser.renderer.xml import XmlRenderer
+
+
 @permission_required(content_type=RIGHTS.curate_content_type, permission=RIGHTS.curate_access, login_url='/login')
 def index(request):
     template = loader.get_template('curate/curate.html')
@@ -105,31 +110,37 @@ def curate_edit_data(request):
             pass
         else:
             xml_data_id = request.GET['id']
-            xml_data = XMLdata.get(xml_data_id)
-            json_content = xml_data['content']
-            xml_content = xmltodict.unparse(json_content)
-            request.session['curate_edit_data'] = xml_content
             request.session['curate_edit'] = True
-            request.session['currentTemplateID'] = xml_data['schema']
             # remove previously created forms when editing a new one
-            previous_forms = FormData.objects(user=str(request.user.id), xml_data_id__exists=True)
+            previous_forms = FormData.objects(user=str(request.user.id), xml_data_id__exists=True,
+                                              isNewVersionOfRecord=False)
             for previous_form in previous_forms:
-                # TODO: check if need to delete all SchemaElements
+                if previous_form.schema_element_root is not None:
+                    delete_branch_from_db(previous_form.schema_element_root.pk)
                 previous_form.delete()
-            form_data = FormData(
-                user=str(request.user.id),
-                template=xml_data['schema'],
-                name=xml_data['title'],
-                xml_data=xml_content,
-                xml_data_id=xml_data_id
-            )
-            form_data.save()
-            request.session['curateFormData'] = str(form_data.id)
+
+            #Check if a form_data already exists for this record
+            form_data = FormData.objects(xml_data_id=xml_data_id).all().first()
+            if not form_data:
+                xml_data = XMLdata.get(xml_data_id)
+                json_content = xml_data['content']
+                xml_content = xmltodict.unparse(json_content)
+                form_data = FormData(
+                    user=str(request.user.id),
+                    template=xml_data['schema'],
+                    name=xml_data['title'],
+                    xml_data=xml_content,
+                    xml_data_id=xml_data_id,
+                    isNewVersionOfRecord=xml_data.get('ispublished', False)
+                )
+                form_data.save()
+
+            request.session['currentTemplateID'] = form_data.template
+            request.session['curate_edit_data'] = form_data.xml_data
+            request.session['curateFormData'] = str(form_data.pk)
 
             if 'form_id' in request.session:
                 del request.session['form_id']
-            if 'formString' in request.session:
-                del request.session['formString']
             if 'xmlDocTree' in request.session:
                 del request.session['xmlDocTree']
     except:
@@ -455,15 +466,10 @@ def start_curate(request):
 def save_xml_data_to_db(request):
     form_data_id = request.session['curateFormData']
     form_data = FormData.objects.get(pk=form_data_id)
-
     form_id = request.session['form_id']
     root_element = SchemaElement.objects.get(pk=form_id)
-
     xml_renderer = XmlRenderer(root_element)
     xml_string = xml_renderer.render()
-
-    # xmlString = request.session['xmlString']
-    # template_id = request.session['currentTemplateID']
     template_id = form_data.template
 
     # Parse data from form
@@ -478,13 +484,22 @@ def save_xml_data_to_db(request):
         return HttpResponseBadRequest('No XML data found')
 
     try:
-        # update data if id is present
+        # update form data if id is present
         if form_data.xml_data_id is not None:
-            XMLdata.update_content(
-                form_data.xml_data_id,
-                xml_string,
-                title=form.data['title']
-            )
+            if not form_data.isNewVersionOfRecord:
+                #Update the record
+                XMLdata.update_content(
+                    form_data.xml_data_id,
+                    xml_string,
+                    title=form.data['title']
+                )
+                #Delete form_data
+                if form_data.schema_element_root is not None:
+                    delete_branch_from_db(form_data.schema_element_root.pk)
+                form_data.delete()
+            else:
+                form_data.xml_data = xml_string
+                form_data.save()
         else:
             # create new data otherwise
             xml_data = XMLdata(
@@ -494,24 +509,15 @@ def save_xml_data_to_db(request):
                 iduser=str(request.user.id)
             )
             xml_data.save()
-
-        form_data.delete()
+            #Delete form_data because we just create an XmlData and we don't need anymore the formdata
+            if form_data.schema_element_root is not None:
+                delete_branch_from_db(form_data.schema_element_root.pk)
+            form_data.delete()
 
         return HttpResponse('ok')
     except Exception, e:
         message = e.message.replace('"', '\'')
         return HttpResponseBadRequest(message)
-
-
-def cancel_changes(request):
-    if request.method == 'POST':
-        form = CancelChangesForm(request.POST)
-        if form.is_valid():
-            return HttpResponse(request.POST['cancel'])
-    else:
-        form = CancelChangesForm({'cancel': 'revert'})
-
-    return HttpResponse(json.dumps({'form': str(form)}), content_type='application/javascript')
 
 
 ################################################################################
@@ -534,17 +540,38 @@ def curate_edit_form(request):
                     raise MDCSError("The form you are looking for doesn't exist.")
 
                 # parameters to build FormData object in db
-                request.session['currentTemplateID'] = form_data.template
+                #                 request.session['currentTemplateID'] = form_data.template
                 request.session['curate_edit'] = True
                 request.session['curate_edit_data'] = form_data.xml_data
 
                 # parameters that will be used during curation
                 request.session['curateFormData'] = str(form_data.id)
 
-                if 'formString' in request.session:
-                    del request.session['formString']
-                if 'xmlDocTree' in request.session:
-                    del request.session['xmlDocTree']
+                request.session['currentTemplateID'] = form_data.template
+                templateObject = Template.objects.get(pk=form_data.template)
+                xmlDocData = templateObject.content
+                XMLtree = etree.parse(BytesIO(xmlDocData.encode('utf-8')))
+                request.session['xmlDocTree'] = etree.tostring(XMLtree)
+
+                if form_data.schema_element_root is None:
+                    if form_data.template is not None:
+                        template_object = Template.objects.get(pk=form_data.template)
+                        xsd_doc_data = template_object.content
+                    else:
+                        raise MDCSError("No schema attached to this file")
+
+                    if form_data.xml_data is not None:
+                        xml_doc_data = form_data.xml_data
+                    else:
+                        xml_doc_data = None
+
+                    root_element_id = generate_form(request, xsd_doc_data, xml_doc_data, config=load_config())
+                    root_element = SchemaElement.objects.get(pk=root_element_id)
+
+                    form_data.update(set__schema_element_root=root_element)
+                    form_data.reload()
+
+                request.session['form_id'] = str(form_data.schema_element_root.id)
 
                 context = RequestContext(request, {})
                 template = loader.get_template('curate/curate_enter_data.html')
@@ -558,3 +585,14 @@ def curate_edit_form(request):
             'errors': e.message,
         })
         return HttpResponse(template.render(context))
+
+
+def cancel_changes(request):
+    if request.method == 'POST':
+        form = CancelChangesForm(request.POST)
+        if form.is_valid():
+            return HttpResponse(request.POST['cancel'])
+    else:
+        form = CancelChangesForm({'cancel': 'revert'})
+
+    return HttpResponse(json.dumps({'form': str(form)}), content_type='application/javascript')

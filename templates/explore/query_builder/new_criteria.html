@@ -1,0 +1,8 @@
+<p id='crit{{tagID}}'>
+{% include 'explore/query_builder/and_or_not.html'%}
+    <input onclick="showCustomTree('crit{{tagID}}')" readonly="readonly" type="text" class="elementInput">
+    <span id='ui{{tagID}}'>
+    </span>
+    <span class="icon remove" onclick="removeField('crit{{tagID}}')"></span>
+    <span class="icon add" onclick="addField()"></span>
+</p>

@@ -13,6 +13,7 @@
 
 from testing.models import TokenTest, TemplateVersion, XMLDATA_VALID_CONTENT, FAKE_ID, XMLdata
 
+
 class tests_token(TokenTest):
 
     def test_select_all_schema_admin(self):
@@ -41,8 +42,8 @@ class tests_token(TokenTest):
         self.isStatusUnauthorized(r.status_code)
 
     def test_select_schema_admin_id(self):
-        templateID = self.createTemplate()
-        param = {'id': templateID.id}
+        template = self.createTemplate()
+        param = {'id': template.id}
         r = self.doRequestGet(self.get_token_admin(), url="/rest/templates/select",params=param)
         self.isStatusOK(r.status_code)
 

@@ -21,9 +21,8 @@
 ################################################################################
 
 import os
-import sys
 
-VERSION = "1.3"
+VERSION = "BETA"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -71,6 +70,56 @@ else:
     #     }
     # }
 
+#SMTP Configuration
+USE_EMAIL = False #Send email, True or False
+SERVER_EMAIL = 'noreply@nmrr.org'
+ADMINS = [('admin', 'admin@nmrr.org')]
+MANAGERS = [('manager', 'moderator@nmrr.org'),]
+EMAIL_SUBJECT_PREFIX = "[NMRR] "
+#For test purpose
+#EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+#EMAIL_FILE_PATH = '/tmp/emails'
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_HOST_USER = "curator.testing.us@gmail.com"
+# EMAIL_HOST_PASSWORD = "ilovecurator"
+# EMAIL_PORT= 587
+
+#Password Policy
+# Determines wether to use the password history.
+PASSWORD_USE_HISTORY = True
+# A list of raw strings representing paths to ignore while checking if a user has to change his/her password.
+PASSWORD_CHANGE_MIDDLEWARE_EXCLUDED_PATHS = []
+# Specifies the number of user's previous passwords to remember when the password history is being used.
+PASSWORD_HISTORY_COUNT = 1
+# Determines after how many seconds a user is forced to change his/her password.
+PASSWORD_DURATION_SECONDS = 24 * 90 * 3600
+# Don't log the person out in the middle of a session. Only do the checks at login time.
+PASSWORD_CHECK_ONLY_AT_LOGIN = True
+# Specifies the minimum length for passwords.
+PASSWORD_MIN_LENGTH = 12
+# Specifies the minimum amount of required letters in a password.
+PASSWORD_MIN_LETTERS = 3
+# Specifies the minimum amount of required uppercase letters in a password.
+PASSWORD_MIN_UPPERCASE_LETTERS = 1
+# Specifies the minimum amount of required lowercase letters in a password.
+PASSWORD_MIN_LOWERCASE_LETTERS = 1
+# Specifies the minimum amount of required numbers in a password.
+PASSWORD_MIN_NUMBERS = 1
+# Specifies the minimum amount of required symbols in a password.
+PASSWORD_MIN_SYMBOLS = 1
+# Specifies a list of common sequences to attempt to match a password against.
+PASSWORD_COMMON_SEQUENCES = [u'0123456789', u'`1234567890-=', u'~!@#$%^&*()_+', u'abcdefghijklmnopqrstuvwxyz',
+                             u"quertyuiop[]\\asdfghjkl;'zxcvbnm,./", u'quertyuiop{}|asdfghjkl;"zxcvbnm<>?',
+                             u'quertyuiopasdfghjklzxcvbnm', u"1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-['=]\\",
+                             u'qazwsxedcrfvtgbyhnujmikolp']
+# A minimum distance of the difference between old and new password. A positive integer.
+# Values greater than 1 are recommended.
+PASSWORD_DIFFERENCE_DISTANCE = 3
+# Specifies the maximum amount of consecutive characters allowed in passwords.
+PASSWORD_MAX_CONSECUTIVE = 3
+# A list of project specific words to check a password against.
+PASSWORD_WORDS = []
+
 # Replace by your own values
 from mongoengine import connect
 MONGO_MGI_USER = "mgi_user"
@@ -91,8 +140,6 @@ OAI_ADMINS = (
     ('Administrator', 'admin@curator.com'),
 )
 OAI_HOST_URI = 'http://127.0.0.1:8082'
-OAI_USER = 'admin'
-OAI_PASS = 'admin'
 OAI_NAME = 'MDCS Admin 127.0.0.1 '
 OAI_DELIMITER = ':'
 OAI_DESCRIPTION = 'OAI-PMH CURATOR'
@@ -101,9 +148,10 @@ OAI_PROTOCOLE_VERSION = '2.0' #the version of the OAI-PMH supported by the repos
 OAI_SCHEME = 'oai'
 OAI_REPO_IDENTIFIER = 'server-127.0.0.1'
 OAI_SAMPLE_IDENTIFIER = OAI_SCHEME+OAI_DELIMITER+OAI_REPO_IDENTIFIER+OAI_DELIMITER+'id/12345678a123aff6ff5f2d9e'
-OAI_DELETED_RECORD = 'no' #no ; transient ; persistent
+OAI_DELETED_RECORD = 'persistent' #no ; transient ; persistent
 
 #Celery configuration
+USE_BACKGROUND_TASK = False
 BROKER_URL = 'redis://localhost:6379/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
@@ -124,9 +172,12 @@ CUSTOM_CURATE = 'Data Curation'
 CUSTOM_EXPLORE = 'Data Exploration'
 CUSTOM_COMPOSE = 'Composer'
 
-#CURATE
-CURATE_MIN_TREE = True
-CURATE_COLLAPSE = True
+# PARSER
+PARSER_MIN_TREE = True
+PARSER_IGNORE_MODULES = False
+PARSER_COLLAPSE = True
+PARSER_AUTO_KEY_KEYREF = False
+PARSER_IMPLICIT_EXTENSION_BASE = False
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 
@@ -137,14 +188,17 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
-"django.core.context_processors.debug",
-"django.core.context_processors.request",
-"django.core.context_processors.i18n",
-"django.core.context_processors.media",
-"django.core.context_processors.static",
-"django.core.context_processors.tz",
-"django.contrib.messages.context_processors.messages",
-"utils.custom_context_processors.domain_context_processor")
+    "django.core.context_processors.debug",
+    "django.core.context_processors.request",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "utils.custom_context_processors.domain_context_processor",
+    # "password_policies.context_processors.password_status",
+    'mgi.context_processors.password_status',
+)
 
 # Application definition
 
@@ -155,7 +209,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mongoengine.django.mongo_auth',
+    # 'mongoengine.django.mongo_auth',
     'rest_framework',
     'rest_framework_swagger',
     'oauth2_provider',
@@ -166,9 +220,11 @@ INSTALLED_APPS = (
     'explore',
     'compose',
     'modules',
+    'user_dashboard',
     'oai_pmh',
     'testing',
-
+    'utils.XSDParser',
+    'password_policies'
 )
 
 OAUTH2_PROVIDER = {
@@ -221,6 +277,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.RemoteUserMiddleware',  # https://docs.djangoproject.com/en/dev/howto/auth-remote-user/
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'password_policies.middleware.PasswordChangeMiddleware',
+    'mgi.middleware.PasswordChangeMiddleware',
 )
 
 ROOT_URLCONF = 'mgi.urls'

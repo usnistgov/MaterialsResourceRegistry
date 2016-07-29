@@ -13,24 +13,25 @@
 # Sponsor: National Institute of Standards and Technology (NIST)
 #
 ################################################################################
-from urlparse import urlparse
-
 from django.http import HttpResponse
 import lxml.etree as etree
 import json
 from io import BytesIO
-
 from mgi.common import LXML_SCHEMA_NAMESPACE, update_dependencies
 from mgi.models import create_template, create_type, create_template_version, create_type_version
-
 from rest_framework.status import HTTP_404_NOT_FOUND
 from mgi.models import Template, TemplateVersion, Instance, Request, Module, Type, TypeVersion, Message, Bucket, \
     Exporter, ExporterXslt, ResultXslt
 from django.contrib.auth.models import User
-
 from utils.XMLValidation.xml_schema import validate_xml_schema
 import random
 from django.contrib import messages
+from mgi.common import send_mail
+from django.utils.importlib import import_module
+import os
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
+MDCS_URI = settings.MDCS_URI
 
 
 ################################################################################
@@ -442,6 +443,12 @@ def accept_request(request):
         user = User.objects.create_user(username=userRequest.username, password=userRequest.password, first_name=userRequest.first_name, last_name=userRequest.last_name, email=userRequest.email)
         user.save()
         userRequest.delete()
+        # Send mail to the user
+        context = {'lastname': userRequest.last_name,
+                   'firstname': userRequest.first_name,
+                   'URI': MDCS_URI}
+        send_mail(subject='Account approved', pathToTemplate='admin/email/request_account_approved.html',
+                  context=context, recipient_list=[userRequest.email])
         
     return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
 
@@ -460,6 +467,12 @@ def deny_request(request):
     
     userRequest = Request.objects.get(pk=request_id)
     userRequest.delete()
+    # Send mail to the user
+    context = {'lastname': userRequest.last_name,
+               'firstname': userRequest.first_name,
+               'URI': MDCS_URI}
+    send_mail(subject='Account denied', pathToTemplate='admin/email/request_account_denied.html',
+              context=context, recipient_list=[userRequest.email])
     
     return HttpResponse(json.dumps({}), content_type='application/javascript')
 
@@ -538,7 +551,7 @@ def delete_bucket(request):
 #
 ################################################################################
 def rdm_hex_color():
-    return '#' +''.join([random.choice('0123456789ABCDEF') for x in range(6)])
+    return '#' + ''.join([random.choice('0123456789ABCDEF') for x in range(6)])
 
 
 ################################################################################

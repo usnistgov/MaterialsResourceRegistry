@@ -1,3 +1,4 @@
+
 ################################################################################
 #
 # File Name: models.py
@@ -17,9 +18,6 @@ from mgi.models import OaiMyMetadataFormat, OaiTemplMfXslt, OaiMySet, OaiSetting
 
 class OAI_PMH_Test(RegressionTest):
 
-    def setUp(self):
-        super(OAI_PMH_Test, self).setUp()
-        self.clean_db()
 
     def dump_oai_my_metadata_format(self):
         self.assertEquals(len(OaiMyMetadataFormat.objects()), 0)

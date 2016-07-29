@@ -1,0 +1,38 @@
+{% load dict_key_extras %}
+
+<table class="data-table">
+    <tr>
+        <th width="175em">Name</th>
+        <th width="100em">Template</th>
+        {% if user.is_staff %}
+            <th width="100em">
+                User
+            </th>
+        {% endif %}
+        <th width="160em">Actions</th>
+    </tr>
+    {% for form in forms %}
+        {% with key=form.user %}
+        {% cycle 'even' '' as rowcolors silent %}
+        <tr class="{{ rowcolors }}">
+            <td style="word-break: break-all;">{{ form.form.name }}</td>
+            <td style="word-break: break-all;">{{ form.template_name}}</td>
+            {% if user.is_staff %}
+                <td>
+                    {{usernames|get:key}}
+                </td>
+            {% endif %}
+            <td>
+                <a href="/dashboard/detail?type=form&id={{form.form.id}}"><span class="icon legend result">
+                            View
+                </span></a>
+                <a href="/curate/edit-form?id={{form.form.id}}"><span class="icon legend edit">
+                            Edit
+                </span></a>
+                <div class="icon legend delete" onclick='deleteForm("{{form.form.id}}")'>Delete</div>
+                <div class="icon legend changeOwner" onclick='changeOwnerForm("{{form.form.id}}")'>Change Owner</div>
+            </td>
+        </tr>
+        {% endwith %}
+    {% endfor %}
+</table>

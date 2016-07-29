@@ -13,37 +13,45 @@
 
 from rest_framework import status
 from django.http.response import HttpResponseBadRequest
-from oai_pmh.admin.forms import UpdateRegistryForm, MyMetadataFormatForm, RegistryForm, MyRegistryForm, UpdateMyMetadataFormatForm, MySetForm, UpdateMySetForm, \
-MyTemplateMetadataFormatForm, SettingHarvestForm
+from oai_pmh.admin.forms import UpdateRegistryForm, MyMetadataFormatForm, RegistryForm, MyRegistryForm, \
+    UpdateMyMetadataFormatForm, MySetForm, UpdateMySetForm, MyTemplateMetadataFormatForm, SettingHarvestForm
 import json
 import os
 from django.utils.importlib import import_module
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
 OAI_HOST_URI = settings.OAI_HOST_URI
-OAI_USER = settings.OAI_USER
-OAI_PASS = settings.OAI_PASS
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 # Responses
 from django.http import HttpResponse
 # Requests
-import requests
 from django.template import RequestContext, loader
 from mgi.models import OaiRegistry, OaiSettings, OaiMyMetadataFormat, OaiXslt, OaiTemplMfXslt, Template, OaiMySet
 from django.contrib.admin.views.decorators import staff_member_required
-from mgi.models import Message, OaiMetadataFormat, OaiSet, OaiRecord
+from mgi.models import OaiMetadataFormat, OaiSet, OaiRecord
 from oai_pmh.forms import Url
 from oai_pmh.admin.forms import UploadOaiPmhXSLTForm
 from django.utils.dateformat import DateFormat
 import lxml.etree as etree
 from lxml.etree import XMLSyntaxError
-from mongoengine import NotUniqueError, OperationError
 from django.forms import formset_factory
 from oai_pmh.admin.forms import AssociateXSLT
-from django.core.urlresolvers import reverse
 from oai_pmh.api.messages import APIMessage
+from oai_pmh.api.models import objectIdentifyByURL, add_registry as add_registry_model,\
+    update_registry as update_registry_model, delete_registry as delete_registry_model,\
+    deactivate_registry as deactivate_registry_model, reactivate_registry as reactivate_registry_model,\
+    update_my_registry as update_my_registry_model, add_my_metadataFormat as add_my_metadataFormat_model,\
+    add_my_template_metadataFormat as add_my_template_metadataFormat_model,\
+    delete_my_metadataFormat as delete_my_metadataFormat_model,\
+    update_my_metadataFormat as update_my_metadataFormat_model, add_my_set as add_my_set_model,\
+    delete_my_set as delete_my_set_model, update_my_set as update_my_set_model,\
+    update_registry_harvest as update_registry_harvest_model,\
+    update_registry_info as update_registry_info_model, oai_pmh_conf_xslt as oai_pmh_conf_xslt_model,\
+    upload_oai_pmh_xslt as upload_oai_pmh_xslt_model, delete_oai_pmh_xslt as delete_oai_pmh_xslt_model,\
+    edit_oai_pmh_xslt as edit_oai_pmh_xslt_model, harvest as harvest_model
+from oai_pmh.api.exceptions import OAIAPIException
 
 
 ################################################################################
@@ -84,9 +92,7 @@ def check_registry(request):
         #Get the oai registry URL
         form = Url(request.POST)
         if form.is_valid():
-            #Call the identify function from the API.
-            uri= OAI_HOST_URI + reverse("api_objectIdentify")
-            req = requests.post(uri, {"url":request.POST.get("url")}, auth=(OAI_USER, OAI_PASS))
+            req = objectIdentifyByURL(request.POST.get("url"))
             #If the return status is HTTP_200_OK, the OAI Registry is available
             isAvailable = req.status_code == status.HTTP_200_OK
         else:
@@ -112,37 +118,29 @@ def add_registry(request):
         #Check the Form
         if form.is_valid():
             try:
-                #We add the registry
-                uri = OAI_HOST_URI + reverse("api_add_registry")
                 try:
                     url = request.POST.get('url')
                 except ValueError:
                     return HttpResponseBadRequest('Please provide a URL.')
-
                 #We retrieve information from the form
-                if 'harvestrate' in request.POST:
-                    harvestrate = request.POST.get('harvestrate')
-                else:
-                    harvestrate = ""
+                harvestrate = request.POST.get('harvestrate', "")
                 if 'harvest' in request.POST:
                     harvest = True
                 else:
                     harvest = False
-
                 #Call to the API to add the registry
                 try:
-                    req = requests.post(uri, {"url":url,
-                                              "harvestrate":harvestrate,
-                                              "harvest":harvest},
-                                        auth=(OAI_USER, OAI_PASS))
+                    req = add_registry_model(url, harvestrate, harvest)
                     #If the status is OK, sucess message
                     if req.status_code == status.HTTP_201_CREATED:
                         messages.add_message(request, messages.SUCCESS, 'Data provider added with success.')
                         return HttpResponse('CREATED')
                     #Else, we return a bad request response with the message provided by the API
                     else:
-                        data = json.loads(req.text)
+                        data = req.data
                         return HttpResponseBadRequest(data[APIMessage.label])
+                except OAIAPIException as e:
+                    return HttpResponseBadRequest(e.message)
                 except Exception as e:
                     return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
             except Exception as e:
@@ -164,7 +162,6 @@ def update_registry(request):
     if request.method == 'POST':
         #UPDATE the registry
         try:
-            uri = OAI_HOST_URI + reverse("api_update_registry")
             #Get the ID
             if 'id' in request.POST:
                 id = request.POST.get('id')
@@ -181,19 +178,17 @@ def update_registry(request):
                 harvest = False
             #Call the API to update the registry
             try:
-                req = requests.put(uri,
-                                   {"id":id,
-                                    "harvestrate":harvestrate,
-                                    "harvest": harvest},
-                                   auth=(OAI_USER, OAI_PASS))
+                req = update_registry_model(id, harvestrate, harvest)
                 #If the status is OK, sucess message
                 if req.status_code == status.HTTP_200_OK:
                     messages.add_message(request, messages.INFO, 'Data Provider successfully edited.')
                     return HttpResponse(json.dumps({}), content_type='application/javascript')
                 #Else, we return a bad request response with the message provided by the API
                 else:
-                    data = json.loads(req.text)
+                    data = req.data
                     return HttpResponseBadRequest(data[APIMessage.label])
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -227,22 +222,22 @@ def update_registry(request):
 ################################################################################
 @login_required(login_url='/login')
 def delete_registry(request):
-    uri = OAI_HOST_URI + reverse("api_delete_registry")
     try:
         id = request.POST.get('RegistryId')
     except ValueError:
         return HttpResponseBadRequest('Please provide an ID in order to delete the data provider.')
     try:
-        req = requests.post(uri, {"RegistryId":id}, auth=(OAI_USER, OAI_PASS))
-
+        req = delete_registry_model(id)
         #If the status is OK, sucess message
         if req.status_code == status.HTTP_200_OK:
             messages.add_message(request, messages.INFO, 'Data provider deleted with success.')
             return HttpResponse(json.dumps({}), content_type='application/javascript')
         #Else, we return a bad request response with the message provided by the API
         else:
-            data = json.loads(req.text)
+            data = req.data
             return HttpResponseBadRequest(data[APIMessage.label])
+    except OAIAPIException as e:
+        return HttpResponseBadRequest(e.message)
     except Exception as e:
         return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
 
@@ -258,13 +253,12 @@ def delete_registry(request):
 ################################################################################
 @login_required(login_url='/login')
 def deactivate_registry(request):
-    uri = OAI_HOST_URI + reverse("api_deactivate_registry")
     try:
         id = request.POST.get('RegistryId')
     except ValueError:
         return HttpResponseBadRequest('Please provide an ID in order to deactivate the data provider.')
     try:
-        req = requests.post(uri, {"RegistryId":id}, auth=(OAI_USER, OAI_PASS))
+        req = deactivate_registry_model(id)
 
         #If the status is OK, sucess message
         if req.status_code == status.HTTP_200_OK:
@@ -272,8 +266,10 @@ def deactivate_registry(request):
             return HttpResponse(json.dumps({}), content_type='application/javascript')
         #Else, we return a bad request response with the message provided by the API
         else:
-            data = json.loads(req.text)
+            data = req.data
             return HttpResponseBadRequest(data[APIMessage.label])
+    except OAIAPIException as e:
+        return HttpResponseBadRequest(e.message)
     except Exception as e:
         return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
 
@@ -289,13 +285,12 @@ def deactivate_registry(request):
 ################################################################################
 @login_required(login_url='/login')
 def reactivate_registry(request):
-    uri = OAI_HOST_URI + reverse("api_reactivate_registry")
     try:
         id = request.POST.get('RegistryId')
     except ValueError:
         return HttpResponseBadRequest('Please provide an ID in order to reactivate the data provider.')
     try:
-        req = requests.post(uri, {"RegistryId":id}, auth=(OAI_USER, OAI_PASS))
+        req = reactivate_registry_model(id)
 
         #If the status is OK, sucess message
         if req.status_code == status.HTTP_200_OK:
@@ -303,73 +298,12 @@ def reactivate_registry(request):
             return HttpResponse(json.dumps({}), content_type='application/javascript')
         #Else, we return a bad request response with the message provided by the API
         else:
-            data = json.loads(req.text)
+            data = req.data
             return HttpResponseBadRequest(data[APIMessage.label])
+    except OAIAPIException as e:
+        return HttpResponseBadRequest(e.message)
     except Exception as e:
         return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
-
-
-################################################################################
-#
-# Function Name: deactivate_registry(request)
-# Inputs:        request -
-# Outputs:
-# Exceptions:    None
-# Description:   OAI-PMH Deactivate Registry
-#
-################################################################################
-@login_required(login_url='/login')
-def deactivate_registry(request):
-    uri = OAI_HOST_URI + reverse("api_deactivate_registry")
-    try:
-        id = request.POST.get('RegistryId')
-    except ValueError:
-        return HttpResponseBadRequest('Please provide an ID in order to deactivate the data provider.')
-    try:
-        req = requests.post(uri, {"RegistryId":id}, auth=(OAI_USER, OAI_PASS))
-
-        #If the status is OK, sucess message
-        if req.status_code == status.HTTP_200_OK:
-            messages.add_message(request, messages.INFO, 'Data provider deactivated with success.')
-            return HttpResponse(json.dumps({}), content_type='application/javascript')
-        #Else, we return a bad request response with the message provided by the API
-        else:
-            data = json.loads(req.text)
-            return HttpResponseBadRequest(data['message'])
-    except Exception as e:
-        return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
-
-
-################################################################################
-#
-# Function Name: reactivate_registry(request)
-# Inputs:        request -
-# Outputs:
-# Exceptions:    None
-# Description:   OAI-PMH Deactivate Registry
-#
-################################################################################
-@login_required(login_url='/login')
-def reactivate_registry(request):
-    uri = OAI_HOST_URI + reverse("api_reactivate_registry")
-    try:
-        id = request.POST.get('RegistryId')
-    except ValueError:
-        return HttpResponseBadRequest('Please provide an ID in order to reactivate the data provider.')
-    try:
-        req = requests.post(uri, {"RegistryId":id}, auth=(OAI_USER, OAI_PASS))
-
-        #If the status is OK, sucess message
-        if req.status_code == status.HTTP_200_OK:
-            messages.add_message(request, messages.INFO, 'Data provider reactivate with success.')
-            return HttpResponse(json.dumps({}), content_type='application/javascript')
-        #Else, we return a bad request response with the message provided by the API
-        else:
-            data = json.loads(req.text)
-            return HttpResponseBadRequest(data['message'])
-    except Exception as e:
-        return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
-
 
 ################################################################################
 #
@@ -408,13 +342,8 @@ def harvest(request):
         try:
             #Get the ID
             registry_id = request.POST['registry_id']
-            uri = OAI_HOST_URI + reverse("api_harvest")
-
-            #Call the API to update all records for this registry
             try:
-                r = requests.post(uri,
-                                   {"registry_id": registry_id},
-                                   auth=(OAI_USER, OAI_PASS))
+                r = harvest_model(registry_id)
                 return HttpResponse(json.dumps({}), content_type='application/javascript')
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
@@ -538,7 +467,6 @@ def update_my_registry(request):
     if request.method == 'POST':
         #UPDATE the registry
         try:
-            uri = OAI_HOST_URI + reverse("api_update_my_registry")
             #Get all form information
             if 'name' in request.POST:
                 name = request.POST.get('name')
@@ -550,19 +478,17 @@ def update_my_registry(request):
                 enable_harvesting = False
             #Call the API to update the registry
             try:
-                req = requests.put(uri,
-                                   {"repositoryName": name,
-                                    # "repositoryIdentifier": repo_identifier,
-                                    "enableHarvesting": enable_harvesting},
-                                   auth=(OAI_USER, OAI_PASS))
+                req = update_my_registry_model(name, enable_harvesting)
                 #If the status is OK, sucess message
                 if req.status_code == status.HTTP_200_OK:
                     messages.add_message(request, messages.INFO, 'Data provider edited with success.')
                     return HttpResponse(json.dumps({}), content_type='application/javascript')
                 #Else, we return a bad request response with the message provided by the API
                 else:
-                    data = json.loads(req.text)
+                    data = req.data
                     return HttpResponseBadRequest(data[APIMessage.label])
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -598,34 +524,26 @@ def update_my_registry(request):
 def add_my_metadataFormat(request):
     if request.method == 'POST':
         form = MyMetadataFormatForm(request.POST, request.FILES)
-
         if form.is_valid():
             try:
-                #We add the metadata Format
-                uri = OAI_HOST_URI + reverse("api_add_my_metadataFormat")
                 #We retrieve information from the form
                 if 'metadataPrefix' in request.POST:
                     metadataprefix = request.POST.get('metadataPrefix')
-
                 if 'schema' in request.POST:
                     schema = request.POST.get('schema')
-
                 #Call to the API to add the registry
                 try:
-                    req = requests.post(uri, {"metadataPrefix": metadataprefix,
-                                              "schema": schema},#,
-                                              #"metadataNamespace": namespace,
-                                              #"xmlSchema": xml_data},
-                                        auth=(OAI_USER, OAI_PASS))
-
+                    req = add_my_metadataFormat_model(metadataprefix, schema)
                     #If the status is OK, sucess message
                     if req.status_code == status.HTTP_201_CREATED:
                         messages.add_message(request, messages.SUCCESS, 'Metadata Format added with success.')
                         return HttpResponse('CREATED')
                     #Else, we return a bad request response with the message provided by the API
                     else:
-                        data = json.loads(req.text)
+                        data = req.data
                         return HttpResponseBadRequest(data[APIMessage.label])
+                except OAIAPIException as e:
+                    return HttpResponseBadRequest(e.message)
                 except Exception as e:
                     return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
             except Exception as e:
@@ -649,32 +567,28 @@ def add_my_template_metadataFormat(request):
         form = MyTemplateMetadataFormatForm(request.POST)
         if form.is_valid():
             try:
-                #We add the tempalte metadata Format
-                uri = OAI_HOST_URI + reverse("api_add_my_template_metadataFormat")
                 #We retrieve information from the form
                 if 'metadataPrefix' in request.POST:
                     metadataprefix = request.POST.get('metadataPrefix')
                 else:
                     return HttpResponseBadRequest('Please enter a metadata prefix.')
-
                 if 'template' in request.POST:
                     template = request.POST.get('template')
                 else:
                     return HttpResponseBadRequest('Please choose a template.')
-
                 #Call to the API to add the template metadata prefix
                 try:
-                    req = requests.post(uri, {"metadataPrefix": metadataprefix,
-                                              "template": template},
-                                        auth=(OAI_USER, OAI_PASS))
+                    req = add_my_template_metadataFormat_model(metadataprefix, template)
                     #If the status is OK, sucess message
                     if req.status_code == status.HTTP_201_CREATED:
                         messages.add_message(request, messages.SUCCESS, 'Metadata Format added with success.')
                         return HttpResponse('CREATED')
                     #Else, we return a bad request response with the message provided by the API
                     else:
-                        data = json.loads(req.text)
+                        data = req.data
                         return HttpResponseBadRequest(data[APIMessage.label])
+                except OAIAPIException as e:
+                    return HttpResponseBadRequest(e.message)
                 except Exception as e:
                     return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
             except Exception as e:
@@ -694,22 +608,22 @@ def add_my_template_metadataFormat(request):
 ################################################################################
 @login_required(login_url='/login')
 def delete_my_metadataFormat(request):
-    uri = OAI_HOST_URI + reverse("api_delete_my_metadataFormat")
     try:
         id = request.POST.get('MetadataFormatId')
     except ValueError:
         return HttpResponseBadRequest('Please provide an ID in order to delete the metadata format.')
     try:
-        req = requests.post(uri, {"MetadataFormatId":id}, auth=(OAI_USER, OAI_PASS))
-
+        req = delete_my_metadataFormat_model(id)
         #If the status is OK, sucess message
         if req.status_code == status.HTTP_200_OK:
             messages.add_message(request, messages.INFO, 'Metadata Format deleted with success.')
             return HttpResponse(json.dumps({}), content_type='application/javascript')
         #Else, we return a bad request response with the message provided by the API
         else:
-            data = json.loads(req.text)
+            data = req.data
             return HttpResponseBadRequest(data[APIMessage.label])
+    except OAIAPIException as e:
+        return HttpResponseBadRequest(e.message)
     except Exception as e:
         return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
 
@@ -728,31 +642,24 @@ def update_my_metadataFormat(request):
     if request.method == 'POST':
         #UPDATE the registry
         try:
-            uri = OAI_HOST_URI + reverse("api_update_my_metadataFormat")
             #Get all form information
             if 'id' in request.POST:
                 id = request.POST.get('id')
-
             if 'metadataPrefix' in request.POST:
                 metadataprefix = request.POST.get('metadataPrefix')
-
             #Call the API to update my metadataFormat
             try:
-                req = requests.put(uri, { "id": id,
-                                          "metadataPrefix": metadataprefix#,
-                                          # "schema": schema,
-                                          # "metadataNamespace": namespace
-                                          },
-                                        auth=(OAI_USER, OAI_PASS))
-
+                req = update_my_metadataFormat_model(id, metadataprefix)
                 #If the status is OK, sucess message
                 if req.status_code == status.HTTP_200_OK:
                     messages.add_message(request, messages.INFO, 'Metadata Format edited with success.')
                     return HttpResponse(json.dumps({}), content_type='application/javascript')
                 #Else, we return a bad request response with the message provided by the API
                 else:
-                    data = json.loads(req.text)
+                    data = req.data
                     return HttpResponseBadRequest(data[APIMessage.label])
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -788,18 +695,13 @@ def update_my_metadataFormat(request):
 def add_my_set(request):
     if request.method == 'POST':
         try:
-            #We add the set
-            uri = OAI_HOST_URI + reverse("api_add_my_set")
             #We retrieve information from the form
             if 'setSpec' in request.POST:
                 setSpec = request.POST.get('setSpec')
-
             if 'setName' in request.POST:
                 setName = request.POST.get('setName')
-
             if 'description' in request.POST:
                 description = request.POST.get('description')
-
             if 'templates' in request.POST:
                 templates = request.POST.getlist('templates')
             else:
@@ -807,19 +709,17 @@ def add_my_set(request):
 
             #Call to the API to add the set
             try:
-                req = requests.post(uri, {"setSpec": setSpec,
-                                          "setName": setName,
-                                          "description": description,
-                                          'templates': templates},
-                                    auth=(OAI_USER, OAI_PASS))
+                req = add_my_set_model(setSpec, setName, templates, description)
                 #If the status is OK, sucess message
                 if req.status_code == status.HTTP_201_CREATED:
                     messages.add_message(request, messages.SUCCESS, 'Set added with success.')
                     return HttpResponse('CREATED')
                 #Else, we return a bad request response with the message provided by the API
                 else:
-                    data = json.loads(req.text)
+                    data = req.data
                     return HttpResponseBadRequest(data[APIMessage.label])
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -837,22 +737,22 @@ def add_my_set(request):
 ################################################################################
 @login_required(login_url='/login')
 def delete_my_set(request):
-    uri = OAI_HOST_URI + reverse("api_delete_my_set")
     try:
         id = request.POST.get('set_id')
     except ValueError:
         return HttpResponseBadRequest('Please provide an ID in order to delete the set.')
     try:
-        req = requests.post(uri, {"set_id":id}, auth=(OAI_USER, OAI_PASS))
-
+        req = delete_my_set_model(id)
         #If the status is OK, sucess message
         if req.status_code == status.HTTP_200_OK:
             messages.add_message(request, messages.INFO, 'Set deleted with success.')
             return HttpResponse(json.dumps({}), content_type='application/javascript')
         #Else, we return a bad request response with the message provided by the API
         else:
-            data = json.loads(req.text)
+            data = req.data
             return HttpResponseBadRequest(data[APIMessage.label])
+    except OAIAPIException as e:
+        return HttpResponseBadRequest(e.message)
     except Exception as e:
         return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
 
@@ -871,7 +771,6 @@ def update_my_set(request):
     if request.method == 'POST':
         #UPDATE the set
         try:
-            uri = OAI_HOST_URI + reverse("api_update_my_set")
             #Get all form information
             if 'id' in request.POST:
                 id = request.POST.get('id')
@@ -885,24 +784,18 @@ def update_my_set(request):
                 templates = request.POST.getlist('templates')
             else:
                 templates = []
-
-            #Call the API to update my set
             try:
-                req = requests.put(uri, { "id": id,
-                                          "setSpec": setSpec,
-                                          "setName": setName,
-                                          "description": description,
-                                          "templates": templates},
-                                        auth=(OAI_USER, OAI_PASS))
-
+                req = update_my_set_model(id, setSpec, setName, templates, description)
                 #If the status is OK, sucess message
                 if req.status_code == status.HTTP_200_OK:
                     messages.add_message(request, messages.INFO, 'Set edited with success.')
                     return HttpResponse(json.dumps({}), content_type='application/javascript')
                 #Else, we return a bad request response with the message provided by the API
                 else:
-                    data = json.loads(req.text)
+                    data = req.data
                     return HttpResponseBadRequest(data[APIMessage.label])
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -936,7 +829,6 @@ def update_my_set(request):
 def update_registry_harvest(request):
     if request.method == 'POST':
         try:
-            uri = OAI_HOST_URI + reverse("api_update_registry_harvest")
             #Get all form information
             if 'id' in request.POST:
                 id = request.POST.get('id')
@@ -950,18 +842,17 @@ def update_registry_harvest(request):
                 sets = []
             #Call the API to update the harvest configuration
             try:
-                req = requests.put(uri, { "id": id,
-                                          "metadataFormats": metadataFormats,
-                                          "sets": sets},
-                                        auth=(OAI_USER, OAI_PASS))
+                req = update_registry_harvest_model(id, sets, metadataFormats)
                 #If the status is OK, sucess message
                 if req.status_code == status.HTTP_200_OK:
                     messages.add_message(request, messages.INFO, 'Data provider edited with success.')
                     return HttpResponse(json.dumps({}), content_type='application/javascript')
                 #Else, we return a bad request response with the message provided by the API
                 else:
-                    data = json.loads(req.text)
+                    data = req.data
                     return HttpResponseBadRequest(data[APIMessage.label])
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -997,13 +888,12 @@ def update_registry_info(request):
         try:
             #Get the ID
             registry_id = request.POST['registry_id']
-            uri = OAI_HOST_URI + reverse("api_update_registry_info")
             #Call the API to update information
             try:
-                requests.put(uri,
-                                   {"registry_id": registry_id},
-                                   auth=(OAI_USER, OAI_PASS))
+                update_registry_info_model(registry_id)
                 return HttpResponse(json.dumps({}), content_type='application/javascript')
+            except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
             except Exception as e:
                 return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
         except Exception as e:
@@ -1052,7 +942,6 @@ def check_update_info(request):
 @login_required(login_url='/login')
 def oai_pmh_conf_xslt(request):
     if request.method == 'POST':
-        uri = OAI_HOST_URI + reverse("api_oai_pmh_conf_xslt")
         try:
             errors = []
             AssociateFormSet = formset_factory(AssociateXSLT, extra=3)
@@ -1067,15 +956,11 @@ def oai_pmh_conf_xslt(request):
                     xslt_id = None
                     if xslt:
                         xslt_id = xslt.id
-                    req = requests.post(uri, {"template_id": template_id,
-                                              "my_metadata_format_id": myMetadataFormat_id,
-                                              "xslt_id": xslt_id,
-                                              "activated": activated}, auth=(OAI_USER, OAI_PASS))
+                    req = oai_pmh_conf_xslt_model(template_id, myMetadataFormat_id, xslt_id, activated)
                     #If sth wrong happened, we keep the error
                     if req.status_code != status.HTTP_200_OK:
-                        data = json.loads(req.text)
+                        data = req.data
                         errors.append(data[APIMessage.label])
-
                 #Good treatment
                 if len(errors) == 0:
                     messages.add_message(request, messages.INFO, 'XSLT edited with success.')
@@ -1086,6 +971,8 @@ def oai_pmh_conf_xslt(request):
             else:
                 return HttpResponseBadRequest([x['__all__'] for x in article_formset.errors if '__all__' in x],
                                               content_type='application/javascript')
+        except OAIAPIException as e:
+            return HttpResponseBadRequest(e.message)
         except Exception:
             return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
     else:
@@ -1134,7 +1021,6 @@ def oai_pmh_conf_xslt(request):
 def manage_oai_pmh_xslt(request, id=None):
     if request.method == 'POST':
         try:
-            uri = OAI_HOST_URI + reverse("api_upload_oai_pmh_xslt")
             upload_form = UploadOaiPmhXSLTForm(request.POST, request.FILES)
             name = upload_form['oai_name'].value()
             name = name.strip(' \t\n\r')
@@ -1149,16 +1035,17 @@ def manage_oai_pmh_xslt(request, id=None):
             except XMLSyntaxError:
                 return HttpResponseBadRequest('Uploaded File is not well formed XML.')
             #No exceptions, we can add it in DB
-            req = requests.post(uri, {"name": name, 'filename': xml_file.name, 'content': xml_data},
-                                        auth=(OAI_USER, OAI_PASS))
+            req = upload_oai_pmh_xslt_model(name, xml_file.name, xml_data)
             #If the status is OK, sucess message
             if req.status_code == status.HTTP_201_CREATED:
                 messages.add_message(request, messages.INFO, 'XSLT added with success.')
                 return HttpResponse(json.dumps({}), content_type='application/javascript')
             #Else, we return a bad request response with the message provided by the API
             else:
-                data = json.loads(req.text)
+                data = req.data
                 return HttpResponseBadRequest(data[APIMessage.label])
+        except OAIAPIException as e:
+            return HttpResponseBadRequest(e.message)
         except Exception:
             return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
     else:
@@ -1176,18 +1063,19 @@ def manage_oai_pmh_xslt(request, id=None):
 @staff_member_required
 def delete_oai_pmh_xslt(request):
     if request.method == 'POST':
-        uri = OAI_HOST_URI + reverse("api_delete_oai_pmh_xslt")
         try:
             xslt_id = request.POST['xslt_id']
-            req = requests.post(uri, {"xslt_id": xslt_id}, auth=(OAI_USER, OAI_PASS))
+            req = delete_oai_pmh_xslt_model(xslt_id)
             #If the status is OK, sucess message
             if req.status_code == status.HTTP_200_OK:
                 messages.add_message(request, messages.INFO, 'XSLT deleted with success.')
                 return HttpResponse(json.dumps({}), content_type='application/javascript')
             #Else, we return a bad request response with the message provided by the API
             else:
-                data = json.loads(req.text)
+                data = req.data
                 return HttpResponseBadRequest(data[APIMessage.label])
+        except OAIAPIException as e:
+            return HttpResponseBadRequest(e.message)
         except Exception:
             return HttpResponseBadRequest('An error occurred. Please contact your administrator.')
 
@@ -1204,18 +1092,19 @@ def delete_oai_pmh_xslt(request):
 @staff_member_required
 def edit_oai_pmh_xslt(request, id=None):
     if request.method == 'POST':
-        uri = OAI_HOST_URI + reverse("api_edit_oai_pmh_xslt")
         try:
             xslt_id = request.POST['object_id']
             new_name = request.POST['new_name']
             new_name = new_name.strip(' \t\n\r')
-            req = requests.put(uri, {"xslt_id": xslt_id, "name": new_name}, auth=(OAI_USER, OAI_PASS))
+            req = edit_oai_pmh_xslt_model(xslt_id, new_name)
             if req.status_code == status.HTTP_200_OK:
                 messages.add_message(request, messages.INFO, 'XSLT edited with success.')
                 return HttpResponse(json.dumps({}), content_type='application/javascript')
             #Else, we return a bad request response with the message provided by the API
             else:
-                data = json.loads(req.text)
+                data = req.data
                 return HttpResponseBadRequest(data[APIMessage.label])
+        except OAIAPIException as e:
+                return HttpResponseBadRequest(e.message)
         except Exception:
             return HttpResponseBadRequest('An error occurred. Please contact your administrator.')

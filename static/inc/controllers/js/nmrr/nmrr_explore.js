@@ -9,6 +9,21 @@ initSearch = function(){
 	get_results_keyword_refined();
 }
 
+selectRadio = function(radio) {
+    var radio_btns = $("#refine_resource_type").children("input:radio")
+	for(var i = 0; i < radio_btns.length; i++) {
+	    selected_val = $(radio_btns[i]).val();
+	    if (selected_val == radio) {
+	        $(radio_btns[i]).click();
+	        $("#icons_table").find("td").each(function(){
+		        	$(this).removeClass("selected_resource");
+		        	if ($(this).attr("value") == selected_val){
+		        		$(this).addClass("selected_resource");
+		        	}
+	        	});
+	    }
+	}
+}
 
 initResources = function(){
 	// select all resources by default
@@ -241,6 +256,7 @@ get_results_keyword_refined = function(numInstance){
             	schemas: getSchemas(),
             	refinements: loadRefinementQueries(),
             	onlySuggestions: false,
+            	registries: getRegistries(),
             },
             beforeSend: function( xhr ) {
                 $("#loading").addClass("isloading");

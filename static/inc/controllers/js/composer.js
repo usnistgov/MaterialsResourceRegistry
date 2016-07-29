@@ -888,62 +888,29 @@ rename_element = function(xpath, newName){
  * @param event
  */
 insertElementSequence = function(event){
-	// change the sequence style
-	parent = $(target).parent()
-	if ($(parent).attr('class') == "element"){
-		$(parent).before("<span class='collapse' style='cursor:pointer;' onclick='showhide(event);'></span>");
-		$(parent).after("<ul></ul>");
-		$(parent).attr('class','category');
-	}
-	
-	insertButton = event.target;
-	typeName = $(insertButton).parent().siblings(':first').text();
-	typeID = $(insertButton).parent().siblings(':first').attr('templateid');
-	namespace = $(target).text().split(":")[0];
-	
-	nbElement = $(parent).parent().children("ul").children().length;
-	console.log(nbElement)
-	if (nbElement == 0){
-		path = namespace + ":element";
-//	}else if (nbElement == 1){
-//		path = namespace + ":element[2]";
-//		$($(parent).parent().find("ul").children()[0]).find(".element-wrapper").find(".path").text(namespace + ":element[0]");
-	}else{
-		path = namespace + ":element[" + String(nbElement + 1) + "]";
-	}	
-	
-	xpath = getXPath();
+    // change the sequence style
+    parent = $(target).parent()
+    if ($(parent).attr('class') == "element"){
+        $(parent).before("<span class='collapse' style='cursor:pointer;' onclick='showhide(event);'></span>");
+        $(parent).after("<ul></ul>");
+        $(parent).attr('class','category');
+    }
+    insertButton = event.target;
+    typeName = $(insertButton).parent().siblings(':first').text();
+    typeID = $(insertButton).parent().siblings(':first').attr('templateid');
+    namespace = $(target).text().split(":")[0];
 
-	//console.log($(parent).parent().find("ul"));
-	// add the new element
-	$(parent).parent().children("ul").append("<li>" +
-											"<div class='element-wrapper'>" +
-												"<span class='path'>"+
-												 path +
-												"</span>" +
-												"<span class='newElement'>" +
-													"<span onclick='showMenuElement(event)' style='cursor:pointer;'>" +
-													namespace + ":element : "+ 
-													"</span>" +													
-												"</span>" +
-												"<span class='name'>"+ typeName +"</span>" +
-												"<span class='type'>"+ typeName +"</span>" +
-												"<span class='occurs'>( 1 , 1)</span>" +
-											"</div>"+
-										"</li>")
-	
-	$( "#dialog-insert-element-sequence" ).dialog("close");
-	
-	insert_element_sequence(typeID, xpath, typeName);
-}
+    nbElement = $(parent).parent().children("ul").children().length;
+    console.log(nbElement)
+    if (nbElement == 0){
+        path = namespace + ":element";
+    }else{
+        path = namespace + ":element[" + String(nbElement + 1) + "]";
+    }
 
+    xpath = getXPath();
 
-
-/**
- * AJAX call, inserts an element in an XML sequence
- */
-insert_element_sequence = function(typeID, xpath, typeName){
-    $.ajax({
+	$.ajax({
         url : "/compose/insert_element_sequence",
         type : "POST",
         dataType: "json",
@@ -954,6 +921,38 @@ insert_element_sequence = function(typeID, xpath, typeName){
         },
         success: function(data){
 
+            console.log($(parent).parent().find("ul"));
+            // add the new element
+            $(parent).parent().children("ul").append("<li>" +
+                                                    "<div class='element-wrapper'>" +
+                                                        "<span class='path'>"+
+                                                         path +
+                                                        "</span>" +
+                                                        "<span class='newElement'>" +
+                                                            "<span onclick='showMenuElement(event)' style='cursor:pointer;'>" +
+                                                            namespace + ":element : "+
+                                                            "</span>" +
+                                                        "</span>" +
+                                                        "<span class='name'>"+ typeName +"</span>" +
+                                                        "<span class='type'>"+ typeName +"</span>" +
+                                                        "<span class='occurs'>( 1 , 1)</span>" +
+                                                    "</div>"+
+                                                "</li>")
+
+            $( "#dialog-insert-element-sequence" ).dialog("close");
+        },
+        error: function(data){
+            $("#validate-error").html(data.responseText);
+            $( "#dialog-validate-error" ).dialog({
+                modal: true,
+                width: 400,
+                height: 250,
+                buttons: {
+                OK: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
         }
     });
 }

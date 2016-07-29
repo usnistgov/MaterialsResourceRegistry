@@ -23,6 +23,12 @@ from mgi.models import Template, Request, Message, TermsOfUse, PrivacyPolicy, He
 from admin_mdcs.forms import RequestAccountForm, ContactForm
 from django.contrib.auth.models import User
 from django.contrib import messages
+from mgi.common import send_mail, send_mail_to_administrators
+import os
+from django.utils.importlib import import_module
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
+MDCS_URI = settings.MDCS_URI
 
 
 ################################################################################
@@ -96,8 +102,20 @@ def request_new_account(request):
                 message = "This username already exists. Please choose another username."
                 return render(request, 'request_new_account.html', {'form':form, 'action_result':message})
             except:
-                Request(username=request.POST["username"], password=request.POST["password1"],first_name=request.POST["firstname"], last_name=request.POST["lastname"], email=request.POST["email"]).save()
+                Request(username=request.POST["username"], password=request.POST["password1"],
+                        first_name=request.POST["firstname"], last_name=request.POST["lastname"],
+                        email=request.POST["email"]).save()
                 messages.add_message(request, messages.INFO, 'User Account Request sent to the administrator.')
+                # Send mail to the user and the admin
+                context = {'lastname': request.POST["lastname"],
+                           'firstname': request.POST["firstname"],
+                           'URI': MDCS_URI}
+                email = request.POST["email"]
+                send_mail(recipient_list=[email], subject='Account Request', pathToTemplate='admin/email/request_account_for_user.html',
+                          context=context)
+                send_mail_to_administrators(subject='Account Request',
+                                            pathToTemplate='admin/email/request_account_for_admin.html',
+                                            context=context)
                 return redirect('/')
                 
     else:

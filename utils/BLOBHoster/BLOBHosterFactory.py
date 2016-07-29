@@ -19,6 +19,7 @@
 from utils.BLOBHoster.DSpaceHoster import DSpaceHoster
 from utils.BLOBHoster.GridFSHoster import GridFSHoster
 
+
 class BLOBHosterFactory(object):
     
     BLOB_HOSTERS = ['DSPACE', 'GRIDFS']
@@ -69,7 +70,3 @@ class BLOBHosterFactory(object):
             return GridFSHoster(self.BLOB_HOSTER_URI, self.BLOB_HOSTER_USER, self.BLOB_HOSTER_PSWD, self.MDCS_URI)
         else:
             raise ValueError('BLOB_HOSTER_URI, BLOB_HOSTER_USER and BLOB_HOSTER_PSWD should be set.')
-    
-    
-    
-    

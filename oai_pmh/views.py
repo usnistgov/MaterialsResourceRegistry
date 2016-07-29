@@ -28,9 +28,6 @@ import os
 from django.utils.importlib import import_module
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
-OAI_HOST_URI = settings.OAI_HOST_URI
-OAI_USER = settings.OAI_USER
-OAI_PASS = settings.OAI_PASS
 from django.template import RequestContext, loader
 from mgi.models import XML2Download
 import datetime
@@ -40,9 +37,9 @@ from django.conf import settings
 import lxml.etree as etree
 import os
 from StringIO import StringIO
-from django.core.urlresolvers import reverse
 from oai_pmh.api.messages import APIMessage
 import urllib
+from oai_pmh.api.models import getData as getData_model
 
 ################################################################################
 #
@@ -162,11 +159,9 @@ def getData(request):
     encoded_args = urllib.urlencode(args_url)
     #Build the url
     url = url + "?" + encoded_args
-    uri= OAI_HOST_URI + reverse("api_get_data")
-    req = requests.post(uri, {"url":url}, auth=(OAI_USER, OAI_PASS))
-    if req.status_code == status.HTTP_200_OK:
-        data = json.load(StringIO(req.content))
-
+    try:
+        req = getData_model(url)
+        data = req.data
         xsltPath = os.path.join(settings.SITE_ROOT, 'static', 'resources', 'xsl', 'xml2html.xsl')
         xslt = etree.parse(xsltPath)
         transform = etree.XSLT(xslt)
@@ -179,9 +174,8 @@ def getData(request):
 
         content = {'message' : xmlTree}
         return HttpResponse(json.dumps(content), content_type="application/javascript")
-    else:
-        data = json.load(StringIO(req.content))
-        return HttpResponseBadRequest(data[APIMessage.label], content_type="application/javascript")
+    except Exception as e:
+        return HttpResponseBadRequest(e.message, content_type="application/javascript")
 
 
 ################################################################################

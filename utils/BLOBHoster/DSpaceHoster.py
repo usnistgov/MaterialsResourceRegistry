@@ -32,4 +32,3 @@ class DSpaceHoster(BLOBHoster):
         
     def query(self, query):
         BLOBHoster.query(self)
-        

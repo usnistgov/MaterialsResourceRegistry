@@ -5,6 +5,8 @@ from django.conf import settings
 import xmltodict
 import lxml.etree as etree
 
+from mgi.models import XMLdata
+
 register = template.Library()
 
 class RenderAsTemplateNode(template.Node):
@@ -34,7 +36,7 @@ def render_xml_as_html(value):
         xsltPath = os.path.join(settings.SITE_ROOT, 'static', 'resources', 'xsl', 'xml2html.xsl')
         xslt = etree.parse(xsltPath)
         transform = etree.XSLT(xslt)
-        xmlString = xmltodict.unparse(dict)
+        xmlString = XMLdata.unparse(dict)
         if (xmlString != ""):
             dom = etree.XML(xmlString.encode('utf-8'))
             newdom = transform(dom)

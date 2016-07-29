@@ -14,7 +14,11 @@
 from django.apps import AppConfig
 from oai_pmh import discover, tasks
 from mgi.models import OaiRecord
-
+import os
+from django.utils.importlib import import_module
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
+USE_BACKGROUND_TASK = settings.USE_BACKGROUND_TASK
 
 
 # TODO: loaded two times (not a problem and may not happen in production) 
@@ -37,4 +41,5 @@ class OAIPMHConfig(AppConfig):
         #Check registries state
         discover.init_registries_status()
         #Launch background tasks
-        tasks.init_harvest()
+        if USE_BACKGROUND_TASK:
+            tasks.init_harvest()

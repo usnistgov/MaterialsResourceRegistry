@@ -19,7 +19,7 @@ import xmltodict
 import os
 import json
 import lxml.etree as etree
-from mgi.models import Template, Instance, TemplateVersion, OaiRecord, OaiMetadataFormat, OaiRegistry
+from mgi.models import Template, Instance, TemplateVersion, OaiRecord, OaiMetadataFormat, OaiRegistry, XMLdata
 from django.template import loader, Context, RequestContext
 
 
@@ -79,12 +79,15 @@ def get_results_by_instance_keyword(request):
             onlySuggestions = json.loads(request.GET['onlySuggestions'])
         else:
             onlySuggestions = False
+        registries = request.GET.getlist('registries[]')
     except:
         keyword = ''
         schemas = []
         userSchemas = []
         refinements = {}
         onlySuggestions = True
+        registries = []
+
     #We get all template versions for the given schemas
     #First, we take care of user defined schema
     templatesIDUser = Template.objects(title__in=userSchemas).distinct(field="id")
@@ -100,9 +103,13 @@ def get_results_by_instance_keyword(request):
     templatesIDCommon = list(set(allTemplatesIDCommon) - set(allTemplatesIDCommonRemoved))
 
     templatesID = templatesIDUser + templatesIDCommon
-    #We retrieve deactivated registries so as not to get their metadata formats
-    deactivatedRegistries = [str(x.id) for x in OaiRegistry.objects(isDeactivated=True).order_by('id')]
-    metadataFormatsID = OaiMetadataFormat.objects(template__in=templatesID, registry__not__in=deactivatedRegistries).distinct(field="id")
+    if len(registries) == 0:
+        #We retrieve deactivated registries so as not to get their metadata formats
+        deactivatedRegistries = [str(x.id) for x in OaiRegistry.objects(isDeactivated=True).order_by('id')]
+        metadataFormatsID = OaiMetadataFormat.objects(template__in=templatesID, registry__not__in=deactivatedRegistries).distinct(field="id")
+    else:
+        #We retrieve registries from the refinement
+        metadataFormatsID = OaiMetadataFormat.objects(template__in=templatesID, registry__in=registries).distinct(field="id")
 
 
     instanceResults = OaiRecord.executeFullTextQuery(keyword, metadataFormatsID, refinements)
@@ -126,7 +133,7 @@ def get_results_by_instance_keyword(request):
             objMetadataFormats[str(schemaId)] = obj
 
         listItems = []
-        xmltodictunparse = xmltodict.unparse
+        xmltodictunparse = XMLdata.unparse
         appendResult = results.append
         toXML = etree.XML
         parse = etree.parse
@@ -151,12 +158,16 @@ def get_results_by_instance_keyword(request):
                     newdom = transform(dom)
                     custom_xslt = False
 
+                registry_name = registriesName[instanceResult['registry']]
+                if len(registry_name) > 30:
+                    registry_name = "{0}...".format(registry_name[:30])
+
                 context = RequestContext(request, {'id':str(instanceResult['_id']),
                                    'xml': str(newdom),
                                    'title': instanceResult['identifier'],
                                    'custom_xslt': custom_xslt,
-                                   'schema_name': metadataFormat.metadataPrefix,
-                                   'registry_name': registriesName[instanceResult['registry']],
+                                   'template_name': metadataFormat.template.title,
+                                   'registry_name': registry_name,
                                    'oai_pmh': True})
 
 
@@ -167,7 +178,7 @@ def get_results_by_instance_keyword(request):
                 wordList = re.sub("[^\w]", " ",  keyword).split()
                 wordList = [x + "|" + x +"\w+" for x in wordList]
                 wordList = '|'.join(wordList)
-                listWholeKeywords = re.findall("\\b("+ wordList +")\\b", xmltodict.unparse(instanceResult['metadata']).encode('utf-8'), flags=re.IGNORECASE)
+                listWholeKeywords = re.findall("\\b("+ wordList +")\\b", XMLdata.unparse(instanceResult['metadata']).encode('utf-8'), flags=re.IGNORECASE)
                 labels = list(set(listWholeKeywords))
 
                 for label in labels:
@@ -204,6 +215,7 @@ def refinements_to_mongo(refinements):
         for refinement in refinements:
             splited_refinement = refinement.split(':')
             dot_notation = splited_refinement[0]
+            dot_notation = "metadata." + dot_notation
             value = splited_refinement[1]
             if dot_notation in mongo_queries:
                 mongo_queries[dot_notation].append(value)

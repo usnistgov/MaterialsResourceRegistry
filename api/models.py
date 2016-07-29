@@ -16,6 +16,7 @@
 from django.db import models
 import mgi.rights as RIGHTS
 
+
 class API(models.Model):
     # model stuff here
     class Meta:

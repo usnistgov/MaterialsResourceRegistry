@@ -16,33 +16,24 @@
 
 from bson.objectid import ObjectId
 from django.http import HttpResponse
-from django.conf import settings
 from io import BytesIO
 from django.core.servers.basehttp import FileWrapper
 from cStringIO import StringIO
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_501_NOT_IMPLEMENTED
-
-from curate import parser
 from curate.models import SchemaElement
-from curate.parser import generate_form, generate_element, generate_sequence, load_schema_data_in_db, \
-    delete_branch_from_db, update_branch_xpath, generate_element_absent, generate_choice_absent
-from curate.renderer import DefaultRenderer
-from curate.renderer.xml import XmlRenderer
-from curate.renderer.list import ListRenderer
 from mgi.exceptions import MDCSError
 from mgi.models import Template, FormData
 import json
-from mgi import common
+from mgi import common, settings
 import lxml.etree as etree
 from django.contrib import messages
 import os
-import urllib2
-from utils.XSDflattener.XSDflattener import XSDFlattenerURL
+from utils.XSDParser.parser import generate_form, generate_element_absent, generate_choice_absent, \
+    update_branch_xpath, delete_branch_from_db
+from utils.XSDParser.renderer import DefaultRenderer
+from utils.XSDParser.renderer.list import ListRenderer
+from utils.XSDParser.renderer.xml import XmlRenderer
 
-######################################################################################################################
-# AJAX Requests
-# TODO Needs to be moved in views
-#########################
 
 ################################################################################
 #
@@ -81,6 +72,10 @@ def cancel_form(request):
         form_data_id = request.session['curateFormData']
         form_data = FormData.objects().get(pk=form_data_id)
         # TODO: check if need to delete all schema elements
+
+        if form_data.schema_element_root is not None:
+            delete_branch_from_db(form_data.schema_element_root.pk)
+
         form_data.delete()
         messages.add_message(request, messages.INFO, 'Form deleted with success.')
         return HttpResponse({},status=204)
@@ -103,10 +98,14 @@ def delete_form(request):
         try:
             form_data = FormData.objects().get(pk=form_data_id)
             # TODO: check if need to delete all SchemaElements
+            if form_data.schema_element_root is not None:
+                delete_branch_from_db(form_data.schema_element_root.pk)
+
             form_data.delete()
+
             messages.add_message(request, messages.INFO, 'Form deleted with success.')
         except Exception, e:
-            return HttpResponse({},status=400)
+            return HttpResponse({}, status=400)
     return HttpResponse({})
 
 
@@ -171,20 +170,6 @@ def clear_fields(request):
 #
 ################################################################################
 def download_xml(request):
-    # xmlString = request.session['xmlString']
-    #
-    # form_data_id = request.session['curateFormData']
-    # form_data = FormData.objects().get(pk=form_data_id)
-    #
-    # xml2download = XML2Download(title=form_data.name, xml=xmlString).save()
-    # xml2downloadID = str(xml2download.id)
-
-    # xml_renderer = XmlRenderer(request.session['form_id'])
-    # response_dict = {
-    #     'xml2downloadID': xml_renderer.render()
-    # }
-    # return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
     form_data_id = request.session['curateFormData']
     form_data = FormData.objects.get(pk=ObjectId(form_data_id))
 
@@ -208,24 +193,6 @@ def download_xml(request):
 #
 ################################################################################
 def download_current_xml(request):
-    # get the XML String built from form
-    # xml_string = request.POST['xmlString']
-    #
-    # xml_tree_str = str(request.session['xmlDocTree'])
-    #
-    # # set namespaces information in the XML document
-    # xml_string = common.manage_namespaces(xml_string, xml_tree_str)
-    #
-    # # get form data information
-    # form_data_id = request.session['curateFormData']
-    # form_data = FormData.objects().get(pk=form_data_id)
-    #
-    # xml2download = XML2Download(title=form_data.name, xml=xml_string).save()
-    # xml2downloadID = str(xml2download.id)
-    #
-    # response_dict = {"xml2downloadID": xml2downloadID}
-    # return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
     form_data_id = request.session['curateFormData']
     form_data = FormData.objects.get(pk=ObjectId(form_data_id))
 
@@ -249,9 +216,6 @@ def download_current_xml(request):
 #
 ################################################################################
 def init_curate(request):
-    if 'formString' in request.session:
-        del request.session['formString']
-
     if 'form_id' in request.session:
         del request.session['form_id']
 
@@ -262,6 +226,23 @@ def init_curate(request):
         del request.session['xmlDocTree']
 
     return HttpResponse(json.dumps({}), content_type='application/javascript')
+
+
+def load_config():
+    """
+    Load configuration for the parser
+    :return:
+    """
+    return {
+        'PARSER_APPLICATION': 'CURATE',
+        'PARSER_MIN_TREE': settings.PARSER_MIN_TREE if hasattr(settings, 'PARSER_MIN_TREE') else True,
+        'PARSER_IGNORE_MODULES': settings.PARSER_IGNORE_MODULES if hasattr(settings, 'PARSER_IGNORE_MODULES') else False,
+        'PARSER_COLLAPSE': settings.PARSER_COLLAPSE if hasattr(settings, 'PARSER_COLLAPSE') else True,
+        'PARSER_AUTO_KEY_KEYREF': settings.PARSER_AUTO_KEY_KEYREF if
+        hasattr(settings, 'PARSER_AUTO_KEY_KEYREF') else False,
+        'PARSER_IMPLICIT_EXTENSION_BASE': settings.PARSER_IMPLICIT_EXTENSION_BASE if
+        hasattr(settings, 'PARSER_IMPLICIT_EXTENSION_BASE') else False,
+    }
 
 
 def generate_xsd_form(request):
@@ -276,16 +257,7 @@ def generate_xsd_form(request):
     try:
         if 'form_id' in request.session:
             root_element_id = request.session['form_id']
-
-            template_id = request.session['currentTemplateID']
-            template_object = Template.objects.get(pk=template_id)
-            xsd_doc_data = template_object.content
-
-            flattener = XSDFlattenerURL(xsd_doc_data)
-            xml_doc_tree_str = flattener.get_flat()
-
-            request.session['xmlDocTree'] = xml_doc_tree_str
-            request.session['curate_edit'] = False
+            form_data = None
         else:  # If this is a new form, generate it and store the root ID
             # get the xsd tree when going back and forth with review step
             if 'xmlDocTree' in request.session:
@@ -304,16 +276,29 @@ def generate_xsd_form(request):
             else:
                 xml_doc_data = None
 
-            root_element_id = generate_form(request, xsd_doc_data, xml_doc_data)
+            root_element_id = generate_form(request, xsd_doc_data, xml_doc_data, config=load_config())
             request.session['form_id'] = str(root_element_id)
 
         root_element = SchemaElement.objects.get(pk=root_element_id)
+
+        if form_data is not None:
+            if form_data.schema_element_root is not None:
+                delete_branch_from_db(form_data.schema_element_root.pk)
+
+            form_data.update(set__schema_element_root=root_element)
+            form_data.reload()
 
         renderer = ListRenderer(root_element, request)
         html_form = renderer.render()
     except Exception as e:
         renderer = DefaultRenderer(SchemaElement(), {})
-        html_form = renderer._render_form_error(e.message)
+
+        if e.message is not None:
+            err_message = e.message
+        else:
+            err_message = "An unknown error raised " + e.__class__.__name__
+
+        html_form = renderer._render_form_error(err_message)
 
     return HttpResponse(json.dumps({'xsdForm': html_form}), content_type='application/javascript')
 
@@ -411,19 +396,15 @@ def save_form(request):
 ################################################################################
 def validate_xml_data(request):
     # template_id = request.session['currentTemplateID']
-    request.session['xmlString'] = ""
     try:
         xsd_tree_str = str(request.session['xmlDocTree'])
 
-        # set namespaces information in the XML document
-        # xmlString = request.POST['xmlString']
         form_id = request.session['form_id']
         root_element = SchemaElement.objects.get(pk=form_id)
 
         xml_renderer = XmlRenderer(root_element)
         xml_data = xml_renderer.render()
 
-        # xmlString = request.POST['xmlString']
         # validate XML document
         common.validateXMLDocument(xml_data, xsd_tree_str)
     except etree.XMLSyntaxError as xse:
@@ -435,9 +416,6 @@ def validate_xml_data(request):
         message = e.message.replace('"', '\'')
         response_dict = {'errors': message}
         return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
-
-    # request.session['xmlString'] = xmlString
-    # request.session['formString'] = request.POST['xsdForm']
 
     return HttpResponse(json.dumps({}), content_type='application/javascript')
 
@@ -452,7 +430,6 @@ def validate_xml_data(request):
 #
 ################################################################################
 def view_data(request):
-    request.session['formString'] = request.POST['form_content']
     return HttpResponse(json.dumps({}), content_type='application/javascript')
 
 
@@ -472,8 +449,6 @@ def set_current_template(request):
     template_id = request.POST['templateID']
 
     # reset global variables
-    request.session['xmlString'] = ""
-    request.session['formString'] = ""
 
     request.session['currentTemplateID'] = template_id
     request.session.modified = True
@@ -505,9 +480,6 @@ def set_current_user_template(request):
     template_id = request.POST['templateID']
 
     # reset global variables
-    request.session['xmlString'] = ""
-    request.session['formString'] = ""
-
     request.session['currentTemplateID'] = template_id
     request.session.modified = True
 
@@ -551,7 +523,7 @@ def generate_absent(request):
     :return:
     """
     element_id = request.POST['id']
-    html_form = generate_element_absent(request, element_id)
+    html_form = generate_element_absent(request, element_id, config=load_config())
     return HttpResponse(html_form)
 
 
@@ -559,7 +531,7 @@ def generate_choice_branch(request):
     element_id = request.POST['id']
 
     try:
-        html_form = generate_choice_absent(request, element_id)
+        html_form = generate_choice_absent(request, element_id, config=load_config())
     except MDCSError:
         return HttpResponse(status=HTTP_501_NOT_IMPLEMENTED)
 
@@ -642,11 +614,10 @@ def reload_form(request):
         # the form has been saved already
         if xml_data is not None and xml_data != '':
             request.session['curate_edit'] = True
-            request.session['xmlDocTree'] = xml_data
-            root_element_id = parser.generate_form(request, xsd_doc_data, xml_data)
+            root_element_id = generate_form(request, xsd_doc_data, xml_data, config=load_config())
         # the form has never been saved
         else:
-            root_element_id = parser.generate_form(request, xsd_doc_data)
+            root_element_id = generate_form(request, xsd_doc_data, config=load_config())
 
         root_element = SchemaElement.objects.get(pk=root_element_id)
         renderer = ListRenderer(root_element, request)

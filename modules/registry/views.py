@@ -1,5 +1,4 @@
-from modules.registry.models import RegistryCheckboxesModule, NamePIDModule, \
-    RelevantDateModule, StatusModule, LocalIDModule, DescriptionModule, TypeModule
+from modules.registry.models import RegistryCheckboxesModule, StatusModule, LocalIDModule, DescriptionModule, TypeModule
 
 
 def registry_checkboxes_materialType(request):
@@ -26,14 +25,6 @@ def registry_checkboxes_sampleProcessing(request):
     return RegistryCheckboxesModule(xml_tag='sampleProcessing').render(request)
 
 
-def name_pid(request):
-    return NamePIDModule().render(request)
-
-
-def relevant_date(request):
-    return RelevantDateModule().render(request)
-
-
 def status(request):
     return StatusModule().render(request)
 
@@ -44,6 +35,7 @@ def localid(request):
 
 def description(request):
     return DescriptionModule().render(request)
+
 
 def resource_type(request):
     return TypeModule().render(request)

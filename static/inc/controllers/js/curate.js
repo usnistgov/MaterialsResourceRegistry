@@ -2,7 +2,7 @@
  * 
  * File Name: curate.js
  * Author: Sharief Youssef
- * 		   sharief.youssef@nist.gov
+ *            sharief.youssef@nist.gov
  *
  *        Guillaume SOUSA AMARAL
  *        guillaume.sousa@nist.gov
@@ -69,7 +69,7 @@ enterDataError = function()
         $( "#dialog-enter-error-message" ).dialog({
             modal: true,
             buttons: {
-            	Ok: function() {
+                Ok: function() {
                     $( this ).dialog( "close" );
                 }
             }
@@ -86,7 +86,7 @@ viewDataError = function()
         $( "#dialog-view-error-message" ).dialog({
             modal: true,
             buttons: {
-            	Ok: function() {
+                Ok: function() {
                     $( this ).dialog( "close" );
                 }
             }
@@ -132,14 +132,14 @@ clearFields = function()
         $( "#dialog-cleared-message" ).dialog({
             modal: true,
             buttons: {
-            	Clear: function() {
-            		clear_fields();
+                Clear: function() {
+                    clear_fields();
                     $( this ).dialog( "close" );
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" );
                 }
-	    }
+        }
         });
     });
 
@@ -830,8 +830,8 @@ duplicate = function(tagID){
  * @param tagID HTML id of the element to disable
  */
 disable_element = function(tagID){
-	$("#" + tagID).children(".collapse").attr("class","expand");
-	$('#add' + tagID.substring(7)).attr('style','');
+    $("#" + tagID).children(".collapse").attr("class","expand");
+    $('#add' + tagID.substring(7)).attr('style','');
     $('#remove' + tagID.substring(7)).attr('style','display:none');
     $("#" + tagID).prop("disabled",true);
     $("#" + tagID).children('select').prop("disabled",true);
@@ -970,7 +970,7 @@ set_current_user_template = function(templateID){
  * AJAX call, loads the start curate form
  */
 load_start_form = function(){
-	$.ajax({
+    $.ajax({
         url : "/curate/start_curate",
         type : "GET",
         dataType: "json",

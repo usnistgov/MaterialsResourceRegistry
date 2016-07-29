@@ -15,8 +15,7 @@
 ################################################################################
 from django.db import models
 from mongoengine.document import Document
-from mongoengine.fields import StringField, DictField, ListField, ReferenceField
-
+from mongoengine.fields import StringField, ListField, ReferenceField, DictField
 import mgi.rights as RIGHTS
 
 class Curate(models.Model):

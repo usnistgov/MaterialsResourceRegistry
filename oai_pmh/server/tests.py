@@ -12,10 +12,10 @@
 ################################################################################
 
 from oai_pmh.tests.models import OAI_PMH_Test
-from mgi.models import OaiSettings, OaiMySet, OaiMyMetadataFormat, Template, XMLdata
-from exceptions import BAD_VERB, NO_SET_HIERARCHY, BAD_ARGUMENT, DISSEMINATE_FORMAT, NO_RECORDS_MATCH, NO_METADATA_FORMAT, ID_DOES_NOT_EXIST
+from mgi.models import OaiSettings, OaiMySet, OaiMyMetadataFormat, Template, XMLdata, Status
+from oai_pmh.server.exceptions import BAD_VERB, NO_SET_HIERARCHY, BAD_ARGUMENT, DISSEMINATE_FORMAT, NO_RECORDS_MATCH, NO_METADATA_FORMAT, ID_DOES_NOT_EXIST
 from testing.models import OAI_SCHEME, OAI_REPO_IDENTIFIER
-
+import datetime
 URL = '/oai_pmh/server'
 
 class tests_OAI_PMH_server(OAI_PMH_Test):
@@ -137,7 +137,7 @@ class tests_OAI_PMH_server(OAI_PMH_Test):
         self.dump_oai_my_metadata_format()
         self.dump_oai_my_set()
         self.dump_xmldata()
-        data = {'verb': 'ListIdentifiers', 'metadataPrefix': 'oai_dc', 'from': '2015-01-01T12:12:12Z', 'until': '2016-01-01T12:12:12Z', 'set': 'soft'}
+        data = {'verb': 'ListIdentifiers', 'metadataPrefix': 'oai_dc', 'from': '2015-01-01T12:12:12Z', 'until': '2017-01-01T12:12:12Z', 'set': 'soft'}
         r = self.doRequestServer(data=data)
         self.isStatusOK(r.status_code)
         self.checkTagExist(r.text, 'ListIdentifiers')
@@ -146,7 +146,7 @@ class tests_OAI_PMH_server(OAI_PMH_Test):
         self.dump_oai_templ_mf_xslt()
         self.dump_oai_my_metadata_format()
         self.dump_xmldata()
-        data = {'verb': 'ListIdentifiers', 'metadataPrefix': 'oai_dc', 'from': '2015-01-01T12:12:12Z', 'until': '2016-01-01T12:12:12Z'}
+        data = {'verb': 'ListIdentifiers', 'metadataPrefix': 'oai_dc', 'from': '2015-01-01T12:12:12Z', 'until': '2017-01-01T12:12:12Z'}
         r = self.doRequestServer(data=data)
         self.isStatusOK(r.status_code)
         self.checkTagExist(r.text, 'ListIdentifiers')
@@ -315,3 +315,66 @@ class tests_OAI_PMH_server(OAI_PMH_Test):
         self.isStatusOK(r.status_code)
         objInDatabase = Template.objects.get(filename='AllResources.xsd')
         self.assertEquals(objInDatabase.content, r.content)
+
+    def test_list_identifiers_deleted(self):
+        self.list_test_deleted('ListIdentifiers')
+
+    def test_list_records_deleted(self):
+        self.list_test_deleted('ListRecords')
+
+    def test_get_record_deleted(self):
+        self.dump_oai_templ_mf_xslt()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_xmldata()
+        template = Template.objects(filename='Software.xsd').get()
+        dataSoft = XMLdata.find({'schema': str(template.id), 'status': {'$ne': Status.DELETED}})
+        if len(dataSoft) > 0:
+            xmlDataId = dataSoft[0]['_id']
+            identifier = '%s:%s:id/%s' % (OAI_SCHEME, OAI_REPO_IDENTIFIER, xmlDataId)
+            data = {'verb': 'GetRecord', 'identifier': identifier, 'metadataPrefix': 'oai_soft'}
+            r = self.doRequestServer(data=data)
+            self.isStatusOK(r.status_code)
+            #Check attribute status='deleted' of header doesn't exist
+            self.checkTagExist(r.text, 'GetRecord')
+            self.checkTagExist(r.text, 'record')
+            #Delete one record
+            XMLdata.update(xmlDataId, {'status': Status.DELETED})
+            r = self.doRequestServer(data=data)
+            self.isStatusOK(r.status_code)
+            #Check attribute status='deleted' of header does exist
+            self.checkTagExist(r.text, 'GetRecord')
+            # Only for NMRR
+            self.checkTagWithParamExist(r.text, 'header', 'status="deleted"')
+
+    def list_test_deleted(self, verb):
+        self.dump_oai_templ_mf_xslt()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_xmldata()
+        data = {'verb': verb, 'metadataPrefix': 'oai_soft'}
+        r = self.doRequestServer(data=data)
+        self.isStatusOK(r.status_code)
+        #Check attribute status='deleted' of header doesn't exist
+        self.checkTagExist(r.text, verb)
+        #Delete one record
+        template = Template.objects(filename='Software.xsd').get()
+        dataSoft = XMLdata.find({'schema': str(template.id), 'status': {'$ne': Status.DELETED}})
+        if len(dataSoft) > 0:
+            XMLdata.update(dataSoft[0]['_id'], {'status': Status.DELETED})
+            r = self.doRequestServer(data=data)
+            self.isStatusOK(r.status_code)
+            self.checkTagExist(r.text, verb)
+            #Check attribute status='deleted' of header does exist
+            self.checkTagWithParamExist(r.text, 'header', 'status="deleted"')
+
+    def test_check_dates_form_until(self):
+        self.dump_oai_templ_mf_xslt()
+        self.dump_oai_xslt()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_xmldata()
+        data = {'verb': 'ListRecords', 'metadataPrefix': 'oai_dc', 'from': '2016-05-04T19:00:00Z', 'until': '2016-05-04T19:48:39Z', 'set': 'soft'}
+        r = self.doRequestServer(data=data)
+        self.isStatusOK(r.status_code)
+        self.checkTagErrorCode(r.text, NO_RECORDS_MATCH)

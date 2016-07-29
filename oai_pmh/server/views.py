@@ -14,7 +14,8 @@
 from django.http import HttpResponseNotFound, HttpResponseBadRequest
 from django.conf import settings
 from django.views.generic import TemplateView
-from mgi.models import XMLdata, OaiSettings, OaiMyMetadataFormat, OaiTemplMfXslt, Template, TemplateVersion, OaiMySet
+from mgi.models import XMLdata, OaiSettings, OaiMyMetadataFormat, OaiTemplMfXslt, Template, TemplateVersion, OaiMySet,\
+Status
 import os
 from oai_pmh.server.exceptions import *
 import xmltodict
@@ -74,7 +75,7 @@ class OAIProvider(TemplateView):
     def get_earliest_date(self):
         try:
             #Get the earliest publication date for the identify request response
-            data = XMLdata.getMinValue('publicationdate')
+            data = XMLdata.getMinValue('oai_datestamp')
             #If we have a date
             if data != None:
                 return datestamp.datetime_to_datestamp(data)
@@ -264,8 +265,9 @@ class OAIProvider(TemplateView):
                     identifier = '%s:%s:id/%s' % (settings.OAI_SCHEME, settings.OAI_REPO_IDENTIFIER, str(i['_id']))
                     item_info = {
                         'identifier': identifier,
-                        'last_modified': datestamp.datetime_to_datestamp(i['publicationdate']) if 'publicationdate' in i else datestamp.datetime_to_datestamp(datetime.datetime.min),
-                        'sets': sets
+                        'last_modified': self.get_last_modified_date(i),
+                        'sets': sets,
+                        'deleted': i.get('status', '') == Status.DELETED
                     }
                     items.append(item_info)
             #If there is no records
@@ -335,17 +337,19 @@ class OAIProvider(TemplateView):
                 raise cannotDisseminateFormat(self.metadataPrefix)
 
             #Transform XML data
-            dataToTransform = [{'title': data['_id'], 'content': self.cleanXML(xmltodict.unparse(data['content']))}]
+            dataToTransform = [{'title': data['_id'], 'content': self.cleanXML(XMLdata.unparse(data['content']))}]
             if hasToBeTransformed:
                 dataXML = self.getXMLTranformXSLT(dataToTransform, xslt)
             else:
                 dataXML = dataToTransform
+
             #Fill the response
             record_info = {
                 'identifier': self.identifier,
-                'last_modified': datestamp.datetime_to_datestamp(data['publicationdate']) if 'publicationdate' in data else datestamp.datetime_to_datestamp(datetime.datetime.min),
+                'last_modified': self.get_last_modified_date(data),
                 'sets': sets,
-                'XML': dataXML[0]['content']
+                'XML': dataXML[0]['content'],
+                'deleted': data.get('status', '') == Status.DELETED
             }
             return self.render_to_response(record_info)
         except OAIExceptions, e:
@@ -404,7 +408,7 @@ class OAIProvider(TemplateView):
                 #IF no records, go to the next template
                 if len(data) == 0:
                     continue
-                dataToTransform = [{'title': x['_id'], 'content': self.cleanXML(xmltodict.unparse(x['content']))} for x in data]
+                dataToTransform = [{'title': x['_id'], 'content': self.cleanXML(XMLdata.unparse(x['content']))} for x in data]
                 if myMetadataFormat.isTemplate:
                     #No transformation needed
                     dataXML = dataToTransform
@@ -420,9 +424,10 @@ class OAIProvider(TemplateView):
                     xmlStr = filter(lambda xml: xml['title'] == elt['_id'], dataXML)[0]
                     record_info = {
                         'identifier': identifier,
-                        'last_modified': datestamp.datetime_to_datestamp(elt['publicationdate']) if 'publicationdate' in elt else datestamp.datetime_to_datestamp(datetime.datetime.min),
+                        'last_modified': self.get_last_modified_date(elt),
                         'sets': sets,
-                        'XML': xmlStr['content']
+                        'XML': xmlStr['content'],
+                        'deleted': elt.get('status', '') == Status.DELETED
                     }
                     items.append(record_info)
 
@@ -439,6 +444,24 @@ class OAIProvider(TemplateView):
             return HttpResponse({'content':e.message}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         except badResumptionToken, e:
             return self.error(badResumptionToken.code, badResumptionToken.message)
+
+
+################################################################################
+#
+# Function Name: get_last_modified_date(request)
+# Inputs:        element -
+# Outputs:       Date
+# Exceptions:    None
+# Description:  Get last modified date
+#
+################################################################################
+    def get_last_modified_date(self, element):
+        try:
+            date = datestamp.datetime_to_datestamp(element['oai_datestamp'])
+        except:
+            date = datestamp.datetime_to_datestamp(datetime.datetime.min)
+
+        return date
 
 ################################################################################
 #
@@ -529,23 +552,33 @@ class OAIProvider(TemplateView):
 ################################################################################
     def check_dates(self):
         query = dict()
+        query_until = dict()
+        query_from = dict()
         #To store errors
         date_errors = []
         #Handle FROM and UNTIL
         if self.until:
             try:
                 endDate = datestamp.datestamp_to_datetime(self.until)
-                query['publicationdate'] = { "$lte" : endDate}
+                query_until['oai_datestamp'] = {"$lte" : endDate}
             except:
                 error = 'Illegal date/time for "until" (%s)' % self.until
                 date_errors.append(badArgument(error))
         if self.From:
             try:
                 startDate = datestamp.datestamp_to_datetime(self.From)
-                query['publicationdate'] = { "$gte" : startDate}
+                query_from['oai_datestamp'] = {"$gte" : startDate}
             except:
                 error = 'Illegal date/time for "from" (%s)' % self.From
                 date_errors.append(badArgument(error))
+
+        if self.until and self.From:
+            query['$and'] = [query_until, query_from]
+        elif self.until:
+            query = query_until
+        elif self.From:
+            query = query_from
+
         #Return possible errors
         if len(date_errors) > 0:
             raise OAIExceptions(date_errors)

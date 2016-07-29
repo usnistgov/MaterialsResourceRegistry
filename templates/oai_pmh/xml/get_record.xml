@@ -3,18 +3,20 @@
 {% block content %}
   <GetRecord>
     <record>
-        <header>
+        <header{% if deleted %} status="deleted"{% endif %}>
             <identifier>{{ identifier }}</identifier>
             <datestamp>{{ last_modified }}</datestamp>
             {% for set in sets %}
                 <setSpec>{{ set.setSpec }}</setSpec>
             {% endfor %}
         </header>
+        {% if not deleted %}
         <metadata>
             {% autoescape off %}
             {{ XML|safe }}
             {% endautoescape %}
         </metadata>
+        {% endif %}
     </record>
   </GetRecord>
 {% endblock %}

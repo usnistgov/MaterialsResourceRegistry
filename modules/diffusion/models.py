@@ -358,3 +358,130 @@ class ExcelUploaderModule(PopupModule):
 
     def _post_result(self, request):
         return self.extract_xml_from_table()
+
+
+class PeriodicTableMultipleModuleShort(PopupModule):
+
+    def __init__(self):
+        with open(os.path.join(TEMPLATES_PATH, 'periodic_multiple.html'), 'r') as periodic_file:
+            periodic_table = periodic_file.read()
+
+        PopupModule.__init__(self, popup_content=periodic_table, button_label='Select Elements',
+                             styles=[os.path.join(STYLES_PATH, 'periodic.css'),
+                                     os.path.join(STYLES_PATH, 'periodic_multiple.css')],
+                             scripts=[os.path.join(SCRIPTS_PATH, 'periodic_multiple.js')])
+
+    def _get_module(self, request):
+        return PopupModule.get_module(self, request)
+
+    def _get_display(self, request):
+        if 'data' in request.GET:
+            if len(request.GET['data']) > 0:
+                constituents = etree.fromstring("<constituents>" + request.GET['data'] + "</constituents>")
+
+                if len(constituents) == 0:
+                    return 'No element selected.'
+                else:
+                    constituents_disp = '<table class="table table-striped element-list">'
+                    constituents_disp += '<thead><tr>'
+                    constituents_disp += '<th>Element</th>'
+                    constituents_disp += '<th>Quantity</th>'
+                    constituents_disp += '<th>Purity</th>'
+                    constituents_disp += '</tr></thead>'
+                    constituents_disp += '<tbody>'
+
+                    for constituent in constituents:
+                        constituent_elements = list(constituent)
+                        name = ""
+                        quantity = ""
+                        purity = ""
+
+                        for constituent_element in constituent_elements:
+                            if constituent_element.tag == 'element':
+                                if constituent_element.text is None:
+                                    name = ''
+                                else:
+                                    name = constituent_element.text
+                            elif constituent_element.tag == 'quantity':
+                                if constituent_element.text is None:
+                                    quantity = ''
+                                else:
+                                    quantity = constituent_element.text
+                            elif constituent_element.tag == 'purity':
+                                if constituent_element.text is None:
+                                    purity = '0'
+                                else:
+                                    purity = constituent_element.text
+
+
+                        constituents_disp += '<tr>'
+                        constituents_disp += "<td>" + name + "</td>"
+                        constituents_disp += "<td>" + quantity + "</td>"
+                        constituents_disp += "<td>" + purity + "</td>"
+
+                        constituents_disp += '</tr>'
+
+                    constituents_disp += '</tbody>'
+                    constituents_disp += '</table>'
+
+                return constituents_disp
+            else:
+                return 'No element selected.'
+        return 'No element selected.'
+
+    def _get_result(self, request):
+        if 'data' in request.GET:
+            return request.GET['data']
+        return ''
+
+    def _post_display(self, request):
+        if 'elementList' in request.POST:
+            element_list = json.loads(request.POST['elementList'])
+
+            if len(element_list) == 0:
+                return 'No element selected.'
+            else:
+                element_list_disp = '<table class="table table-striped element-list">'
+                element_list_disp += '<thead><tr>'
+                element_list_disp += '<th>Element</th>'
+                element_list_disp += '<th>Quantity</th>'
+                element_list_disp += '<th>Purity</th>'
+
+                element_list_disp += '</tr></thead>'
+                element_list_disp += '<tbody>'
+
+                for element in element_list:
+                    element_list_disp += '<tr>'
+                    element_list_disp += "<td>" + element['name'] + "</td>"
+                    element_list_disp += "<td>" + element['qty'] + "</td>"
+                    element_list_disp += "<td>" + element['pur'] + "</td>"
+
+                    element_list_disp += '</tr>'
+
+                element_list_disp += '</tbody>'
+                element_list_disp += '</table>'
+            return element_list_disp
+        else:
+            return self._get_display(request)
+
+    def _post_result(self, request):
+        if 'elementList' in request.POST:
+            element_list = json.loads(request.POST['elementList'])
+
+            if len(element_list) == 0:
+                element_list_xml = self._get_result(request)
+            else:
+                element_list_xml = ""
+
+                for element in element_list:
+                    element_list_xml += '<constituent>'
+                    element_list_xml += "<element>" + element['name'] + "</element>"
+                    element_list_xml += "<quantity>" + element['qty'] + "</quantity>"
+                    if element['pur'] != '':
+                        element_list_xml += "<purity>" + element['pur'] + "</purity>"
+
+
+                    element_list_xml += '</constituent>'
+            return element_list_xml
+        else:
+            return self._get_result(request)

@@ -70,3 +70,4 @@ class CancelChangesForm(forms.Form):
                       ('return', 'Return to Add Resources')]
 
     cancel = forms.ChoiceField(label='', choices=CANCEL_CHOICES, widget=forms.RadioSelect())
+

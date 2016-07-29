@@ -189,6 +189,12 @@ showErrorEditType = function(name){
     });
 }
 
+initBanner = function()
+{
+    $("[data-hide]").on("click", function(){
+        $(this).closest("." + $(this).attr("data-hide")).hide(200);
+    });
+}
 
 /**
  * Delete a curated document
@@ -304,6 +310,180 @@ update_unpublish = function(result_id){
         },
 		success: function(data){
             $("#" + result_id).load(document.URL +  " #" + result_id);
+	    }
+    });
+}
+
+/**
+ * Change record owner
+ * @param recordID
+ */
+changeOwnerRecord = function(recordID){
+    $("#banner_errors").hide();
+    $(function() {
+        $( "#dialog-change-owner-record" ).dialog({
+            modal: true,
+            buttons: {
+                Cancel: function() {
+                    $( this ).dialog( "close" );
+                },
+                "Change": function() {
+                    if (validateChangeOwner()){
+                        var formData = new FormData($( "#form_start" )[0]);
+                        change_owner_record(recordID);
+                    }
+                },
+            }
+        });
+    });
+}
+
+/**
+ * Validate fields of the start curate form
+ */
+validateChangeOwner = function(){
+    errors = ""
+
+    $("#banner_errors").hide()
+    // check if a user has been selected
+    if ($( "#id_users" ).val().trim() == ""){
+        errors = "Please provide a user."
+    }
+
+    if (errors != ""){
+        $("#form_start_errors").html(errors);
+        $("#banner_errors").show(500)
+        return (false);
+    }else{
+        return (true);
+    }
+}
+
+
+/**
+ * AJAX call, change record owner
+ * @param recordID
+ */
+change_owner_record = function(recordID){
+    var userId = $( "#id_users" ).val().trim();
+    $.ajax({
+        url : "/dashboard/change-owner-record",
+        type : "POST",
+        dataType: "json",
+        data : {
+            recordID: recordID,
+            userID: userId,
+        },
+		success: function(data){
+			window.location = "/dashboard/resources"
+	    },
+        error:function(data){
+            $("#form_start_errors").html(data.responseText);
+            $("#banner_errors").show(500)
+        }
+    });
+}
+
+/**
+ * Delete a form
+ * @param formID
+ */
+deleteDraft = function(formID){
+	$(function() {
+        $( "#dialog-delete-draft" ).dialog({
+            modal: true,
+            buttons: {
+                Cancel: function() {
+                    $( this ).dialog( "close" );
+                },
+            	Delete: function() {
+            	    $( "#banner_wait").show();
+                    delete_draft(formID);
+                },
+            }
+        });
+    });
+}
+
+
+/**
+ * AJAX call, delete a form
+ * @param formID
+ */
+delete_draft = function(formID){
+	$.ajax({
+        url : "/curate/delete-form?id=" + formID,
+        type : "GET",
+        dataType: "json",
+        data : {
+        	formID: formID,
+        },
+		success: function(data){
+			window.location = "/dashboard/resources"
+	    },
+        error:function(data){
+        	window.location = "/dashboard/resources"
+        }
+    });
+}
+
+/**
+ * Publish a draft
+ * @param draft_id
+ */
+updatePublishDraft = function(draft_id){
+	$(function() {
+        $( "#dialog-publish-draft" ).dialog({
+            modal: true,
+            buttons: {
+            	Cancel: function() {
+                    $( this ).dialog( "close" );
+                },
+            	Publish: function() {
+            	$( "#banner_wait_publish").show();
+                    update_publish_draft(draft_id);
+                },
+            }
+        });
+    });
+}
+
+/**
+ * AJAX call, update the publish document and date of a XMLdata
+ * @param draft_id
+ */
+update_publish_draft = function(draft_id){
+	$.ajax({
+        url : "/dashboard/update_publish_draft",
+        type : "GET",
+        dataType: "json",
+        data : {
+        	draft_id: draft_id,
+        },
+		success: function(data){
+		    location.reload();
+	    }
+    });
+}
+
+/**
+ * AJAX call, change the status of a XMLdata
+ * @param result_id
+ */
+change_status = function(result_id, is_published){
+    var e = document.getElementById("status"+result_id);
+    var value = e.options[e.selectedIndex].value;
+	$.ajax({
+        url : "/dashboard/change_status",
+        type : "GET",
+        dataType: "json",
+        data : {
+        	status: value,
+        	result_id: result_id,
+        	is_published: is_published,
+        },
+		success: function(data){
+		    location.reload();
 	    }
     });
 }

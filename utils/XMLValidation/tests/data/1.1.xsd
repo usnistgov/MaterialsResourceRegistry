@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+    attributeFormDefault="unqualified" vc:minVersion="1.1">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any processContents="strict" notNamespace="##targetNamespace"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

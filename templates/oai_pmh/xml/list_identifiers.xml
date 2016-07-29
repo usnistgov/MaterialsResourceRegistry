@@ -3,7 +3,7 @@
 {% block content %}
   <ListIdentifiers>
     {% for i in items %}
-    <header>
+    <header{% if i.deleted %} status="deleted"{% endif %}>
         <identifier>{{ i.identifier }}</identifier>
         <datestamp>{{ i.last_modified }}</datestamp>
         {% for set in i.sets %}

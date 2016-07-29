@@ -734,9 +734,41 @@ generate_xsd_tree_for_querying_data = function(){
         dataType: "json",
         success: function(data){
             $("#xsdForm").html(data.xsdForm);
+            $(".icon.add").hide();
+            $(".icon.remove").hide();
+            // Save events
+            //$(':checkbox').change(saveElement);
         }
     });
 }
+
+// Save the value of one (default) element in the database
+var saveElement = function(event) {
+    event.preventDefault();
+
+    var $input = $(this);
+    console.log($input);
+    var inputId = $input.parent().attr('class');
+
+    console.log('Saving element ' + inputId + '...');
+
+    $.ajax({
+        'url': '/curate/save_element',
+        'type': 'POST',
+        'dataType': 'json',
+        'data': {
+            'id': inputId,
+            'value': $input.is(':checked')
+        },
+        success: function() {
+            console.log('Element ' + inputId + ' saved');
+        },
+        error: function() {
+            console.error('An error occurred when saving element ' + inputId);
+        }
+    });
+};
+
 
 
 /**
@@ -871,37 +903,22 @@ set_current_criteria = function(currentCriteriaID){
  */
 selectElement = function(elementID)
 {
-	console.log('BEGIN [selectElement]');
-		
-	var elementName = $("#" + elementID).text().trim();
-	select_element(elementID, elementName);
-	
-	console.log('END [selectElement]');
-}
-
-
-/**
- * AJAX call, select an element to insert in the query
- * @param elementID
- * @param elementName
- */
-select_element = function(elementID, elementName){
 	$.ajax({
         url : "/explore/select_element",
         type : "POST",
         dataType: "json",
         data : {
         	elementID: elementID,
-        	elementName: elementName
         },
 		success: function(data){
-            $($("#" + data.criteriaTagID).children()[1]).val(elementName);
+            $($("#" + data.criteriaTagID).children()[1]).val(data.elementName);
             $($("#" + data.criteriaTagID).children()[1]).attr("class","elementInput");
-            updateUserInputs(elementID, data.criteriaID); 
-            $("#dialog-customTree").dialog("close");    
+            updateUserInputs(elementID, data.criteriaID);
+            $("#dialog-customTree").dialog("close");
 	    }
     });
 }
+
 
 /**
  * Select an element from the custom tree, for subelement query

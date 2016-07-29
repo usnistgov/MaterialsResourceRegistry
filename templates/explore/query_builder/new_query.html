@@ -1,0 +1,15 @@
+<p id='crit{{tagID}}'>
+    {% if first%}
+        {% include 'explore/query_builder/yes_no.html'%}
+    {% else %}
+        {% include 'explore/query_builder/and_or_not.html'%}
+    {% endif %}
+    <input onclick="showCustomTree('crit{{tagID}}')" readonly="readonly" type="text" class="queryInput"
+           value=" {{query|safe}} ">
+    <span id="ui{{tagID}}">
+    </span>
+    {% if not first%}
+    <span class="icon remove" onclick="removeField('crit{{tagID}}')"></span>
+    {% endif %}
+    <span class="icon add" onclick=addField()> </span>
+</p>

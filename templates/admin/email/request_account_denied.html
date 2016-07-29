@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account denied</title>
+</head>
+<body>
+Dear {{firstname}} {{lastname}} ,
+<br><br>
+
+Unfortunately, we have to let you know that your account on {{URI}} has been denied.<br>
+Please feel free to contact us to know more about your account request: <a href="{{URI}}{% url 'contact' %}">Go to the contact form</a>.
+
+<br><br>
+
+Thank you,
+<br><br>
+</body>
+</html>

@@ -1,5 +1,7 @@
 import collections
 import json
+import unittest
+import os
 from os.path import join
 from time import sleep
 from pymongo import MongoClient
@@ -206,6 +208,7 @@ def convert(data):
         return data
 
 
+@unittest.skipIf(os.environ.get("SELENIUM") == "false", "Skip Selenium tests")
 class SeleniumTestCase(TestCase):
 
     def setUp(self):

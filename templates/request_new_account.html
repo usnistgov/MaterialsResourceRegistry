@@ -29,7 +29,7 @@
 Use the following form to request an user account on the {{CUSTOM_TITLE}} Curation System.
 	<div>
 		<br/>
-		<form action="/request-new-account" method="post" onsubmit="return validateRequest()">
+		<form action="/request-new-account" method="post">
 		 	{% csrf_token %}
 		    {{ form }}
 		    <br/>

@@ -16,7 +16,7 @@ from pymongo import MongoClient
 from pymongo.errors import OperationFailure
 import requests
 from datetime import datetime, timedelta
-from mgi.models import Instance, XMLdata, Template, TemplateVersion, ResultXslt, OaiMyMetadataFormat, OaiMySet, OaiSettings
+from mgi.models import Instance, XMLdata, Template, TemplateVersion, ResultXslt, OaiMyMetadataFormat, OaiMySet, OaiSettings,Type, TypeVersion, FormData
 from utils.XSDhash import XSDhash
 from django.contrib.auth.models import User
 from oauth2_provider.models import Application
@@ -29,6 +29,8 @@ from django.test import Client
 import base64
 import json
 from lxml import etree
+from django.test import TestCase
+
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
 MONGODB_URI = settings.MONGODB_URI
@@ -64,9 +66,12 @@ ADMIN_AUTH_GET = ('admin', 'admin')
 
 XMLParser = etree.XMLParser(remove_blank_text=True, recover=True)
 
-class RegressionTest(LiveServerTestCase):
+
+class RegressionTest(LiveServerTestCase, TestCase):
 
     def setUp(self):
+        self.clean_db()
+
         discover.init_rules()
 
         user, userCreated = User.objects.get_or_create(username='user')
@@ -78,6 +83,12 @@ class RegressionTest(LiveServerTestCase):
         if adminCreated:
             admin.set_password('admin')
             admin.save()
+
+    def getUser(self):
+        return User.objects.get_by_natural_key(username='user')
+
+    def getAdmin(self):
+        return User.objects.get_by_natural_key(username='admin')
 
     def getClient(self, auth=None):
         client = Client()
@@ -100,6 +111,11 @@ class RegressionTest(LiveServerTestCase):
         self.client = self.getClient('user:user')
         self.client.login(username='user', password='user')
         return self.client.get(URL_TEST + url, data=data, params=params)
+
+    def doRequestPostUserClientLogged(self, url, data=None, params=None):
+        self.client = self.getClient('user:user')
+        self.client.login(username='user', password='user')
+        return self.client.post(URL_TEST + url, data=data, params=params)
 
     def doRequestGet(self, url, data=None, params=None, auth=None):
         return requests.get(URL_TEST + url, data=data, params=params, auth=auth)
@@ -141,13 +157,30 @@ class RegressionTest(LiveServerTestCase):
         re = open(file, 'rb').read()
         target_collection.insert(decode_all(re))
 
-    def createXMLData(self):
-        return XMLdata(schemaID='', xml='<test>test xmldata</test>', title='test', iduser=1).save()
+    def createFormData(self, user='', template='', name='', xml_data=None, xml_data_id=None):
+        countFormData = len(FormData.objects())
+        formData = FormData(user=str(user), template=template, name=name, xml_data=xml_data, xml_data_id=xml_data_id).save()
+        self.assertEquals(len(FormData.objects()), countFormData + 1)
+        return formData
 
-    def createTemplate(self):
+    def createXMLData(self, schemaID='', ispublished=False, iduser='1'):
+        return XMLdata(schemaID=str(schemaID), xml='<test>test xmldata</test>', title='test', iduser=str(iduser), ispublished=ispublished).save()
+
+    def createType(self, title='test', filename='test', user=None):
+        countType = len(Type.objects())
+        hash = XSDhash.get_hash('<test>test xmldata</test>')
+        objectVersions = self.createTypeVersion()
+        type = Type(title=title, filename=filename, content='<test>test xmldata</test>', version=1, typeVersion=str(objectVersions.id), hash=hash, user=str(user)).save()
+        self.assertEquals(len(Type.objects()), countType + 1)
+        return type
+
+    def createTemplate(self, title='test', filename='test', user=None):
+        countTemplate = len(Template.objects())
         hash = XSDhash.get_hash('<test>test xmldata</test>')
         objectVersions = self.createTemplateVersion()
-        return Template(title='test', filename='test', content='<test>test xmldata</test>', version=1, templateVersion=str(objectVersions.id), hash=hash).save()
+        template = Template(title=title, filename=filename, content='<test>test xmldata</test>', version=1, templateVersion=str(objectVersions.id), hash=hash, user=str(user)).save()
+        self.assertEquals(len(Template.objects()), countTemplate + 1)
+        return template
 
     def createTemplateWithTemplateVersion(self, templateVersionId):
         hash = XSDhash.get_hash('<test>test xmldata</test>')
@@ -166,18 +199,34 @@ class RegressionTest(LiveServerTestCase):
         return template
 
     def createTemplateVersion(self):
-        return TemplateVersion(nbVersions=1, isDeleted=False, current=FAKE_ID).save()
+        countTemplateVersion = len(TemplateVersion.objects())
+        templateVersion = TemplateVersion(nbVersions=1, isDeleted=False, current=FAKE_ID).save()
+        self.assertEquals(len(TemplateVersion.objects()), countTemplateVersion + 1)
+        return templateVersion
+
+    def createTypeVersion(self):
+        countTypeVersion = len(TypeVersion.objects())
+        typeVersion = TypeVersion(nbVersions=1, isDeleted=False, current=FAKE_ID).save()
+        self.assertEquals(len(TypeVersion.objects()), countTypeVersion + 1)
+        return typeVersion
 
     def createTemplateVersionDeleted(self):
         return TemplateVersion(nbVersions=1, isDeleted=True).save()
 
     def checkTagErrorCode(self, text, error):
+        self.checkTagExist(text, 'error')
         for tag in etree.XML(text.encode("utf8"), parser=XMLParser).iterfind('.//' + '{http://www.openarchives.org/OAI/2.0/}' + 'error'):
             self.assertEqual(tag.attrib['code'], error)
 
     def checkTagExist(self, text, checkTag):
         tagFound = False
         for tag in etree.XML(text.encode("utf8"), parser=XMLParser).iterfind('.//' + '{http://www.openarchives.org/OAI/2.0/}' + checkTag):
+                tagFound = True
+        self.assertTrue(tagFound)
+
+    def checkTagWithParamExist(self, text, checkTag, checkParam):
+        tagFound = False
+        for tag in etree.XML(text.encode("utf8"), parser=XMLParser).iterfind('.//' + '{http://www.openarchives.org/OAI/2.0/}' + checkTag + '[@' + checkParam + ']'):
             tagFound = True
         self.assertTrue(tagFound)
 
@@ -224,32 +273,6 @@ class RegressionTest(LiveServerTestCase):
     def isStatusInternalError(self, code):
         self.assertEqual(code, 500)
 
-class OAI_PMH_Test(RegressionTest):
-
-    def setUp(self):
-        self.clean_db()
-
-    def dump_oai_my_metadata_format(self):
-        self.assertEquals(len(OaiMyMetadataFormat.objects()), 0)
-        self.restoreDump(join(DUMP_OAI_PMH_TEST_PATH, 'oai_my_metadata_format.bson'), 'oai_my_metadata_format')
-        self.assertTrue(len(OaiMyMetadataFormat.objects()) > 0)
-
-    def dump_oai_my_set(self):
-        self.assertEquals(len(OaiMySet.objects()), 0)
-        self.restoreDump(join(DUMP_OAI_PMH_TEST_PATH, 'oai_my_set.bson'), 'oai_my_set')
-        self.assertTrue(len(OaiMySet.objects()) > 0)
-
-    def dump_oai_settings(self):
-        self.assertEquals(len(OaiSettings.objects()), 0)
-        self.restoreDump(join(DUMP_OAI_PMH_TEST_PATH, 'oai_settings.bson'), 'oai_settings')
-        self.assertTrue(len(OaiSettings.objects()) > 0)
-
-    def isStatusInternalError(self, r):
-        if r.status_code == 500:
-            self.assertTrue(True)
-        else:
-            self.assertTrue(False)
-
 class TokenTest(RegressionTest):
 
     def setUp(self):
@@ -266,38 +289,6 @@ class TokenTest(RegressionTest):
         application.client_id = id
         application.client_secret = secret
         application.save()
-
-    # @classmethod
-    # def setUpClass(cls):
-    #     user, created = User.objects.get_or_create(username = 'user')
-    #     if created:
-    #         user.set_password('user')
-    #         user.save()
-    #
-    #     user_application = Application()
-    #     user_application.user = user
-    #     user_application.client_type = 'confidential'
-    #     user_application.authorization_grant_type = 'password'
-    #     user_application.name = USER_APPLICATION
-    #     user_application.client_id = CLIENT_ID_USER
-    #     user_application.client_secret = CLIENT_SECRET_USER
-    #     user_application.save()
-    #
-    #     admin = User.objects.get_by_natural_key('admin')
-    #
-    #     admin_application = Application()
-    #     admin_application.user = admin
-    #     admin_application.client_type = 'confidential'
-    #     admin_application.authorization_grant_type = 'password'
-    #     admin_application.name = ADMIN_APPLICATION
-    #     admin_application.client_id = CLIENT_ID_ADMIN
-    #     admin_application.client_secret = CLIENT_SECRET_ADMIN
-    #     admin_application.save()
-    #
-    # @classmethod
-    # def tearDownClass(cls):
-    #     user = User.objects.get_by_natural_key('user')
-    #     user.delete()
 
     def get_token(self, username, password, client_id, client_secret, application):
         try:

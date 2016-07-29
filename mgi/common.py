@@ -1,15 +1,21 @@
 
 import lxml.etree as etree
-from mgi.models import Template
 from cStringIO import StringIO
-from io import BytesIO
-
 from utils.APIschemaLocator.APIschemaLocator import getSchemaLocation
 from utils.XMLValidation.xml_schema import validate_xml_data
+import mgi.tasks as MgiTasks
+import os
+from django.utils.importlib import import_module
+from django.forms import ValidationError
+import re
 
 SCHEMA_NAMESPACE = "http://www.w3.org/2001/XMLSchema"
 LXML_SCHEMA_NAMESPACE = "{" + SCHEMA_NAMESPACE + "}"
-
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
+SERVER_EMAIL = settings.SERVER_EMAIL
+USE_EMAIL = settings.USE_EMAIL
+USE_BACKGROUND_TASK = settings.USE_BACKGROUND_TASK
 
 ################################################################################
 # 
@@ -33,7 +39,7 @@ def getValidityErrorsForMDCS(xmlTree, type):
     includes = xmlTree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
     # get the elements
     elements = xmlTree.findall("{}element".format(LXML_SCHEMA_NAMESPACE))
-
+    
     if len(imports) != 0 or len(includes) != 0:
         for el_import in imports:
             if 'schemaLocation' not in el_import.attrib:
@@ -60,7 +66,7 @@ def getValidityErrorsForMDCS(xmlTree, type):
     #         errors.append("Only templates with at least one root element are supported.")
 
     # Types Tests
-    elif type == "Type":
+    if type == "Type":
         elements = xmlTree.findall("*")
         if len(elements) > 0:
             # only simpleType, complexType or include
@@ -269,3 +275,48 @@ def update_dependencies(xsd_tree, dependencies):
             for xsd_import in xsd_imports:
                 if schema_location == xsd_import.attrib['schemaLocation']:
                     xsd_import.attrib['schemaLocation'] = getSchemaLocation(dependency_id)
+
+
+def send_mail(recipient_list, subject, pathToTemplate, context={}, fail_silently=True, sender=SERVER_EMAIL):
+    if USE_EMAIL:
+        if USE_BACKGROUND_TASK:
+            #Async call. Use celery
+            MgiTasks.send_mail.apply_async((recipient_list, subject, pathToTemplate, context, fail_silently, sender), countdown=1)
+        else:
+            #Sync call
+            MgiTasks.send_mail(recipient_list, subject, pathToTemplate, context, fail_silently, sender)
+
+def send_mail_to_administrators(subject, pathToTemplate, context={}, fail_silently=True):
+    if USE_EMAIL:
+        if USE_BACKGROUND_TASK:
+            #Async call. Use celery
+            MgiTasks.send_mail_to_administrators.apply_async((subject, pathToTemplate, context, fail_silently), countdown=1)
+        else:
+            #Sync call
+            MgiTasks.send_mail_to_administrators(subject, pathToTemplate, context, fail_silently)
+
+def send_mail_to_managers(subject, pathToTemplate, context={}, fail_silently=True):
+    if USE_EMAIL:
+        if USE_BACKGROUND_TASK:
+            #Async call. Use celery
+            MgiTasks.send_mail_to_managers.apply_async((subject, pathToTemplate, context, fail_silently), countdown=1)
+        else:
+            #Sync call
+            MgiTasks.send_mail_to_managers(subject, pathToTemplate, context, fail_silently)
+
+def xpath_to_dot_notation(xpath, namespaces):
+    """
+    Transorm XML xpath in dot notation
+    :param xpath:
+    :param namespaces:
+    :return:
+    """
+    # remove indexes from xpath
+    xpath = re.sub(r'\[[0-9]+\]', '', xpath)
+    # remove namespaces
+    for prefix in namespaces.keys():
+        xpath = re.sub(r'{}:'.format(prefix), '', xpath)
+    # replace / by .
+    xpath = xpath.replace("/", ".")
+
+    return xpath

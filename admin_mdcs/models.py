@@ -20,7 +20,6 @@ from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import resolve_url
 from urlparse import urlparse
-from django.utils import six
 from django.core.exceptions import PermissionDenied
 import mgi.rights as RIGHTS
 from rest_framework.response import Response
@@ -28,6 +27,7 @@ from rest_framework import status
 from mgi.rights import default_group
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 
 ################################################################################
 #
@@ -90,6 +90,7 @@ def login_or_anonymous_perm_required(anonymous_permission, function=None, redire
         return wrapper
     return _check_group
 
+
 ################################################################################
 #
 # Function Name: permission_required(request)
@@ -136,6 +137,7 @@ def permission_required(content_type, permission, login_url=None, raise_exceptio
         return wrapper
     return _check_group
 
+
 ################################################################################
 #
 # Function Name: api_staff_member_required(request)
@@ -157,6 +159,7 @@ def api_staff_member_required():
 
         return wrapper
     return _check_group
+
 
 ################################################################################
 #

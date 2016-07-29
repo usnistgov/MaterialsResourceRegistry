@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"> 
+    <xs:import schemaLocation="https://www.w3.org/Math/XMLSchema/mathml3/mathml3.xsd" namespace="http://www.w3.org/1998/Math/MathML"/>
+</xs:schema>

@@ -1,0 +1,52 @@
+/*! Light */
+#light div {
+    float: right;
+}
+
+#light span {
+    border-radius: 50px;
+    height: 15px;
+    margin: 0px 0.5em 0em;
+    opacity: .5;
+    width: 15px;
+    display:none;
+    float: left;
+}
+
+/*! Light colors */
+#red    { background-color: red; }
+#orange { background-color: orange; }
+#green  { background-color: green; }
+
+/*! Active states */
+#light span.active    { opacity: 1; }
+#light #red.active    { box-shadow: 0 0 10px red; display:block; }
+#light #orange.active { box-shadow: 0 0 10px orange; display:block; }
+#light #green.active  { box-shadow: 0 0 10px green; display:block; }
+
+.draft {
+  background: repeating-linear-gradient(
+    -45deg,
+    white,
+    white 10px,
+    rgba(204, 204, 204, 0.1) 10px,
+    rgba(204, 204, 204, 0.1) 20px
+  );
+  display:inline-grid;
+  color: black;
+}
+
+
+.draft tr {
+    border-style:hidden;
+    margin: 0em;
+    padding: 0em;
+}
+
+.draft td {
+    border-style:hidden;
+    margin-top: 0em;
+    padding-top: 0em;
+    margin-bottom: 0.3em;
+    padding-bottom: 0.4em;
+}

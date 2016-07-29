@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="namespace" xmlns="namespace" xmlns:imp="import-namespace">
+    <xs:import schemaLocation="to-import.xsd" namespace="import-namespace"/>
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="inc" type="imp:inc"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>    
+</xs:schema>

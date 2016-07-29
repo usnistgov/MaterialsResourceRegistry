@@ -44,6 +44,11 @@ available in the query screen. When you are done, please click on Perform Search
             <a href="/explore/keyword">Search by Keyword</a>
         </div>
     </li>
+    <li>
+        <div style="cursor:pointer">
+            <a href="/oai_pmh/explore/keyword">OAI-PMH Search by Keyword</a>
+        </div>
+    </li>
 </ul>
 {% endblock %}
 
@@ -88,6 +93,7 @@ available in the query screen. When you are done, please click on Perform Search
 {% endblock %}
 
 {% block extrajs %}
+<script src="{% static 'js/form/choice.js' %}"></script>
 <script src="{% static 'inc/controllers/js/explore.js' %}"></script>
 <script>
 verifyTemplateIsSelectedCustomize();

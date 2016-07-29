@@ -1,3 +1,4 @@
+
 ################################################################################
 #
 # File Name: tests.py
@@ -12,12 +13,12 @@
 ################################################################################
 
 from oai_pmh.tests.models import OAI_PMH_Test
-from oai_pmh.api.views import createRegistry, createOaiIdentify, setDataToRegistry, createMetadataformatsForRegistry,\
-    sickleListObjectMetadataFormats, sickleListObjectSets, setMetadataFormatXMLSchema, createSetsForRegistry, \
-    sickleObjectIdentify, getListRecords, harvestRecords, harvestByMF, harvestBySetsAndMF, modifyRegistry, \
-    modifyOaiIdentify, modifyMetadataformatsForRegistry, modifySetsForRegistry
+from oai_pmh.api.models import createOaiIdentify, setDataToRegistry, createMetadataformatsForRegistry,\
+    sickleListObjectMetadataFormats, sickleListObjectSets, sickleObjectIdentify, createSetsForRegistry,\
+    getListRecords, harvestRecords, harvestByMF, harvestBySetsAndMF, modifyRegistry, modifyOaiIdentify, \
+    modifyMetadataformatsForRegistry, modifySetsForRegistry, createRegistry, setMetadataFormatXMLSchema
 from mgi.models import OaiRegistry, OaiIdentify, OaiMetadataFormat, OaiMyMetadataFormat, OaiSettings, Template, OaiSet,\
-    OaiMySet, OaiRecord, XMLdata, OaiTemplMfXslt, OaiMetadataformatSet, OaiXslt
+    OaiMySet, OaiRecord, XMLdata, OaiTemplMfXslt, OaiMetadataformatSet, OaiXslt, Status
 import xmltodict
 from testing.models import URL_TEST, ADMIN_AUTH, ADMIN_AUTH_GET, USER_AUTH, TEMPLATE_VALID_CONTENT, \
     TEMPLATE_INVALID_CONTENT
@@ -853,6 +854,22 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         self.isStatusOK(req.status_code)
         self.assert_OaiListRecords(metadataPrefix, req.data)
 
+    def test_listObjectAllRecords_with_deleted_inactive(self):
+        self.dump_oai_settings()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_oai_templ_mf_xslt()
+        self.dump_oai_xslt()
+        self.dump_template()
+        self.addNewSoftwareXmlDataDeleted()
+        self.addNewSoftwareXmlDataInactive()
+        self.setHarvest(True)
+        metadataPrefix = "oai_soft"
+        data = {"url": URL_TEST_SERVER, "metadataprefix": metadataPrefix}
+        req = self.doRequestPost(url=reverse("api_listObjectAllRecords"), data=data, auth=ADMIN_AUTH)
+        self.isStatusOK(req.status_code)
+        self.assert_OaiListRecords(metadataPrefix, req.data)
+
     def test_listObjectAllRecords_unauthorized(self):
         self.dump_oai_settings()
         data = {"url": URL_TEST_SERVER}
@@ -881,14 +898,39 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         req = self.doRequestPost(url=reverse("api_listObjectAllRecords"), data=data, auth=ADMIN_AUTH)
         self.assertEquals(req.status_code, status.HTTP_400_BAD_REQUEST)
 
-################################################################################
+###############################################################################
 
-################################ Get Record tests ##############################
+############################### Get Record tests ##############################
     def test_getRecord(self):
         self.dump_oai_settings()
         self.dump_oai_my_metadata_format()
         self.dump_oai_my_set()
         self.dump_xmldata()
+        self.setHarvest(True)
+        metadataPrefix = "oai_soft"
+        myMetadataFormat = OaiMyMetadataFormat.objects().get(metadataPrefix=metadataPrefix)
+        query = dict()
+        query['schema'] = str(myMetadataFormat.template.id)
+        #Get all records for this template
+        dataInDatabase = XMLdata.executeQueryFullResult(query)
+        for elt in dataInDatabase:
+            identifier = '%s:%s:id/%s' % (settings.OAI_SCHEME, settings.OAI_REPO_IDENTIFIER, str(elt['_id']))
+            data = {"url": URL_TEST_SERVER, "metadataprefix": metadataPrefix, "identifier": identifier}
+            req = self.doRequestPost(url=reverse("api_getRecord"), data=data, auth=ADMIN_AUTH)
+            if elt['ispublished'] == True:
+                self.isStatusOK(req.status_code)
+                self.assertTrue(len(req.data) == 1)
+                self.assert_OaiRecord(metadataPrefix, req.data[0])
+            else:
+                self.isStatusInternalError(req.status_code)
+
+    def test_getRecord_deleted_inactive(self):
+        self.dump_oai_settings()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_template()
+        self.addNewSoftwareXmlDataDeleted()
+        self.addNewSoftwareXmlDataInactive()
         self.setHarvest(True)
         metadataPrefix = "oai_soft"
         myMetadataFormat = OaiMyMetadataFormat.objects().get(metadataPrefix=metadataPrefix)
@@ -967,6 +1009,21 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         self.assertEquals(req.status_code, status.HTTP_200_OK)
         self.assert_OaiListIdentifiers(metadataPrefix, req.data)
 
+    def test_listIdentifiers_deleted_inactive(self):
+        self.dump_oai_settings()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_template()
+        self.addNewSoftwareXmlDataDeleted()
+        self.addNewSoftwareXmlDataInactive()
+        self.setHarvest(True)
+        metadataPrefix = "oai_soft"
+        data = {"url": URL_TEST_SERVER, "metadataprefix": metadataPrefix}
+        req = self.doRequestPost(url=reverse("api_listIdentifiers"), data=data, auth=ADMIN_AUTH)
+        self.assertEquals(req.status_code, status.HTTP_200_OK)
+        self.assert_OaiListIdentifiers(metadataPrefix, req.data)
+
+
     def test_listIdentifiers_set(self):
         self.dump_oai_settings()
         self.dump_oai_my_metadata_format()
@@ -1035,6 +1092,21 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         self.assertEquals(req.status_code, status.HTTP_200_OK)
         self.assertNotEquals(req.data, '')
 
+    def test_getData_deleted_inactive(self):
+        self.dump_oai_settings()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_xmldata()
+        self.addNewSoftwareXmlDataDeleted()
+        self.addNewSoftwareXmlDataInactive()
+        self.setHarvest(True)
+        metadataPrefix = "oai_soft"
+        data = {"url": URL_TEST_SERVER + "?ListRecords&metadataprefix="+metadataPrefix}
+        req = self.doRequestPost(url=reverse("api_get_data"), data=data, auth=ADMIN_AUTH)
+        self.assertEquals(req.status_code, status.HTTP_200_OK)
+        self.assertNotEquals(req.data, '')
+
+
     def test_getData_server_not_found(self):
         self.dump_oai_settings()
         url = "http://127.0.0.1:8082/noserver"
@@ -1078,8 +1150,37 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         allSets = [x.setSpec for x in OaiMySet.objects.all()]
         self.harvest(allMetadataPrefixes, allSets)
 
+    def test_harvest_by_MF_deleted_inactive(self):
+        self.dump_oai_settings()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_oai_templ_mf_xslt()
+        self.dump_oai_xslt()
+        self.dump_oai_registry(dumpRecords=False)
+        self.dump_template()
+        self.addNewSoftwareXmlDataDeleted()
+        self.addNewSoftwareXmlDataInactive()
+        allMetadataPrefixes = [x.metadataPrefix for x in OaiMyMetadataFormat.objects.all()]
+        allSets = [x.setSpec for x in OaiMySet.objects.all()]
+        self.harvest(allMetadataPrefixes, allSets)
+
+
     def test_harvest_by_Set_MF(self):
         self.initDataBaseHarvest()
+        allMetadataPrefixes = [x.metadataPrefix for x in OaiMyMetadataFormat.objects.all().limit(3)]
+        allSets = [x.setSpec for x in OaiMySet.objects.all().limit(3)]
+        self.harvest(allMetadataPrefixes, allSets)
+
+    def test_harvest_by_Set_MF_deleted_inactive(self):
+        self.dump_oai_settings()
+        self.dump_oai_my_metadata_format()
+        self.dump_oai_my_set()
+        self.dump_oai_templ_mf_xslt()
+        self.dump_oai_xslt()
+        self.dump_oai_registry(dumpRecords=False)
+        self.dump_template()
+        self.addNewSoftwareXmlDataDeleted()
+        self.addNewSoftwareXmlDataInactive()
         allMetadataPrefixes = [x.metadataPrefix for x in OaiMyMetadataFormat.objects.all().limit(3)]
         allSets = [x.setSpec for x in OaiMySet.objects.all().limit(3)]
         self.harvest(allMetadataPrefixes, allSets)
@@ -1227,7 +1328,7 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         #Get all sets
         registryAllSets = OaiSet.objects(registry=registry_id).order_by("setName")
         return registrySetsToHarvest, metadataformatsToHarvest, registry_id, registryAllSets
-
+#
     def initDataBaseHarvest(self):
         self.dump_oai_settings()
         self.dump_oai_my_metadata_format()
@@ -1999,7 +2100,7 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         self.assertEquals(objInDatabase.setName, setName)
         self.assertEquals([str(x.id) for x in objInDatabase.templates], templates)
         self.assertEquals(objInDatabase.description, description)
-
+#
     def test_update_my_set_not_found(self):
         self.dump_oai_settings()
         self.dump_oai_my_set()
@@ -2351,7 +2452,7 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         query['ispublished'] = True
         if fromDate:
             startDate = datestamp.datestamp_to_datetime(fromDate)
-            query['publicationdate'] = { "$gte" : startDate}
+            query['oai_datestamp'] = { "$gte" : startDate}
         #Get all records for this template
         dataInDatabase = XMLdata.executeQueryFullResult(query)
         self.assertEquals(len(dataInDatabase), len(data))
@@ -2361,10 +2462,10 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
     def assert_OaiRecord(self, metadataPrefix, data):
         identifier = data['identifier'].split('/')[1]
         objInDatabase = XMLdata.get(identifier)
-        if 'publicationdate' in objInDatabase:
-            date = str(datestamp.datetime_to_datestamp(objInDatabase['publicationdate']))
+        if 'oai_datestamp' in objInDatabase:
+            date = str(datestamp.datetime_to_datestamp(objInDatabase['oai_datestamp']))
             self.assertEquals(date, data['datestamp'])
-        self.assertEquals(False, data['deleted'])
+        self.assertEquals(objInDatabase['status'] == Status.DELETED, data['deleted'])
         sets = OaiMySet.objects(templates__in=[str(objInDatabase['schema'])]).all()
         if sets:
             setSpecs = [x.setSpec for x in sets]
@@ -2412,17 +2513,17 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         query['ispublished'] = True
         if lastUpdate:
             startDate = datestamp.datestamp_to_datetime(lastUpdate)
-            query['publicationdate'] = { "$gte" : startDate}
+            query['oai_datestamp'] = { "$gte" : startDate}
         #Get all records for this template
         dataInDatabase = XMLdata.executeQueryFullResult(query)
         for dataDB in dataInDatabase:
             identifier = '%s:%s:id/%s' % (settings.OAI_SCHEME, settings.OAI_REPO_IDENTIFIER, str(dataDB['_id']))
             records = OaiRecord.objects(identifier=identifier).all()
             for record in records:
-                if 'publicationdate' in dataDB:
+                if 'oai_datestamp' in dataDB:
                     self.assertEquals(str(datestamp.datetime_to_datestamp(record.datestamp)),
-                                      str(datestamp.datetime_to_datestamp(dataDB['publicationdate'])))
-                self.assertEquals(record.deleted, False)
+                                      str(datestamp.datetime_to_datestamp(dataDB['oai_datestamp'])))
+                self.assertEquals(record.deleted, dataDB['status'] == Status.DELETED)
                 sets = OaiMySet.objects(templates__in=[str(dataDB['schema'])]).all().distinct('setSpec')
                 if sets:
                     recordSets = [x.setSpec for x in record.sets]
@@ -2443,8 +2544,8 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
             identifier = obj['identifier'].split('/')[1]
             objInDatabase = next(x for x in dataInDatabase if x['_id'] == ObjectId(identifier))
             self.assertTrue(objInDatabase != None)
-            if 'publicationdate' in objInDatabase:
-                date = str(datestamp.datetime_to_datestamp(objInDatabase['publicationdate']))
+            if 'oai_datestamp' in objInDatabase:
+                date = str(datestamp.datetime_to_datestamp(objInDatabase['oai_datestamp']))
                 self.assertEquals(date, obj['datestamp'])
             sets = OaiMySet.objects(templates__in=[str(objInDatabase['schema'])]).all()
             if sets:
@@ -2854,8 +2955,31 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
                "</contact></curation><content><description>This is a new record</description><subject></subject>" \
                "<referenceURL></referenceURL></content></Resource>"
         schemaId = str(template.id)
-        XMLdata(schemaID=schemaId, xml=xml, title='newRecord', iduser=1, ispublished=True,
-                publicationdate=datetime.datetime.now()).save()
+        now = datetime.datetime.now()
+        data = XMLdata(schemaID=schemaId, xml=xml, title='newRecord', iduser=1, ispublished=True,
+                publicationdate=now, oai_datestamp=now).save()
+
+    def addNewSoftwareXmlDataDeleted(self):
+        template = Template.objects.get(filename="Software.xsd")
+        xml = "<Resource localid='' status='deleted'><identity>" \
+               "<title>My new software</title></identity><curation><publisher>PF</publisher><contact><name></name>" \
+               "</contact></curation><content><description>This is a new record</description><subject></subject>" \
+               "<referenceURL></referenceURL></content></Resource>"
+        schemaId = str(template.id)
+        now = datetime.datetime.now()
+        data = XMLdata(schemaID=schemaId, xml=xml, title='newRecord', iduser=1, ispublished=True,
+                publicationdate=now, oai_datestamp=now).save()
+
+    def addNewSoftwareXmlDataInactive(self):
+        template = Template.objects.get(filename="Software.xsd")
+        xml = "<Resource localid='' status='inactive'><identity>" \
+               "<title>My new software</title></identity><curation><publisher>PF</publisher><contact><name></name>" \
+               "</contact></curation><content><description>This is a new record</description><subject></subject>" \
+               "<referenceURL></referenceURL></content></Resource>"
+        schemaId = str(template.id)
+        now = datetime.datetime.now()
+        data = XMLdata(schemaID=schemaId, xml=xml, title='newRecord', iduser=1, ispublished=True,
+                publicationdate=now, oai_datestamp=now).save()
 
     def addNewDataCollectionXmlData(self):
         template = Template.objects.get(filename="DataCollection.xsd")
@@ -2864,8 +2988,9 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
                "</contact></curation><content><description>This is a data collection</description><subject></subject>" \
                "<referenceURL></referenceURL></content></Resource>"
         schemaId = str(template.id)
-        XMLdata(schemaID=schemaId, xml=xml, title='newDataCollection', iduser=1, ispublished=True,
-                publicationdate=datetime.datetime.now()).save()
+        now = datetime.datetime.now()
+        data = XMLdata(schemaID=schemaId, xml=xml, title='newDataCollection', iduser=1, ispublished=True,
+                publicationdate=now, oai_datestamp=now).save()
 
 
     def getRegistryData(self):

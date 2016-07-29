@@ -243,7 +243,7 @@ saveTemplateUser = function(){
                   modal: true,
                   buttons: {
                     OK: function() {
-                        if(type == "template") {
+                        if(type == "Template") {
                             window.location = '/dashboard/templates'
                         } else {
                             window.location = '/dashboard/types'

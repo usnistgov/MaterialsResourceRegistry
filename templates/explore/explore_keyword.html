@@ -70,31 +70,31 @@
 <table id="icons_table">
 <tr>
 <td align="center" class="selected_resource" value="all">
-<img width="100" src="/static/img/allresources.png"><br/>
+<img onclick="selectRadio('all');" width="100" src="/static/img/allresources.png"><br/>
 All Resources
 </td>
 <td align="center" value="organization">
-<img width="100" src="/static/img/organization.png"><br>
+<img onclick="selectRadio('organization');" width="100" src="/static/img/organization.png"><br>
 Organizations
 </td>
 <td align="center" value="datacollection">
-<img width="100" src="/static/img/datacollection.png"><br>
+<img onclick="selectRadio('datacollection');" width="100" src="/static/img/datacollection.png"><br>
 Data Collections
 </td>
 <td align="center" value="dataset">
-<img width="100" src="/static/img/dataset.png"><br>
+<img onclick="selectRadio('dataset');" width="100" src="/static/img/dataset.png"><br>
 Datasets
 </td>
 <td align="center" value="service">
-<img width="100" src="/static/img/service.png"><br>
+<img onclick="selectRadio('service');" width="100" src="/static/img/service.png"><br>
 Services
 </td>
 <td align="center" value="informational">
-<img width="100" src="/static/img/informational.png"><br>
+<img onclick="selectRadio('informational');" width="100" src="/static/img/informational.png"><br>
 Informational Sites
 </td>
 <td align="center" value="software">
-<img width="100" src="/static/img/software.jpg"><br>
+<img onclick="selectRadio('software');" width="100" src="/static/img/software.jpg"><br>
 Software
 </td>
 </tr>
@@ -115,6 +115,7 @@ Software
 <br/>
 <a id="config_custom" onclick="configure_custom_view();" style="display:none;cursor: pointer;">Change Custom View</a>
 <br/><br/>
+<div>
 Resource Type:
 <form id="refine_resource_type">
 <input type="radio" name="resource_type" value="all"> All Resources<br/>
@@ -129,6 +130,17 @@ Resource Type:
 <input type="radio" name="resource_type" value="software"> Software<br/>
 <br/>
 </form>
+{% if search_Form.form_oai_pmh.my_registries %}
+<div id="id_my_registries">
+	Data Providers:
+		<br/>
+	{% for value, label in search_Form.form_oai_pmh.my_registries.field.choices %}
+		<input type='checkbox' checked_id="id_my_registries_{{ forloop.counter0 }}" name="my_registries" value='{{value}}' onchange='get_results_keyword_refined();'> {{label}} <br/>
+	{% endfor %}
+</div>
+{% endif %}
+</div>
+<br/><br/>
 <div id="refine_common"></div>
 <div id="refine_resource"></div>
 </td>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    elementFormDefault="qualified"
+    xmlns:ns1="namespace">
+    <xs:import namespace="namespace" schemaLocation="type-ns.xsd"/>
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="element" type="ns1:ab"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

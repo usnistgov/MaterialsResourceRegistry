@@ -13,26 +13,29 @@
 # Sponsor: National Institute of Standards and Technology (NIST)
 #
 ################################################################################
+import numbers
 from mongoengine import *
-import json
 
 # Specific to MongoDB ordered inserts
 from collections import OrderedDict
 from bson.objectid import ObjectId
 import xmltodict
-from pymongo import MongoClient, TEXT, ASCENDING, DESCENDING, errors
-
+from pymongo import MongoClient, TEXT, DESCENDING, errors
+import re
+import datetime
+from utils.XSDhash import XSDhash
 import os
 from django.utils.importlib import import_module
-
-from utils.XSDhash import XSDhash
-
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
 MONGODB_URI = settings.MONGODB_URI
 MGI_DB = settings.MGI_DB
-import re
-import datetime
+
+
+class Status:
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    DELETED = 'deleted'
 
 
 class Request(Document):
@@ -87,6 +90,32 @@ class Template(Document):
     XSLTFiles = ListField(ReferenceField(ExporterXslt, reverse_delete_rule=PULL))
     ResultXsltList = ReferenceField(ResultXslt, reverse_delete_rule=NULLIFY)
     ResultXsltDetailed = ReferenceField(ResultXslt, reverse_delete_rule=NULLIFY)
+
+
+def delete_template(object_id):
+    from mgiutils import getListNameTemplateDependenciesRecordFormData
+    listName = getListNameTemplateDependenciesRecordFormData(object_id)
+    return listName if listName != '' else delete_template_and_version(object_id)
+
+
+def delete_template_and_version(object_id):
+    template = Template.objects(pk=object_id).get()
+    version = TemplateVersion.objects(pk=template.templateVersion).get()
+    version.delete()
+    template.delete()
+
+
+def delete_type(object_id):
+    from mgiutils import getListNameTypeDependenciesTemplateType
+    listName = getListNameTypeDependenciesTemplateType(object_id)
+    return listName if listName != '' else delete_type_and_version(object_id)
+
+
+def delete_type_and_version(object_id):
+    type = Type.objects(pk=object_id).get()
+    version = TypeVersion.objects(pk=type.typeVersion).get()
+    version.delete()
+    type.delete()
 
 
 def create_template(content, name, filename, dependencies=[], user=None):
@@ -158,6 +187,39 @@ def create_type_version(content, filename, versions_id):
     type_versions.save()
 
     return new_type
+
+
+def template_list_current():
+    """
+    List current templates
+    :param request:
+    :return:
+    """
+    current_template_versions = TemplateVersion.objects().values_list('current')
+
+    current_templates = []
+    for tpl_version in current_template_versions:
+        tpl = Template.objects.get(pk=tpl_version)
+        if tpl.user is None:
+            current_templates.append(tpl)
+
+    return current_templates
+
+
+def type_list_current():
+    """
+    List current types
+    :return:
+    """
+    current_type_versions = TypeVersion.objects().values_list('current')
+
+    current_types = []
+    for tpl_version in current_type_versions:
+        tpl = Type.objects.get(pk=tpl_version)
+        if tpl.user is None:
+            current_types.append(tpl)
+
+    return current_types
 
 
 class TemplateVersion(Document):
@@ -250,20 +312,29 @@ class Bucket(Document):
     types = ListField()
 
 
+from curate.models import SchemaElement
+
+
 class FormData(Document):
     """Stores data being entered and not yet curated"""
     user = StringField(required=True)
     template = StringField(required=True)
-    name = name = StringField(required=True, unique_with=['user', 'template'])
-    elements = DictField()
+    name = StringField(required=True, unique_with=['user', 'template'])
+    # elements = DictField()
+    schema_element_root = ReferenceField(SchemaElement, required=False)
     xml_data = StringField(default='')
     xml_data_id = StringField()
+    isNewVersionOfRecord = BooleanField(required=True, default=False)
 
 
 def postprocessor(path, key, value):
-    """Called after XML to JSON transformation"""
-    if key == "#text":
-        return key, str(value)
+    """
+    Called after XML to JSON transformation
+    :param path:
+    :param key:
+    :param value:
+    :return:
+    """
     try:
         return key, int(value)
     except (ValueError, TypeError):
@@ -273,11 +344,30 @@ def postprocessor(path, key, value):
             return key, value
 
 
+def preprocessor(key, value):
+    """
+    Called before JSON to XML transformation
+    :param key:
+    :param value:
+    :return:
+    """
+    if isinstance(value, OrderedDict):
+        for ik, iv in value.items():
+            if ik == "#text":
+                if isinstance(iv, numbers.Number):
+                    value[ik] = str(iv)
+                else:
+                    value[ik] = iv
+        return key, value
+    else:
+        return key, value
+
+
 class XMLdata(object):
     """Wrapper to manage JSON Documents, like mongoengine would have manage them (but with ordered data)"""
 
     def __init__(self, schemaID=None, xml=None, json=None, title="", iduser=None, ispublished=False,
-                 publicationdate=None):
+                 publicationdate=None, oai_datestamp=None):
         """                                                                                                                                                                                                                   
             initialize the object                                                                                                                                                                                             
             schema = ref schema (Document)                                                                                                                                                                                    
@@ -310,6 +400,15 @@ class XMLdata(object):
         if (publicationdate is not None):
             self.content['publicationdate'] = publicationdate
 
+        if oai_datestamp is not None:
+            self.content['oai_datestamp'] = oai_datestamp
+
+        self.content['status'] = Status.ACTIVE
+
+    @staticmethod
+    def unparse(json):
+        return xmltodict.unparse(json, preprocessor=preprocessor)
+
     @staticmethod
     def initIndexes():
         #create a connection
@@ -328,7 +427,6 @@ class XMLdata(object):
         self.content['lastmodificationdate'] = datetime.datetime.now()
         docID = self.xmldata.insert(self.content)
         return docID
-    
 
     @staticmethod
     def objects():        
@@ -407,7 +505,6 @@ class XMLdata(object):
             results.append(result)
         return results
 
-
     @staticmethod
     def get(postID):
         """
@@ -463,7 +560,7 @@ class XMLdata(object):
             results.append(result['minAttr'])
 
         return results[0] if results[0] else None
-    
+
     @staticmethod
     def delete(postID):
         """
@@ -478,29 +575,29 @@ class XMLdata(object):
         xmldata.remove({'_id': ObjectId(postID)})
     
     # TODO: to be tested
-#     @staticmethod
-#     def update(postID, json=None, xml=None):
-#         """
-#             Update the object with the given id
-#         """
-#         # create a connection
-#         client = MongoClient(MONGODB_URI)
-#         # connect to the db 'mgi'
-#         db = client[MGI_DB]
-#         # get the xmldata collection
-#         xmldata = db['xmldata']
-#
-#         data = None
-#         if (json is not None):
-#             data = json
-#             if '_id' in json:
-#                 del json['_id']
-#         else:
-#             data = xmltodict.parse(xml, postprocessor=postprocessor)
-#
-#         if data is not None:
-#             xmldata.update({'_id': ObjectId(postID)}, {"$set":data}, upsert=False)
-            
+    @staticmethod
+    def update(postID, json=None, xml=None):
+        """
+            Update the object with the given id
+        """
+        # create a connection
+        client = MongoClient(MONGODB_URI)
+        # connect to the db 'mgi'
+        db = client[MGI_DB]
+        # get the xmldata collection
+        xmldata = db['xmldata']
+
+        data = None
+        if (json is not None):
+            data = json
+            if '_id' in json:
+                del json['_id']
+        else:
+            data = xmltodict.parse(xml, postprocessor=postprocessor)
+
+        if data is not None:
+            xmldata.update({'_id': ObjectId(postID)}, {"$set":data}, upsert=False)
+
     @staticmethod
     def update_content(postID, content=None, title=None):
         """
@@ -515,8 +612,11 @@ class XMLdata(object):
                 
         json_content = xmltodict.parse(content, postprocessor=postprocessor)
         json = {'content': json_content, 'title': title, 'lastmodificationdate': datetime.datetime.now()}
-                    
-        xmldata.update({'_id': ObjectId(postID)}, {"$set":json}, upsert=False)
+        #TODO: DO NOT bind directly the field with the status
+        status = json_content['Resource'].get('@status', None)
+        if status:
+            json.update({'status': status})
+        xmldata.update({'_id': ObjectId(postID)}, {"$set":json})
 
     @staticmethod
     def update_publish(postID):
@@ -529,7 +629,34 @@ class XMLdata(object):
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
-        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'publicationdate': datetime.datetime.now(), 'ispublished': True}}, upsert=False)
+        now = datetime.datetime.now()
+        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'publicationdate': now,
+                                                           'ispublished': True,
+                                                           'oai_datestamp': now}}, upsert=False)
+
+    @staticmethod
+    def update_publish_draft(postID, content=None, user=None):
+        """
+            Update the object with the given id
+        """
+        # create a connection
+        client = MongoClient(MONGODB_URI)
+        # connect to the db 'mgi'
+        db = client[MGI_DB]
+        # get the xmldata collection
+        xmldata = db['xmldata']
+        json_content = xmltodict.parse(content, postprocessor=postprocessor)
+        publicationdate = datetime.datetime.now()
+        #TODO: DO NOT bind directly the field with the status
+        status = json_content['Resource'].get('@status', None)
+        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'lastmodificationdate': publicationdate,
+                                                           'publicationdate': publicationdate,
+                                                           'oai_datestamp': publicationdate,
+                                                           'ispublished': True,
+                                                           'content': json_content,
+                                                           'status': status,
+                                                           'iduser': user}}, upsert=False)
+        return publicationdate
 
     @staticmethod
     def update_unpublish(postID):
@@ -543,6 +670,19 @@ class XMLdata(object):
         # get the xmldata collection
         xmldata = db['xmldata']
         xmldata.update({'_id': ObjectId(postID)}, {'$set':{'ispublished': False}}, upsert=False)
+
+    @staticmethod
+    def update_user(postID, user=None):
+        """
+            Update the object with the given id
+        """
+        # create a connection
+        client = MongoClient(MONGODB_URI)
+        # connect to the db 'mgi'
+        db = client[MGI_DB]
+        # get the xmldata collection
+        xmldata = db['xmldata']
+        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'iduser': user}}, upsert=False)
 
     @staticmethod
     def executeFullTextQuery(text, templatesID, refinements={}):
@@ -568,13 +708,31 @@ class XMLdata(object):
             full_text_query.update(refinements)
 
         # only get published and active resources
-        full_text_query.update({'ispublished': True, 'content.Resource.@status': 'active'})
+        full_text_query.update({'ispublished': True, 'status': {'$ne': Status.DELETED}})
         cursor = xmldata.find(full_text_query, as_class = OrderedDict).sort('publicationdate', DESCENDING)
         
         results = []
         for result in cursor:
             results.append(result)
         return results
+
+    @staticmethod
+    def change_status(id, status, ispublished=False):
+        """
+            Update the status of the object with the given id
+        """
+        # create a connection
+        client = MongoClient(MONGODB_URI)
+        # connect to the db 'mgi'
+        db = client[MGI_DB]
+        # get the xmldata collection
+        xmldata = db['xmldata']
+        #TODO: DO NOT bind directly the field with the status
+        update_query = {'status': status, 'content.Resource.@status': status}
+        if ispublished:
+            update_query.update({'oai_datestamp': datetime.datetime.now()})
+
+        xmldata.update({'_id': ObjectId(id)}, {'$set': update_query}, upsert=False)
 
 
 class OaiSettings(Document):
@@ -830,6 +988,8 @@ class OaiRecord(Document):
         if len(refinements.keys()) > 0:
             full_text_query.update(refinements)
 
+        # only no deleted records
+        full_text_query.update({'deleted': False})
         cursor = xmlrecord.find(full_text_query, as_class = OrderedDict)
 
         results = []

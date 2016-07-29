@@ -22,3 +22,12 @@ dialog_detail_oai_pmh = function(id){
     });
 	
 }
+
+getRegistries = function(numInstance){
+    var values = [];
+    $('#id_my_registries input:checked').each(function() {
+        values.push(this.value);
+    });
+
+    return values;
+}

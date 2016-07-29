@@ -5,17 +5,12 @@ import os
 from django.utils.importlib import import_module
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
-OAI_HOST_URI = settings.OAI_HOST_URI
-OAI_USER = settings.OAI_USER
-OAI_PASS = settings.OAI_PASS
-import requests
 from mgi.celery import app
-from django.core.urlresolvers import reverse
 import datetime
 logger = getLogger(__name__)
 import json
 from oai_pmh.api.messages import APIMessage
-
+from oai_pmh.api.models import update_registry_info as update_registry_info_model, harvest as harvest_model
 
 def init_harvest():
     #Kill all tasks
@@ -37,7 +32,7 @@ def watch_harvest_task():
     for registry in registries:
         #If we need to harvest and a task doesn't already exist for this registry
         if registry.harvest and not registry.isQueued:
-            message = message + "Registry {!s} need to be updated and harvested.".format(registry.name)
+            message = message + "Registry {!s} need to be updated and harvested.".format(registry.name.encode("utf-8"))
             task = harvest_task.apply_async((str(registry.id),))
             registry.isQueued = True
             registry.save()
@@ -52,18 +47,24 @@ def harvest_task(registryId):
     try:
         #Get the registry
         registry = OaiRegistry.objects.get(pk=registryId)
-        #Update registry
-        if not registry.isUpdating:
-            update_message = update_registry(registryId, registry.name)
-            message = "Date: {!s}, Registry {!s} has been updated"\
-               "Update Message: {!s}".format(datetime.datetime.now(), registry.name, update_message)
-        if registry.harvest and not registry.isHarvesting:
-            harvest_message = harvest_registry(registryId, registry.name)
-            message = message + "Date: {!s}, Registry {!s} has been harvested. " \
-                "Harvest Message: {!s}".format(datetime.datetime.now(), registry.name, harvest_message)
+        #Check if the registry has been deactivated
+        if registry.isDeactivated:
+            registry.isQueued = False
+            registry.save()
+            message = "Registry {!s} has been deactivated. No need to harvest it anymore.".format(registry.name.encode("utf-8"))
+        else:
+            #Update registry
+            if not registry.isUpdating:
+                update_message = update_registry(registryId)
+                message = "Date: {!s}, Registry {!s} has been updated"\
+                   "Update Message: {!s}".format(datetime.datetime.now(), registry.name.encode("utf-8"), update_message)
+            if registry.harvest and not registry.isHarvesting:
+                harvest_message = harvest_registry(registryId)
+                message = message + "Date: {!s}, Registry {!s} has been harvested. " \
+                    "Harvest Message: {!s}".format(datetime.datetime.now(), registry.name.encode("utf-8"), harvest_message)
 
-        #New update in harvestrate seconds
-        harvest_task.apply_async((registryId,), countdown=registry.harvestrate)
+            #New update in harvestrate seconds
+            harvest_task.apply_async((registryId,), countdown=registry.harvestrate)
         return message
 
     except Exception as e:
@@ -93,15 +94,13 @@ def purge_all_tasks():
 # Description:   Check OAI Error and Exception - Illegal and required arguments
 #
 ################################################################################
-def update_registry(registryId, registryName):
+def update_registry(registryId):
      try:
         #Update the registry information
-        uri= OAI_HOST_URI + reverse("api_update_registry_info")
-        # Call the API to update registry information
-        req = requests.put(uri, {"registry_id": registryId}, auth=(OAI_USER, OAI_PASS))
-        data = json.loads(req.text)
-        return "Date: {!s}, Registry: {!s}, Message: {!s}, Status code: {!s}".format(datetime.datetime.now(),registryName,
-                                                                            data[APIMessage.label], str(req.status_code))
+        req = update_registry_info_model(registryId)
+        data = req.data
+        return "Message: {!s}, Status code: {!s}".format(data[APIMessage.label], str(req.status_code))
+
      except Exception as e:
         return e.message
 
@@ -114,16 +113,11 @@ def update_registry(registryId, registryName):
 # Description:   Check OAI Error and Exception - Illegal and required arguments
 #
 ################################################################################
-def harvest_registry(registryId, registryName):
+def harvest_registry(registryId):
     try:
-        #Get the uri
-        uri= OAI_HOST_URI + reverse("api_harvest")
-        # Call the API to harvest records
-        req = requests.post(uri,
-                           {"registry_id": registryId},
-                           auth=(OAI_USER, OAI_PASS))
-        data = json.loads(req.text)
-        return "Date: {!s}, Registry: {!s}, Message: {!s}, Status code: {!s}".format(datetime.datetime.now(),registryName,
-                                                                            data[APIMessage.label], str(req.status_code))
+        #Harvest
+        req = harvest_model(registryId)
+        data = req.data
+        return "Message: {!s}, Status code: {!s}".format(data[APIMessage.label], str(req.status_code))
     except Exception as e:
         return e.message

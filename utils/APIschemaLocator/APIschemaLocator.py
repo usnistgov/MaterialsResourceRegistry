@@ -22,8 +22,12 @@
 # Next:
 # - add some version management
 # - get the schema using the ID and use the hash in the API call
-from mgi.settings import MDCS_URI
+import os
+from django.utils.importlib import import_module
+
+settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
+settings = import_module(settings_file)
 
 
 def getSchemaLocation(schemaID):
-    return str(MDCS_URI)+'/rest/types/get-dependency?id=' + str(schemaID)
+    return str(settings.MDCS_URI)+'/rest/types/get-dependency?id=' + str(schemaID)

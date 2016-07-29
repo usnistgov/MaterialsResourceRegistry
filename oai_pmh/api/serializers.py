@@ -133,6 +133,10 @@ class UpdateMySetSerializer(serializers.Serializer):
 class DeleteXSLTSerializer(serializers.Serializer):
     xslt_id = serializers.CharField(required=True)
 
+class EditXSLTSerializer(serializers.Serializer):
+    xslt_id = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
+
 class OaiConfXSLTSerializer(serializers.Serializer):
     template_id = serializers.CharField(required=True)
     my_metadata_format_id = serializers.CharField(required=True)

@@ -23,7 +23,7 @@ from requests import status_codes
 from mgi.common import LXML_SCHEMA_NAMESPACE, SCHEMA_NAMESPACE
 from mgi.models import Request, Message, PrivacyPolicy, TermsOfUse, Help, Template, TemplateVersion, Type, \
     TypeVersion, Module, Bucket, Instance, Exporter, ExporterXslt, ResultXslt, create_template, create_type, \
-    create_template_version, create_type_version, OaiXslt
+    create_template_version, create_type_version, OaiXslt, template_list_current, type_list_current
 from forms import UploadResultXSLTForm, PrivacyPolicyForm, TermsOfUseForm, HelpForm, RepositoryForm, \
     RefreshRepositoryForm, UploadXSLTForm, UploadResultXSLTForm, UploadTemplateForm, UploadTypeForm, \
     UploadVersionForm
@@ -48,6 +48,9 @@ import xmltodict
 from oai_pmh.admin.forms import UploadOaiPmhXSLTForm
 from django import utils
 from utils.XMLValidation.xml_schema import validate_xml_schema
+import xmltodict
+#TODO Move to OAI-PMH
+from oai_pmh.admin.forms import UploadOaiPmhXSLTForm
 
 
 ################################################################################
@@ -375,14 +378,11 @@ def upload_xsd(request):
                         # get the includes
                         includes = xsd_tree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
                         if len(includes) > 0 or len(imports) > 0:
-                        # if "{}include".format(LXML_SCHEMA_NAMESPACE) in e.message \
-                        #         or "{}import".format(LXML_SCHEMA_NAMESPACE) in e.message:
-
                             # build the list of dependencies
                             list_dependencies_template = loader.get_template('admin/list_dependencies.html')
                             context = RequestContext(request, {
-                                'templates': Template.objects(user=None),
-                                'types':  Type.objects(user=None),
+                                'templates': template_list_current(),
+                                'types':  type_list_current(),
                             })
                             list_dependencies_html = list_dependencies_template.render(context)
 
@@ -555,14 +555,11 @@ def manage_versions(request):
                         # get the includes
                         includes = xsd_tree.findall("{}include".format(LXML_SCHEMA_NAMESPACE))
                         if len(includes) > 0 or len(imports) > 0:
-                        # if "{}include".format(LXML_SCHEMA_NAMESPACE) in e.message \
-                        #         or "{}import".format(LXML_SCHEMA_NAMESPACE) in e.message:
-
                             # build the list of dependencies
                             list_dependencies_template = loader.get_template('admin/list_dependencies.html')
                             context = RequestContext(request, {
-                                'templates': Template.objects(user=None),
-                                'types':  Type.objects(user=None),
+                                'templates': template_list_current(),
+                                'types':  type_list_current(),
                             })
                             list_dependencies_html = list_dependencies_template.render(context)
 

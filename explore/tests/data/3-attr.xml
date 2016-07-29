@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <integer attrib="value">3</integer>
+    <float attrib="value">3.0</float>
+    <str attrib="value">test3</str>
+    <enum attib="value">c</enum>
+</root>
