@@ -210,7 +210,7 @@ class XmlRenderer(AbstractXmlRenderer):
                         else:
                             xmlns = ''
 
-                attr_list.append("{0} {1}='{2}'".format(xmlns, attr_key, attr_value))
+                attr_list.append(xmlns + " " + attr_key + "='" + attr_value + "'")
                 # TODO: check that sibling attributes are not declaring the same namespaces
             else:
                 attr_list.append(attr_key + '="' + attr_value + '"')

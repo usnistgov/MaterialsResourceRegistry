@@ -22,8 +22,8 @@ usage()
 
 # Check if there is no argument
 if [[ -z $* ]]; then
-	echo 'No argument found. All folders known to have tests will be tested. (mgi, api, user_dashboard, oai_pmh, compose, explore, utils/XSDhash)'
-	python manage.py test mgi/ user_dashboard/ oai_pmh/ api/ compose/ explore/ utils/XSDhash --liveserver=localhost:8082 --no-selenium
+	echo 'No argument found. All folders known to have tests will be tested. (mgi, api, user_dashboard, oai_pmh, compose, explore, utils/XSDhash, admin_mdcs)'
+	python manage.py test mgi/ user_dashboard/ oai_pmh/ api/ compose/ explore/ utils/XSDhash admin_mdcs/ --liveserver=localhost:8082 --no-selenium
 else
     SELENIUM='--no-selenium'
     for arg do

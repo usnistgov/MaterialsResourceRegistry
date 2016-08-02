@@ -214,14 +214,14 @@ def dashboard_detail_resource(request) :
 
     if type=='form':
         form_data = FormData.objects.get(pk=ObjectId(result_id))
-        xmlString = form_data.xml_data
+        xmlString = form_data.xml_data.encode('utf-8')
         title = form_data.name
         schemaId = form_data.template
     elif type=='record':
         xmlString = XMLdata.get(result_id)
         title = xmlString['title']
         schemaId = xmlString['schema']
-        xmlString = xmltodict.unparse(xmlString['content']).encode('utf-8')
+        xmlString = XMLdata.unparse(xmlString['content']).encode('utf-8')
 
 
     xsltPath = os.path.join(settings.SITE_ROOT, 'static', 'resources', 'xsl', 'xml2html.xsl')

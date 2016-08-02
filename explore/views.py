@@ -367,7 +367,7 @@ def start_export(request):
         is_many_inst = len(instances) > 1
         for instance in instances:
             #Retrieve data
-            sessionName = "resultsExplore" + eval(instance)['name']
+            sessionName = "resultsExplore" + json.loads(instance)['name']
             results = request.session[sessionName]
             if (len(results) > 0):
                 for result in results:
@@ -379,7 +379,7 @@ def start_export(request):
                 #Init the folder name
                 folder_name = None
                 if is_many_inst:
-                    folder_name = eval(instance)['name']
+                    folder_name = json.loads(instance)['name']
                 #Check if the XSLT converter is asked. If yes, we start with this one because there is a specific treatment
                 listXslt = request.POST.getlist('my_xslts')
                 #Get the content of the file

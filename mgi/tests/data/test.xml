@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <integer attrib="42">2</integer>
+    <float attrib="value">2.0</float>
+    <str attrib="é">été123</str>
+    <enum attib="value">
+        <a>1</a>
+        <a>2</a>
+        <a>3</a>
+        <a>é</a>
+        <a>
+            <b attr="3é">test</b>
+            <b>1</b>
+            <b>1é</b>
+        </a>
+    </enum>
+</root>

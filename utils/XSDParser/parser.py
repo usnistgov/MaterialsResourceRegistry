@@ -1,6 +1,7 @@
 """
 """
 import logging
+import numbers
 import traceback
 import sys
 import re
@@ -39,7 +40,11 @@ def load_schema_data_in_db(xsd_data):
     xsd_element.tag = xsd_data['tag']
 
     if xsd_data['value'] is not None:
-        element_value = str(xsd_data['value'])
+        if isinstance(xsd_data['value'], numbers.Number):
+            element_value = str(xsd_data['value'])
+        else:
+            element_value = xsd_data['value']
+
         element_value = element_value.lstrip()
         xsd_data['value'] = element_value.rstrip()
 
@@ -47,7 +52,7 @@ def load_schema_data_in_db(xsd_data):
 
     if 'options' in xsd_data:
         if xsd_element.tag == 'module' and xsd_data['options']['data'] is not None:
-            module_data = str(xsd_data['options']['data']).encode('utf-8')
+            module_data = xsd_data['options']['data'].encode('utf-8')
             module_data = module_data.lstrip()
             xsd_data['options']['data'] = module_data.rstrip()
 
@@ -1116,7 +1121,10 @@ def generate_element(request, element, xml_tree, choice_info=None, full_path="",
                     # get the value of the attribute
                     if edit_elements[x] is not None:
                         # set the value of the element
-                        default_value = str(edit_elements[x])
+                        if isinstance(edit_elements[x], numbers.Number):
+                            default_value = str(edit_elements[x])
+                        else:
+                            default_value = edit_elements[x]
         elif 'default' in element.attrib:
             # if the default attribute is present
             default_value = element.attrib['default']

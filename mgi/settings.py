@@ -74,6 +74,7 @@ SERVER_EMAIL = 'noreply@nmrr.org'
 ADMINS = [('admin', 'admin@nmrr.org')]
 MANAGERS = [('manager', 'moderator@nmrr.org'),]
 EMAIL_SUBJECT_PREFIX = "[NMRR] "
+
 #EMAIL_HOST = ""
 #EMAIL_HOST_USER = ""
 #EMAIL_HOST_PASSWORD = ""

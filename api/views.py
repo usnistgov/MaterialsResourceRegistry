@@ -68,6 +68,7 @@ import zipfile
 import mongoengine.errors as MONGO_ERRORS
 from admin_mdcs.models import api_permission_required, api_staff_member_required
 import mgi.rights as RIGHTS
+import json
 
 
 ################################################################################
@@ -483,11 +484,11 @@ def query_by_example(request):
                             return Response(content, status=status.HTTP_400_BAD_REQUEST)
                 if local:
                     try:
-                        query = eval(request.DATA['query'])
+                        query = json.loads(request.DATA['query'])
                         manageRegexInAPI(query)
                         instanceResults = instanceResults + XMLdata.executeQueryFullResult(query)                        
                     except:
-                        content = {'message':'Bad query: use the following format {\'element\':\'value\'}'}
+                        content = {'message': 'Bad query: use the following format {"element":"value"}'}
                         return Response(content, status=status.HTTP_400_BAD_REQUEST)
                 for instance in instances:
                     url = instance.protocol + "://" + instance.address + ":" + str(instance.port) + "/rest/explore/query-by-example"   
@@ -498,7 +499,7 @@ def query_by_example(request):
                     result = r.text
                     instanceResults = instanceResults + json.loads(result,object_pairs_hook=OrderedDict)
             
-                if dataformat== None or dataformat=="xml":
+                if dataformat is None or dataformat == "xml":
                     for jsonDoc in instanceResults:
                         jsonDoc['content'] = XMLdata.unparse(jsonDoc['content'])
                     serializer = jsonDataSerializer(instanceResults)
@@ -511,11 +512,11 @@ def query_by_example(request):
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
-                query = eval(request.DATA['query'])
+                query = json.loads(request.DATA['query'])
                 manageRegexInAPI(query)
                 results = XMLdata.executeQueryFullResult(query)
             
-                if dataformat== None or dataformat=="xml":
+                if dataformat is None or dataformat == "xml":
                     for jsonDoc in results:
                         jsonDoc['content'] = XMLdata.unparse(jsonDoc['content'])
                     serializer = jsonDataSerializer(results)
@@ -524,10 +525,10 @@ def query_by_example(request):
                     serializer = jsonDataSerializer(results)
                     return Response(serializer.data, status=status.HTTP_200_OK)
                 else:
-                    content = {'message':'The specified format is not accepted.'}
+                    content = {'message': 'The specified format is not accepted.'}
                     return Response(content, status=status.HTTP_400_BAD_REQUEST)
             except:
-                content = {'message':'Bad query: use the following format {\'element\':\'value\'}'}
+                content = {'message': 'Bad query: use the following format {"element":"value"}'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
         
     return Response(qSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -610,7 +611,7 @@ def add_schema(request):
         try:
             xmlTree = etree.parse(BytesIO(xsdContent.encode('utf-8')))
         except Exception, e:
-            content = {'message':'This is not a valid XML document.' + e.message.replace("'","")}
+            content = {'message':'This is not a valid XML document.' + e.message.replace("'", "")}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
         # check that the schema is valid for the MDCS
         errors = common.getValidityErrorsForMDCS(xmlTree, "Template")
@@ -676,7 +677,7 @@ def add_schema(request):
         else:
             new_template = create_template(xsdContent, request.DATA['title'], request.DATA['filename'], dependencies)
 
-        return Response(eval(new_template.to_json()), status=status.HTTP_201_CREATED)
+        return Response(json.loads(new_template.to_json()), status=status.HTTP_201_CREATED)
     return Response(sSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1109,7 +1110,7 @@ def add_type(request):
         else:
             new_type = create_type(xsdContent, request.DATA['title'], request.DATA['filename'], [], dependencies)
 
-        return Response(eval(new_type.to_json()), status=status.HTTP_201_CREATED)
+        return Response(json.loads(new_type.to_json()), status=status.HTTP_201_CREATED)
     return Response(oSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 ################################################################################
@@ -1587,17 +1588,29 @@ def add_repository(request):
             content = {'message': errors}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-
         try:
             url = request.DATA["protocol"] + "://" + request.DATA["address"] + ":" + request.DATA["port"] + "/o/token/"
-            data="grant_type=password&username=" + request.DATA["user"] + "&password=" + request.DATA["password"]
             headers = {'content-type': 'application/x-www-form-urlencoded'}
-            r = requests.post(url=url,data=data, headers=headers,  auth=(request.DATA["client_id"], request.DATA["client_secret"]))
+            data = {
+                'grant_type': 'password',
+                'username': request.DATA["user"],
+                'password': request.DATA["password"],
+                'client_id': request.DATA["client_id"],
+                'client_secret': request.DATA["client_secret"]
+            }
+            r = requests.post(url=url, data=data, headers=headers)
+
             if r.status_code == 200:
                 now = datetime.now()
-                delta = timedelta(seconds=int(eval(r.content)["expires_in"]))
+                delta = timedelta(seconds=int(json.loads(r.content)["expires_in"]))
                 expires = now + delta
-                instance = Instance(name=request.DATA["name"], protocol=request.DATA["protocol"], address=request.DATA["address"], port=request.DATA["port"], access_token=eval(r.content)["access_token"], refresh_token=eval(r.content)["refresh_token"], expires=expires).save()
+                instance = Instance(name=request.DATA["name"],
+                                    protocol=request.DATA["protocol"],
+                                    address=request.DATA["address"],
+                                    port=request.DATA["port"],
+                                    access_token=json.loads(r.content)["access_token"],
+                                    refresh_token=json.loads(r.content)["refresh_token"],
+                                    expires=expires).save()
             else:
                 errors += "Unable to get access to the remote instance using these parameters."
         except Exception:
@@ -1607,11 +1620,9 @@ def add_repository(request):
             content = {'message': errors}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(eval(instance.to_json()), status=status.HTTP_201_CREATED)
+            return Response(json.loads(instance.to_json()), status=status.HTTP_201_CREATED)
     return Response(iSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # else:
-    #     content = {'message':'Only an administrator can use this feature.'}
-    #     return Response(content, status=status.HTTP_401_UNAUTHORIZED)
+
 ################################################################################
 # 
 # Function Name: delete_repository(request)

@@ -27,11 +27,14 @@ def get_hash(xml_string):
     :param xml_string: XML String to hash
     :return:
     """
-    hash_parser = etree.XMLParser(remove_blank_text=True,remove_comments=True,remove_pis=True)
+    hash_parser = etree.XMLParser(remove_blank_text=True, remove_comments=True, remove_pis=True)
     etree.set_default_parser(parser=hash_parser)
 
     # parse the XML String removing blanks, comments, processing instructions
-    xml_tree = etree.parse(BytesIO(xml_string.encode('utf-8')))
+    try:
+        xml_tree = etree.parse(BytesIO(xml_string.encode('utf-8')))
+    except:
+        xml_tree = etree.parse(BytesIO(xml_string))
     # remove all annotations
     annotations = xml_tree.findall(".//{http://www.w3.org/2001/XMLSchema}annotation")
     for annotation in annotations:

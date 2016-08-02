@@ -210,7 +210,6 @@ class ExcelUploaderModule(PopupModule):
     
                 headers = xml_table[0]
                 for header in headers.iter('column'):
-                    print etree.tostring(header)
                     self.table['headers'].append(header.text)
     
                 values = xml_table[1]
@@ -222,9 +221,6 @@ class ExcelUploaderModule(PopupModule):
                         value_list.append(data.text)
     
                     self.table['values'].append(value_list)
-    
-                print self.table_name
-                print self.table
 
         return PopupModule.get_module(self, request)
 

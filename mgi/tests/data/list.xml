@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <a>1</a>
+    <a>2</a>
+    <a>3</a>
+    <a>é</a>
+    <a>
+        <b attr="3é">test</b>
+        <b>1</b>
+        <b>1é</b>
+    </a>
+</root>

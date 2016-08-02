@@ -26,6 +26,7 @@ import datetime
 from utils.XSDhash import XSDhash
 import os
 from django.utils.importlib import import_module
+import json
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
 MONGODB_URI = settings.MONGODB_URI
@@ -344,23 +345,8 @@ def postprocessor(path, key, value):
             return key, value
 
 
-def preprocessor(key, value):
-    """
-    Called before JSON to XML transformation
-    :param key:
-    :param value:
-    :return:
-    """
-    if isinstance(value, OrderedDict):
-        for ik, iv in value.items():
-            if ik == "#text":
-                if isinstance(iv, numbers.Number):
-                    value[ik] = str(iv)
-                else:
-                    value[ik] = iv
-        return key, value
-    else:
-        return key, value
+def custom_parse_numbers(num_str):
+    return str(num_str)
 
 
 class XMLdata(object):
@@ -406,8 +392,13 @@ class XMLdata(object):
         self.content['status'] = Status.ACTIVE
 
     @staticmethod
-    def unparse(json):
-        return xmltodict.unparse(json, preprocessor=preprocessor)
+    def unparse(json_dict):
+        json_dump_string = json.dumps(json_dict)
+        preprocessed_dict = json.loads(json_dump_string,
+                               parse_float=custom_parse_numbers,
+                               parse_int=custom_parse_numbers,
+                               object_pairs_hook=OrderedDict)
+        return xmltodict.unparse(preprocessed_dict)
 
     @staticmethod
     def initIndexes():

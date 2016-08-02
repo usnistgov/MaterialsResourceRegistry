@@ -304,12 +304,12 @@ class TokenTest(RegressionTest):
             r = requests.post(url=url, data=data, headers=headers, timeout=int(310000))
             if r.status_code == 200:
                 now = datetime.now()
-                delta = timedelta(seconds=int(eval(r.content)["expires_in"]))
+                delta = timedelta(seconds=int(json.loads(r.content)["expires_in"]))
                 expires = now + delta
 
                 token = Instance(name=application, protocol='http', address='127.0.0.1', port='8082',
-                                 access_token=eval(r.content)["access_token"],
-                                 refresh_token=eval(r.content)["refresh_token"], expires=expires).save()
+                                 access_token=json.loads(r.content)["access_token"],
+                                 refresh_token=json.loads(r.content)["refresh_token"], expires=expires).save()
                 return token
             else:
                 return ''

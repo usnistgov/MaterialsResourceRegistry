@@ -713,10 +713,7 @@ def federation_of_queries(request):
 @staff_member_required
 def add_repository(request):
     if request.method == 'POST':
-
-
         form = RepositoryForm(request.POST)
-
         if form.is_valid():
             if request.POST["action"] == "Register":
                 errors = ""
@@ -754,10 +751,7 @@ def add_repository(request):
                         }
                         r = requests.post(url=url, data=data, headers=headers, timeout=int(request.POST["timeout"]))
                         if r.status_code == 200:
-                            now = datetime.now()
-                            delta = timedelta(seconds=int(eval(r.content)["expires_in"]))
-                            expires = now + delta
-                            Instance(name=request.POST["name"], protocol=request.POST["protocol"], address=request.POST["ip_address"], port=request.POST["port"], access_token=eval(r.content)["access_token"], refresh_token=eval(r.content)["refresh_token"], expires=expires).save()
+                            create_instance(r.content, request.POST)
                             messages.add_message(request, messages.INFO, 'Repository registered with success.')
                             return redirect('/admin/repositories')
                         else:
@@ -777,8 +771,8 @@ def add_repository(request):
                     if r.status_code == 200:
                         message = "Remote API reached with success."
                     else:
-                        if 'detail' in eval(r.content):
-                            message = "Error: " + eval(r.content)['detail']
+                        if 'detail' in json.loads(r.content):
+                            message = "Error: " + json.loads(r.content)['detail']
                         else:
                             message = "Error: Unable to reach the remote API."
                 except Exception, e:
@@ -789,6 +783,15 @@ def add_repository(request):
         form = RepositoryForm()
 
     return render(request, 'admin/add_repository.html', {'form':form})
+
+
+def create_instance(content, request):
+    now = datetime.now()
+    delta = timedelta(seconds=int(json.loads(content)["expires_in"]))
+    expires = now + delta
+    Instance(name=request["name"], protocol=request["protocol"], address=request["ip_address"],
+             port=request["port"], access_token=json.loads(content)["access_token"],
+             refresh_token=json.loads(content)["refresh_token"], expires=expires).save()
 
 
 ################################################################################
@@ -821,13 +824,7 @@ def refresh_repository(request):
                 headers = {'content-type': 'application/x-www-form-urlencoded'}
                 r = requests.post(url=url, data=data, headers=headers, auth=(request.POST["client_id"], request.POST["client_secret"]), timeout=int(request.POST["timeout"]))
                 if r.status_code == 200:
-                    now = datetime.now()
-                    delta = timedelta(seconds=int(eval(r.content)["expires_in"]))
-                    expires = now + delta
-                    instance.access_token=eval(r.content)["access_token"]
-                    instance.refresh_token=eval(r.content)["refresh_token"]
-                    instance.expires=expires
-                    instance.save()
+                    update_instance(instance, r.content)
                     return HttpResponseRedirect('/admin/repositories')
                 else:
                     message = "Unable to get access to the remote instance using these parameters."
@@ -835,13 +832,21 @@ def refresh_repository(request):
             except Exception, e:
                 message = "Unable to get access to the remote instance using these parameters."
                 return render(request, 'admin/refresh_repository.html', {'form':form, 'action_result':message})
-
-
     else:
         form = RefreshRepositoryForm()
         request.session['refreshInstanceID'] = request.GET['id']
 
     return render(request, 'admin/refresh_repository.html', {'form':form})
+
+
+def update_instance(instance, content):
+    now = datetime.now()
+    delta = timedelta(seconds=int(json.loads(content)["expires_in"]))
+    expires = now + delta
+    instance.access_token = json.loads(content)["access_token"]
+    instance.refresh_token = json.loads(content)["refresh_token"]
+    instance.expires = expires
+    instance.save()
 
 
 ################################################################################
