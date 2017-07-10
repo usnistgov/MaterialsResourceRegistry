@@ -1,0 +1,61 @@
+<div class="mod_fancy_tree">
+    <div class="fancy_tree" >
+
+    </div>
+    <div class="source_data" style="display:none;">{{source_data}}</div>
+    <script>
+    glyph_opts = {
+        map: {
+          doc: "glyphicon glyphicon-file",
+          docOpen: "glyphicon glyphicon-file",
+          checkbox: "glyphicon glyphicon-unchecked",
+          checkboxSelected: "glyphicon glyphicon-check",
+          checkboxUnknown: "glyphicon glyphicon-share",
+          dragHelper: "glyphicon glyphicon-play",
+          dropMarker: "glyphicon glyphicon-arrow-right",
+          error: "glyphicon glyphicon-warning-sign",
+          expanderClosed: "glyphicon glyphicon-menu-right",
+          expanderLazy: "glyphicon glyphicon-menu-right",  // glyphicon-plus-sign
+          expanderOpen: "glyphicon glyphicon-menu-down",  // glyphicon-collapse-down
+          folder: "glyphicon glyphicon-folder-close",
+          folderOpen: "glyphicon glyphicon-folder-open",
+          loading: "glyphicon glyphicon-refresh glyphicon-spin"
+        }
+    };
+
+    init_fancy_tree = function($fancy_tree){
+        //console.log("Count:" + $fancy_tree.children().length);
+        $fancy_tree.fancytree({
+            extensions: ["glyph", "wide"],
+            checkbox: true,
+            glyph: glyph_opts,
+            _classNames: {
+                active: "no-css",
+                focused: "no-css"
+            },
+            selectMode: 2,
+            source: JSON.parse($fancy_tree.parent().children(".source_data").html()),
+            wide: {
+                iconWidth: "1em",
+                iconSpacing: "0.5em",
+                levelOfs: "1.5em"
+            },
+            icon: false,
+            init: function(event, data) {
+                //$("#tree"+" ul").addClass("fancytree-colorize-selected");
+            },
+            select: function(event, data){
+                save_selected_checkboxes(event, data);
+            }
+        });
+    }
+
+    $( document ).ready(function() {
+        console.log("document ready");
+        var module_id = "{{module_id}}"
+        console.log(module_id);
+        $fancy_tree = $($("#"+module_id).find(".fancy_tree"));
+        init_fancy_tree($fancy_tree);
+    });
+    </script>
+</div>

@@ -30,7 +30,7 @@ from django.contrib import messages
 import lxml.etree as etree
 from io import BytesIO
 import os
-import xmltodict
+import re
 from django.conf import settings
 from bson.objectid import ObjectId
 import json
@@ -146,26 +146,21 @@ def dashboard_resources(request):
     query = {}
     context = RequestContext(request, {})
     ispublished = request.GET.get('ispublished', None)
-    template_name = request.GET.get('template', None)
+    role_name_list = request.GET.getlist('role', ['all'])
+
+    role_name = ''
+    for role in role_name_list:
+        role_name += role + ','
+    context.update({'roles': role_name[:-1]})
+
     query['iduser'] = str(request.user.id)
-    #If ispublished not None, check if we want publish or unpublish records
+
     if ispublished:
         ispublished = ispublished == 'true'
         query['ispublished'] = ispublished
-    if template_name:
-        context.update({'template': template_name})
-        if template_name == 'datacollection':
-            templateNamesQuery = list(chain(Template.objects.filter(title=template_name).values_list('id'),
-                                            Template.objects.filter(title='repository').values_list('id'),
-                                            Template.objects.filter(title='database').values_list('id'),
-                                            Template.objects.filter(title='projectarchive').values_list('id')))
-        else :
-            templateNamesQuery = Template.objects.filter(title=template_name).values_list('id')
-        templateNames = []
-        for templateQuery in templateNamesQuery:
-            templateNames.append(str(templateQuery))
 
-        query['schema'] = {"$in" : templateNames}
+    if not (len(role_name_list) == 1 and role_name_list[0] == 'all'):
+        query['$or'] = [{"content.Resource.role.@xsi:type": role} for role in role_name_list]
 
     userXmlData = sorted(XMLdata.find(query), key=lambda data: data['lastmodificationdate'], reverse=True)
     #Add user_form for change owner
@@ -271,7 +266,7 @@ def dashboard_my_drafts(request):
                              xml_data__exists=True).order_by('template') # xml_data_id False if document not curated
     detailed_forms = []
     for form in forms:
-        detailed_forms.append({'form': form, 'template_name': Template.objects().get(pk=form.template).title,
+        detailed_forms.append({'form': form, 'template_roles': _get_list_roles(form.xml_data),
                                'user': form.user})
     user_form = UserForm(request.user)
     context = RequestContext(request, {'forms': detailed_forms,
@@ -286,12 +281,17 @@ def dashboard_my_drafts(request):
                                                        xml_data__exists=True).order_by('template')
         for form in otherUsersForms:
             other_users_detailed_forms.append({'form': form,
-                                               'template_name': Template.objects().get(pk=form.template).title,
+                                               'template_roles': _get_list_roles(form.xml_data),
                                                'user': form.user})
         context.update({'otherUsersForms': other_users_detailed_forms, 'usernames': usernames})
 
     return HttpResponse(template.render(context))
 
+
+def _get_list_roles(xml_data):
+    list_roles = re.findall(r"role xsi:type=\"([a-zA-Z]*)\">", xml_data)
+    str_roles = ", ".join(set(list_roles))
+    return str_roles
 
 
 ################################################################################

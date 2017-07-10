@@ -1376,17 +1376,19 @@ initAutocomplete = function() {
                    event.preventDefault(); // Prevent the default focus behavior.
                 },
                 source: function(request, response) {
-                $.getJSON("/explore/get_results_by_instance_keyword", { keyword: request.term, schemas: getSchemas(), userSchemas: [], onlySuggestions: true, },
+                var refinements_ = loadRefinementQueries();
+                $.post("/explore/get_results_by_instance_keyword", { keyword: request.term, schemas: getSchemas(), userSchemas: [],
+                 onlySuggestions: true, csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val(), refinements: refinements_},
                 function (data) {
                     response($.map(data.resultsByKeyword, function (item) {
-                        if(item.label != '')
+                        if(item.label != undefined)
                         {
                             return {
                             label: item.label,
                             value: item.label
                             }
                         }
-                 }));}
+                 }));}, 'json'
                 )},
               minLength: 2,
                 select: function( event, ui ) {

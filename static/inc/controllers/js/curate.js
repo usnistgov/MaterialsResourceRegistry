@@ -167,6 +167,7 @@ clear_fields = function(){
             });
 
             initModules();
+            selectRole();//FIXME: NMRR
         }
     });
 }
@@ -413,8 +414,37 @@ generate_xsd_form = function(){
             setTimeout(disable_elements ,0);
 
             initModules();
+            selectRole();//FIXME: NMRR
         },
     });
+}
+
+var selectRole = function(){
+    var role = $("#role").html();
+    var template_name = $("#template_name").html();
+    if(role != undefined){
+        var option = $("option:contains('" + role + "')")[0];
+        var value = option.value;
+        $(option).parent('select').val(value).change();
+        //$(option).parent('select').prop('disabled', 'disabled');
+        if (template_name == 'repository' ||
+        template_name == 'projectarchive' ||
+        template_name == 'database' ||
+        template_name == 'organization'){
+            if (template_name == 'repository'){
+                var option = $("option:contains('Collection: Repository')")[0];
+            }else if (template_name == 'projectarchive'){
+                var option = $("option:contains('Collection: Project Archive')")[0];
+            }else if (template_name == 'database'){
+                var option = $("option:contains('Dataset: Database')")[0];
+            }else if (template_name == 'organization'){
+                var option = $("option:contains('Organization')")[3];
+            }
+            var value = option.value;
+            $(option).parent('select').val(value).change();
+        }
+
+    }
 }
 
 

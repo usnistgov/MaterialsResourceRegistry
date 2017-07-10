@@ -3,7 +3,8 @@
 import types
 from types import NoneType
 from django.http.request import HttpRequest
-from django.template.base import Template
+# from django.template.base import Template
+from django.template.backends.django import Template
 from django.template.context import RequestContext
 from django.template import loader
 from os.path import join

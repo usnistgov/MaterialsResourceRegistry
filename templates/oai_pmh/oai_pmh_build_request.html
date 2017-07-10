@@ -40,7 +40,7 @@
     <h4><i class='fa fa-circle-o-notch fa-spin fa-1x'></i>&nbsp;&nbsp;Please wait ...</h4>
 </div>
 
-    {% if request_form.dataProvider.choices|length > 1 %}
+    {% if request_form.fields.dataProvider.choices|length > 1 %}
         <table>
             <tr>
                 <td>{{request_form.dataProvider.label}}:</td>

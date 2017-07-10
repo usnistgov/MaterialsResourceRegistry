@@ -41,7 +41,6 @@ from oai_pmh.api.exceptions import OAIAPIException, OAIAPILabelledException, OAI
 from oai_pmh.api.messages import APIMessage
 
 
-
 ################################################################################
 #
 # Function Name: objectIdentifyByURL(request)
@@ -1071,9 +1070,12 @@ def oai_pmh_conf_xslt(template_id, my_metadata_format_id, xslt_id, activated):
         raise OAIAPILabelledException(message='Impossible to activate the configuration. Please provide '
                                       'a XSLT.', status=status.HTTP_400_BAD_REQUEST)
     try:
-        OaiTemplMfXslt.objects.filter(myMetadataFormat=my_metadata_format_id, template=template_id)\
-            .update(set__myMetadataFormat = my_metadata_format_id, set__template = template_id,
-                    set__xslt = xslt_id, set__activated = activated, upsert=True)
+        xslt = OaiXslt.objects.get(id=xslt_id)
+        template = Template.objects.get(id=template_id)
+        myMetadataFormat = OaiMyMetadataFormat.objects.get(pk=my_metadata_format_id)
+        OaiTemplMfXslt.objects.filter(myMetadataFormat=myMetadataFormat, template=template)\
+            .update(set__myMetadataFormat = myMetadataFormat, set__template = template,
+                    set__xslt = xslt, set__activated = activated, upsert=True)
         content = APIMessage.getMessageLabelled("XSLT edited with success.")
 
         return Response(content, status=status.HTTP_200_OK)

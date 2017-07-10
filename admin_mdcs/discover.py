@@ -16,18 +16,22 @@
 #
 ################################################################################
 from django.contrib.auth.models import Permission, Group
+
+from mgi.common import update_dependencies
 from mgi.rights import anonymous_group, default_group, explore_access, curate_access, \
     curate_edit_document, curate_delete_document, api_access
 from pymongo import MongoClient
 import os
+from lxml import etree
+from io import BytesIO
+from mgi.models import Template, Type, create_template, create_type
 from django.utils.importlib import import_module
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
 MONGODB_URI = settings.MONGODB_URI
 SITE_ROOT = settings.SITE_ROOT
 MGI_DB = settings.MGI_DB
-from mgi.models import Template, TemplateVersion
-from utils.XSDhash import XSDhash
+STATIC_DIR = os.path.join(SITE_ROOT, 'static', 'resources', 'xsd')
 
 def init_rules():
     """
@@ -76,23 +80,23 @@ def load_templates():
     existing_templates = Template.objects()
     if len(existing_templates) == 0:
         templates = {
-            'all':'AllResources.xsd',
-            'organization': 'Organization.xsd',
-            'datacollection': 'DataCollection.xsd',
-            'repository': 'Repository.xsd',
-            'projectarchive': 'ProjectArchive.xsd',
-            'database': 'Database.xsd',
-            'dataset': 'Dataset.xsd',
-            'service': 'Service.xsd',
-            'informational': 'Informational.xsd',
-            'software': 'Software.xsd',
+            'all': 'res-md.xsd',
+            'organization': 'res-md.xsd',
+            'datacollection': 'res-md.xsd',
+            'repository': 'res-md.xsd',
+            'projectarchive': 'res-md.xsd',
+            'database': 'res-md.xsd',
+            'dataset': 'res-md.xsd',
+            'service': 'res-md.xsd',
+            'informational': 'res-md.xsd',
+            'software': 'res-md.xsd',
         }    
         
         template_ids = []
         
         template_results = {
-            'full': 'nmrr-full.xsl',
-            'detail': 'nmrr-detail.xsl',
+            'full': 'nmrr-full_demo.xsl',
+            'detail': 'nmrr-detail_demo.xsl',
         }
         
         template_results_id = {
@@ -104,23 +108,20 @@ def load_templates():
         client = MongoClient(MONGODB_URI)
         # connect to the db 'mgi'
         db = client[MGI_DB]
-        
+
         # Add the templates
         for template_name, template_path in templates.iteritems():
-            file = open(os.path.join(SITE_ROOT, 'static', 'resources', 'xsd', template_path),'r')
-            templateContent = file.read()
-            hash = XSDhash.get_hash(templateContent)
-            
-            #create template/ template version
-            objectVersions = TemplateVersion(nbVersions=1, isDeleted=False).save()
-            object = Template(title=template_name, filename=template_path, content=templateContent, version=1, templateVersion=str(objectVersions.id), hash=hash).save()
-            objectVersions.versions = [str(object.id)]
-            objectVersions.current = str(object.id)
-            objectVersions.save()    
-            object.save()
-        
-            # save template id
-            template_ids.append(str(object.id))
+            template_file = open(os.path.join(SITE_ROOT, 'static', 'resources', 'xsd', template_path), 'r')
+            template_content = template_file.read()
+
+            # create template
+            resource_template = create_template(template_content,
+                                                template_name,
+                                                template_path,
+                                                dependencies=[],
+                                                user=None,
+                                                validation=False)
+            template_ids.append(str(resource_template.id))
     
     
 
@@ -142,3 +143,47 @@ def load_templates():
         templates = db['template']
         results_xslt = {'ResultXsltList': template_results_id['full'], 'ResultXsltDetailed': template_results_id['detail']}
         templates.update({}, {"$set":results_xslt}, upsert=False, multi=True)
+
+
+    def scan_static_resources():
+        """
+        Dynamically load templates/types in resource folder
+        :return:
+        """
+        try:
+            # if templates are already present, initialization already happened
+            existing_templates = Template.objects()
+            existing_types = Type.objects()
+
+            if len(existing_templates) == 0 and len(existing_types) == 0:
+                templates_dir = os.path.join(STATIC_DIR, 'templates')
+                if os.path.exists(templates_dir):
+                    for filename in os.listdir(templates_dir):
+                        if filename.endswith(".xsd"):
+                            file_path = os.path.join(templates_dir, filename)
+                            file = open(file_path, 'r')
+                            file_content = file.read()
+                            try:
+                                name_no_extension = filename.split(".xsd")[0]
+                                create_template(file_content, name_no_extension, name_no_extension)
+                            except Exception, e:
+                                print "ERROR: Unable to load {0} ({1})".format(filename, e.message)
+                        else:
+                            print "WARNING: {0} not loaded because extension is not {1}".format(filename, ".xsd")
+
+                types_dir = os.path.join(STATIC_DIR, 'types')
+                if os.path.exists(types_dir):
+                    for filename in os.listdir(types_dir):
+                        if filename.endswith(".xsd"):
+                            file_path = os.path.join(types_dir, filename)
+                            file = open(file_path, 'r')
+                            file_content = file.read()
+                            try:
+                                name_no_extension = filename.split(".xsd")[0]
+                                create_type(file_content, name_no_extension, name_no_extension)
+                            except Exception, e:
+                                print "ERROR: Unable to load {0} ({1})".format(filename, e.message)
+                        else:
+                            print "WARNING: {0} not loaded because extension is not {1}".format(filename, ".xsd")
+        except Exception:
+            print "ERROR: An unexpected error happened during the scan of static resources"

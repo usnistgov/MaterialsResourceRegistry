@@ -20,10 +20,13 @@
 #
 ################################################################################
 import os
+
+from django.core.urlresolvers import reverse_lazy
 from mongoengine import connect
 
-VERSION = "BETA"
+VERSION = "1.0_rc1"
 
+FORCE_SCRIPT_NAME = ""
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -42,23 +45,28 @@ if DEBUG:
         }
     }
 else:
-    pass
-    # Uncomment and set all parameters, delete pass instruction
-    # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-    
-    # https://docs.djangoproject.com/en/1.7/ref/settings/#secret-key
-    # SECRET_KEY = '<secret_key>'
-    
+    SECRET_KEY = "<secret_key>"
+
     # https://docs.djangoproject.com/en/1.7/ref/settings/#allowed-hosts
-    # ALLOWED_HOSTS = ['<domain>','<server_ip>']
-    
-    # os.environ['HTTPS'] = "on"
+    ALLOWED_HOSTS = ['*']
+
+    os.environ['HTTPS'] = "on"
     # https://docs.djangoproject.com/en/1.7/ref/settings/#csrf-cookie-secure
-    # CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_AGE = None
+    SESSION_COOKIE_AGE = 604800
     # https://docs.djangoproject.com/en/1.7/ref/settings/#session-cookie-secure
-    # SESSION_COOKIE_SECURE = True
-    
+    SESSION_COOKIE_SECURE = True
+
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+
     # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
     # DATABASES = {
     #     'default': {
     #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -170,12 +178,14 @@ OAI_REPO_IDENTIFIER = 'server-' + HOST
 OAI_SAMPLE_IDENTIFIER = OAI_SCHEME+OAI_DELIMITER+OAI_REPO_IDENTIFIER+OAI_DELIMITER+'id/12345678a123aff6ff5f2d9e'
 OAI_DELETED_RECORD = 'persistent' #no ; transient ; persistent
 
-# PARSER
+# XSD PARSER
 PARSER_MIN_TREE = True
 PARSER_IGNORE_MODULES = False
 PARSER_COLLAPSE = True
-PARSER_AUTO_KEY_KEYREF = True
+PARSER_AUTO_KEY_KEYREF = False
 PARSER_IMPLICIT_EXTENSION_BASE = False
+PARSER_DOWNLOAD_DEPENDENCIES = True
+XERCES_VALIDATION = False
 
 TEMPLATE_DIRS = [
     os.path.join(BASE_DIR, 'templates')
@@ -265,7 +275,7 @@ SWAGGER_SETTINGS = {
 
 # django.contrib.auth.views.login redirects you to accounts/profile/ 
 # right after you log in by default. This setting changes that.
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = reverse_lazy("home")
 
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

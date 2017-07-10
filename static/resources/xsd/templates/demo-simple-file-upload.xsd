@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"
+    elementFormDefault="unqualified">
+    <xsd:element name="file">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element minOccurs="0" name="name" type="xsd:string"/>
+                <xsd:element maxOccurs="unbounded" minOccurs="0" name="keyword" type="xsd:string"/>
+                <xsd:element xmlns:ns0="http://mdcs.ns" minOccurs="0" name="url" type="xsd:anyURI"
+                    ns0:_mod_mdcs_="/curator/blob-hoster"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

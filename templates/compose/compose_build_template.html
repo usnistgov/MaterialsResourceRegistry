@@ -93,6 +93,17 @@ interact with that element.
 	 	</table>
 	 	</div>
  	{% endfor %}
+    <h3>Built-in Datatypes</h3>
+ 	<div>
+ 	<table class="table table-bordered">
+		{% for type in builtinTypes %}
+		<tr>
+    		<td templateID='{{type.id}}'>{{ type.title }}</td>
+    		<td><button class="btn insert"><i class="icon-plus-sign"></i>Insert</button></td>
+ 		</tr>
+ 		{% endfor %}
+ 	</table>
+ 	</div>
  	
  	<h3>No Buckets</h3>
  	<div>

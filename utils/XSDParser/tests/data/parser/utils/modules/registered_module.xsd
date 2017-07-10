@@ -1,5 +1,5 @@
 <xs:complexType xmlns:ns0="http://mdcs.ns" xmlns:xs="http://www.w3.org/2001/XMLSchema" name="root"
-                ns0:_mod_mdcs_="registered_module">
+                ns0:_mod_mdcs_="/mock/url">
     <xs:sequence>
         <xs:element name="child" type="xs:string"/>
     </xs:sequence>

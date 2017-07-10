@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"
+    elementFormDefault="unqualified">
+
+    <xsd:complexType name="citation-type">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="document-type">
+                <xsd:annotation>
+                    <xsd:documentation>The type of publication</xsd:documentation>
+                </xsd:annotation>
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:enumeration value="book"/>
+                        <xsd:enumeration value="journal"/>
+                        <xsd:enumeration value="report"/>
+                        <xsd:enumeration value="patent"/>
+                        <xsd:enumeration value="thesis"/>
+                        <xsd:enumeration value="conference proceedings"/>
+                        <xsd:enumeration value="archived document"/>
+                        <xsd:enumeration value="personal correspondence"/>
+                        <xsd:enumeration value="published translation"/>
+                        <xsd:enumeration value="unspecified"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="title" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>Title of the publication</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="author">
+                <xsd:annotation>
+                    <xsd:documentation>Author of publication</xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="given-name" type="xsd:string"/>
+                        <xsd:element minOccurs="0" name="surname" type="xsd:string"/>
+                        <xsd:element minOccurs="0" name="suffix" type="xsd:string"/>
+                        <xsd:element maxOccurs="unbounded" minOccurs="0" name="affiliation"
+                            type="xsd:string"/>
+                        <xsd:element minOccurs="0" name="ORCID" type="xsd:string"/>
+
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="publication-name" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="publication-date">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="year" type="xsd:gYear"/>
+                        <xsd:element minOccurs="0" name="month" type="xsd:gMonth"/>
+                        <xsd:element minOccurs="0" name="day" type="xsd:gDay"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="volume" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="issue" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="abstract" type="xsd:string" xmlns:ns0="http://mdcs.ns"
+                ns0:_mod_mdcs_="/registry/description" maxOccurs="unbounded"/>
+            <xsd:element minOccurs="0" name="pages" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="DOI" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="URL" type="xsd:anyURI"/>
+            <xsd:element minOccurs="0" name="bibtex" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="text-bibliography" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

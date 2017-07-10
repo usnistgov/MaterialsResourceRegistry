@@ -24,118 +24,94 @@
 
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/result.css' %}" media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/selection.css' %}"  media="screen" />
 {% endblock %}
 
 {% block content %}
     <div id="body">
         <div class="width">
-            {% if not template %}
-                    <div class="btn-group pull-right">
-                        <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                        <button class="btn clear-fields" onclick="location.href='/curate'"><i class="icon-file"></i> Add New Resource</button>
-                    </div>
-                    <h3>My Resources</h3>
-            {% endif%}
-            {% if template == "organization" %}
-                    <div class="btn-group pull-right">
-                        <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                        <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=organization'"><i class="icon-file"></i> Add New Organization</button>
-                    </div>
-                    <h3>My Organizations</h3>
-            {% endif%}
-            {% if template == "datacollection" %}
-              <div class="btn-group pull-right">
-                  <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                  <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=datacollection'"><i class="icon-file"></i> Add New Data Collection</button>
-                  <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=repository'"><i class="icon-file"></i> New Repository</button>
-                  <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=projectarchive'"><i class="icon-file"></i> New Project Archive</button>
-                  <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=database'"><i class="icon-file"></i> New Database</button>
-              </div>
-              <h3>My Data Collections</h3>
-            {% endif%}
-            {% if template == "dataset" %}
-                <div class="btn-group pull-right">
-                    <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                    <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=dataset'"><i class="icon-file"></i> Add New Dataset</button>
-                </div>
-                <h3>My Datasets</h3>
-            {% endif%}
-            {% if template == "service" %}
-                <div class="btn-group pull-right">
-                    <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                    <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=service'"><i class="icon-file"></i> Add New Service</button>
-                </div>
-                <h3>My Services</h3>
-            {% endif%}
-            {% if template == "informational" %}
-                <div class="btn-group pull-right">
-                    <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                    <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=informational'"><i class="icon-file"></i> Add New Informational Site</button>
-                </div>
-                    <h3>My Informational Sites</h3>
-            {% endif%}
-            {% if template == "software" %}
-                <div class="btn-group pull-right">
-                    <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
-                    <button class="btn clear-fields" onclick="location.href='/curate/start_curate?template=software'"><i class="icon-file"></i> Add New Software</button>
-                </div>
-                <h3>My Software</h3>
-            {% endif%}
+            <div class="btn-group pull-right">
+                <button class="btn clear-fields" onclick="location.href='/dashboard'"><i class="icon-file"></i> My Dashboard</button>
+                <button class="btn clear-fields" onclick="location.href='/curate'"><i class="icon-file"></i> Add New Resource</button>
+            </div>
+            <h3>My Resources</h3>
 
             <br>
             <br>
+            <div style='display: none' id="my_role" >
+                <input type="checkbox" name="my_role" id="Organization" value="Organization">
+                <input type="checkbox" name="my_role" id="DataCollection" value="DataCollection">
+                <input type="checkbox" name="my_role" id="Dataset" value="Dataset">
+                <input type="checkbox" name="my_role" id="ServiceAPI" value="ServiceAPI">
+                <input type="checkbox" name="my_role" id="WebSite" value="WebSite">
+                <input type="checkbox" name="my_role" id="Software" value="Software">
+            </div>
 
-            <table>
+            <table id="icons_table">
             <tr>
-                <td align="center" style={% if not template %}" border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources{% if ispublished == True %}?ispublished=true{% elif ispublished == False %}?ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/allresources.png"><br>
-                    All Resources</div>
-                    </a>
+                <td id="td_all" align="center" onclick="click_role('all');get_url('{{ispublished}}');">
+                    <img width="100" src="/static/img/allresources.png">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br/>
+                    All Resources
                 </td>
-                <td align="center" style={% if template == "organization" %}"border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources?template=organization{% if ispublished == True %}&ispublished=true{% elif ispublished == False %}&ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/organization.png"><br>
-                    Organizations</div>
-                    </a>
+                <td id="td_Organization" align="center" onclick="click_role('Organization');get_url('{{ispublished}}');" >
+                    <img width="100" src="/static/img/organization.png">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br>
+                    Organizations
                 </td>
-                <td align="center" style={% if template == "datacollection" %}"border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources?template=datacollection{% if ispublished == True %}&ispublished=true{% elif ispublished == False %}&ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/datacollection.png"><br>
-                    Data Collections</div>
-                    </a>
+                <td id="td_DataCollection"  align="center" onclick="click_role('DataCollection');get_url('{{ispublished}}');" >
+                    <img width="100" src="/static/img/datacollection.png">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br>
+                    Data Collections
                 </td>
-                <td align="center" style={% if template == "dataset" %}"border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources?template=dataset{% if ispublished == True %}&ispublished=true{% elif ispublished == False %}&ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/dataset.png"><br>
-                    Datasets</div>
-                    </a>
+                <td id="td_Dataset" align="center" onclick="click_role('Dataset');get_url('{{ispublished}}');">
+                    <img width="100" src="/static/img/dataset.png">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br>
+                    Datasets
                 </td>
-                <td align="center" style={% if template == "service" %}"border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources?template=service{% if ispublished == True %}&ispublished=true{% elif ispublished == False %}&ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/service.png"><br>
-                    Services</div>
-                    </a>
+                <td id="td_ServiceAPI" align="center" onclick="click_role('ServiceAPI');get_url('{{ispublished}}');">
+                    <img width="100" src="/static/img/service.png">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br>
+                    Services
                 </td>
-                <td align="center" style={% if template == "informational" %}"border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources?template=informational{% if ispublished == True %}&ispublished=true{% elif ispublished == False %}&ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/informational.png"><br>
-                    Informational</div>
-                    </a>
+                <td id="td_WebSite" align="center" onclick="click_role('WebSite');get_url('{{ispublished}}');">
+                    <img width="100" src="/static/img/informational.png">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br>
+                    Informational Sites
                 </td>
-                <td align="center" style={% if template == "software" %}"border-color:#000000;border-size:15px"{% endif%}>
-                    <a href="/dashboard/resources?template=software{% if ispublished == True %}&ispublished=true{% elif ispublished == False %}&ispublished=false{% endif%}">
-                    <div align="center"><img width="100" src="/static/img/software.jpg"><br>
-                    Software</div>
-                    </a>
+                <td id="td_Software" align="center" onclick="click_role('Software');get_url('{{ispublished}}');">
+                    <img width="100" src="/static/img/software.jpg">
+                    <div class="tick" align="right">
+                         <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <br>
+                    Software
                 </td>
             </tr>
             </table>
 
             <ul class="nav nav-tabs">
-                    {% if ispublished == None %} <li class="active"> {%else%} <li> {% endif%} <a href="/dashboard/resources{% if template  %}?template={{template}}{% endif%}">All</a></li>
-                    {% if ispublished == True %} <li class="active"> {%else%} <li> {% endif%}<a href="/dashboard/resources?{% if template  %}template={{template}}{% endif%}&ispublished=true">Published</a></li>
-                    {% if ispublished == False %} <li class="active"> {%else%} <li> {% endif%}<a href="/dashboard/resources?{% if template  %}template={{template}}{% endif%}&ispublished=false">Not Published</a></li>
+                    {% if ispublished == None %} <li class="active"> {%else%} <li> {% endif%} <a onclick="get_url('None');">All</a></li>
+                    {% if ispublished == True %} <li class="active"> {%else%} <li> {% endif%} <a onclick="get_url('True');">Published</a></li>
+                    {% if ispublished == False %} <li class="active"> {%else%} <li> {% endif%} <a onclick="get_url('False');">Not Published</a></li>
             </ul>
 
             {% if user.is_staff %}
@@ -155,14 +131,14 @@
             <div class="clear"></div>
             {% if user.is_staff %}
                 <span>
-                    <div class="tpl-title">Other users Resources</div>
+                    <div class="tpl-title">Other Users' Resources</div>
                 </span>
                 {% if OtherUsersXMLdatas%}
                     {% with canEdit=request.user|has_perm:'curate.curate_edit_document' canDelete=request.user|has_perm:'curate.curate_delete_document' %}
                         {% include 'dashboard/my_dashboard_my_records_table.html' with XMLdatas=OtherUsersXMLdatas %}
                     {% endwith%}
                 {%else%}
-                    No other users Resources found
+                    No other users' resources found
                 {%endif%}
             {%endif%}
         </div>
@@ -212,6 +188,7 @@ Are you sure you want to publish this new version? Please note this will permane
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="{% static 'inc/controllers/js/dashboard.js' %}"></script>
   <script>
+    initNmrr('{{roles}}');
     initBanner();
   </script>
 {% endblock %}

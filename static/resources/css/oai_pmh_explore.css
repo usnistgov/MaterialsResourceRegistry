@@ -136,3 +136,16 @@ div#form_start_current ul {
 .local {
 	color: red;
 }
+
+.ui-autocomplete-loading {
+	background: white;
+}
+
+.harvested, .harvested a {
+    color: #CD5C5C;
+}
+
+.harvested a {
+    cursor: pointer;
+    cursor: hand;
+}

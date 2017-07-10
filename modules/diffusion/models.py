@@ -359,13 +359,13 @@ class ExcelUploaderModule(PopupModule):
 class PeriodicTableMultipleModuleShort(PopupModule):
 
     def __init__(self):
-        with open(os.path.join(TEMPLATES_PATH, 'periodic_multiple.html'), 'r') as periodic_file:
+        with open(os.path.join(TEMPLATES_PATH, 'periodic_multiple_short.html'), 'r') as periodic_file:
             periodic_table = periodic_file.read()
 
         PopupModule.__init__(self, popup_content=periodic_table, button_label='Select Elements',
                              styles=[os.path.join(STYLES_PATH, 'periodic.css'),
                                      os.path.join(STYLES_PATH, 'periodic_multiple.css')],
-                             scripts=[os.path.join(SCRIPTS_PATH, 'periodic_multiple.js')])
+                             scripts=[os.path.join(SCRIPTS_PATH, 'periodic_multiple_short.js')])
 
     def _get_module(self, request):
         return PopupModule.get_module(self, request)
@@ -408,7 +408,6 @@ class PeriodicTableMultipleModuleShort(PopupModule):
                                     purity = '0'
                                 else:
                                     purity = constituent_element.text
-
 
                         constituents_disp += '<tr>'
                         constituents_disp += "<td>" + name + "</td>"
@@ -475,7 +474,6 @@ class PeriodicTableMultipleModuleShort(PopupModule):
                     element_list_xml += "<quantity>" + element['qty'] + "</quantity>"
                     if element['pur'] != '':
                         element_list_xml += "<purity>" + element['pur'] + "</purity>"
-
 
                     element_list_xml += '</constituent>'
             return element_list_xml

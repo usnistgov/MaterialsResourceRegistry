@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"
+    elementFormDefault="unqualified">
+
+    <xsd:complexType name="note-type">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="title" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="date" type="xsd:date"/>
+            <xsd:element minOccurs="0" name="text" type="xsd:string" xmlns:ns0="http://mdcs.ns"
+                ns0:_mod_mdcs_="/registry/description"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

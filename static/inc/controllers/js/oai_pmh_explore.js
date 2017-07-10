@@ -254,7 +254,7 @@ AJAXOAIPMH = function (keyword)
     $("#banner_tab_results_wait").show(200);
     return $.ajax({
         url : "get_results_by_instance_keyword",
-        type : "GET",
+        type : "POST",
         dataType: "json",
         data : {
             keyword: keyword,
@@ -281,7 +281,7 @@ AJAXLocal = function (keyword)
        $("#banner_tab_results_local_wait").show(200);
        return $.ajax({
             url : "/explore/get_results_by_instance_keyword",
-            type : "GET",
+            type : "POST",
             dataType: "json",
             data : {
                 keyword: keyword,
@@ -327,7 +327,8 @@ initAutocomplete = function() {
                    event.preventDefault(); // Prevent the default focus behavior.
                 },
                 source: function(request, response) {
-                $.getJSON("get_results_by_instance_keyword", { keyword: request.term, schemas: getSchemas(), onlySuggestions: true, },
+                $.post("get_results_by_instance_keyword", { keyword: request.term, schemas: getSchemas(),
+                 onlySuggestions: true, csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val() },
                 function (data) {
                     response($.map(data.resultsByKeyword, function (item) {
                         if(item.label != '')
@@ -337,7 +338,7 @@ initAutocomplete = function() {
                             value: item.label
                             }
                         }
-                 }));}
+                 }));}, 'json'
                 )},
                 minLength: 2,
                 select: function( event, ui ) {

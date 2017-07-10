@@ -22,6 +22,92 @@ loadUploadManagerHandler = function()
     console.log('END [loadUploadManagerHandler]');
 }
 
+
+/**
+ *
+ */
+initNmrr = function (roles_list) {
+    var btns = $("#my_role").children("input");
+    for(var i = 0; i < btns.length; i++) {
+        // when value change
+        btns[i].onclick = function () {
+            var selected_val = $(this).val();
+            var td = $("#td_"+selected_val);
+            if ($(this).prop('checked') == true) {
+                td.addClass("selected_resource");
+            } else {
+                td.removeClass("selected_resource");
+            }
+        };
+    }
+    roles_list = roles_list.split(',');
+    for (var i = 0 ; i<roles_list.length; i++) {
+        click_role(roles_list[i]);
+    }
+}
+
+/**
+ * Check if all the images are selected
+ * @returns {boolean}
+ */
+is_all_td_selected = function() {
+    return $("#Organization").prop('checked') == true
+        && $("#Dataset").prop('checked') == true
+        && $("#DataCollection").prop('checked') == true
+        && $("#ServiceAPI").prop('checked') == true
+        && $("#Software").prop('checked') == true
+        && $("#WebSite").prop('checked') == true ;
+}
+
+/**
+ * Click for a role
+ */
+click_role = function(role) {
+    if (role == 'all') {
+        $("#my_role").find('input:checked').prop('checked', false);
+        $("#td_" + role).addClass("selected_resource");
+    } else {
+        $("#td_all").css({'class': ''});
+        $("#"+role).click();
+        if (is_all_td_selected()) {
+            $("#my_role").find('input:checked').prop('checked',false);
+            $("#td_" + role).removeClass("selected_resource");
+        }
+    }
+}
+
+/**
+ * Update URL
+ */
+get_url = function(ispublished) {
+    var url = "/dashboard/resources";
+    var published = '';
+    var list_role = '';
+    var i = 0;
+    $('input:checked[name=my_role]').each(function() {
+        if (i > 0) {
+            list_role += '&';
+        }
+        list_role += 'role='+$(this).val();
+        i++;
+    });
+
+    if (ispublished == 'True') {
+        published = 'ispublished=true';
+    } else if (ispublished == 'False') {
+        published = 'ispublished=false';
+    }
+    if (list_role != '') {
+        url += '?'+list_role;
+        if (published != '') {
+            url += '&' + published;
+        }
+    } else if (published != '') {
+        url += '?' + published;
+    }
+    window.location.href = url;
+}
+
 /**
  * Edit general information of a template or a type
  */

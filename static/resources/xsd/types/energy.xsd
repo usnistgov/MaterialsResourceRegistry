@@ -1,0 +1,36 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"
+	elementFormDefault="qualified">
+	<xsd:complexType name="energy">
+		<xsd:sequence>
+			<xsd:element name="value" type="xsd:float" maxOccurs="unbounded"/>
+			<xsd:element name="unit">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="J"/>
+						<xsd:enumeration value="kJ"/>
+						<xsd:enumeration value="cal"/>
+						<xsd:enumeration value="kcal"/>
+						<xsd:enumeration value="eV"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element maxOccurs="unbounded" minOccurs="0" name="uncertainty">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element minOccurs="0" name="type" type="xsd:string"/>
+						<xsd:element maxOccurs="unbounded" minOccurs="0" name="value"
+							type="xsd:double"/>
+						<xsd:element minOccurs="0" name="scale">
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:string">
+									<xsd:enumeration value="absolute"/>
+									<xsd:enumeration value="relative"/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

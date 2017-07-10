@@ -30,6 +30,7 @@ class jsonDataSerializer(serializers.Serializer):
     title = serializers.CharField()
     schema = serializers.CharField()
     content = serializers.CharField()
+    # ispublished = serializers.BooleanField(required=False, default=True)
     _id = serializers.CharField(required=False)
 
 
@@ -79,9 +80,12 @@ class querySerializer(serializers.Serializer):
 # 
 ################################################################################
 class schemaSerializer(MongoEngineModelSerializer):
+    templateVersion = serializers.CharField(required=False)
+    dependencies = serializers.CharField(required=False)
+
     class Meta:
         model = Template
-        exclude = (['templateVersion','version','hash'])
+        exclude = (['version', 'hash'])
 
 
 ################################################################################
@@ -188,9 +192,12 @@ class TemplateVersionSerializer(MongoEngineModelSerializer):
 # 
 ################################################################################
 class typeSerializer(MongoEngineModelSerializer):
+    typeVersion = serializers.CharField(required=False)
+    dependencies = serializers.CharField(required=False)
+
     class Meta:
         model = Type
-        exclude = (['typeVersion','version','hash'])
+        exclude = (['version', 'hash'])
 
 
 ################################################################################

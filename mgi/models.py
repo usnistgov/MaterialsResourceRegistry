@@ -14,7 +14,9 @@
 #
 ################################################################################
 import numbers
+from lxml import etree
 from mongoengine import *
+from django_mongoengine import fields as dme_fields, Document as dme_Document
 
 # Specific to MongoDB ordered inserts
 from collections import OrderedDict
@@ -23,10 +25,18 @@ import xmltodict
 from pymongo import MongoClient, TEXT, DESCENDING, errors
 import re
 import datetime
+from io import BytesIO
+
+from mgi import common
+from mgi.exceptions import MDCSError, XMLError, XSDError
+from utils.XMLValidation.xml_schema import validate_xml_schema
 from utils.XSDhash import XSDhash
 import os
 from django.utils.importlib import import_module
 import json
+from curate.models import SchemaElement
+from utils.XSDflattener.XSDflattener import XSDFlattenerDatabaseOrURL
+
 settings_file = os.environ.get("DJANGO_SETTINGS_MODULE")
 settings = import_module(settings_file)
 MONGODB_URI = settings.MONGODB_URI
@@ -45,7 +55,7 @@ class Request(Document):
     password = StringField(required=True)
     first_name = StringField(required=True)
     last_name = StringField(required=True)
-    email = StringField(required=True)    
+    email = StringField(required=True)
 
 
 class Message(Document):
@@ -55,14 +65,14 @@ class Message(Document):
     content = StringField()
 
 
-class Exporter(Document, EmbeddedDocument):
+class Exporter(Document):
     """Represents an exporter"""
     name = StringField(required=True, unique=True)
     url = StringField(required=True)
     available_for_all = BooleanField(required=True)
 
 
-class ExporterXslt(Document, EmbeddedDocument):
+class ExporterXslt(Document):
     """Represents an xslt file for exporter"""
     name = StringField(required=True, unique=True)
     filename = StringField(required=True)
@@ -70,27 +80,27 @@ class ExporterXslt(Document, EmbeddedDocument):
     available_for_all = BooleanField(required=True)
 
 
-class ResultXslt(Document, EmbeddedDocument):
+class ResultXslt(Document):
     """Represents an xslt file for result representation"""
     name = StringField(required=True, unique=True)
     filename = StringField(required=True)
     content = StringField(required=True)
 
 
-class Template(Document):
+class Template(dme_Document):
     """Represents an XML schema template that defines the structure of data for curation"""
-    title = StringField(required=True)
-    filename = StringField(required=True)
-    content = StringField(required=True)
-    templateVersion = StringField(required=False)
-    version = IntField(required=False)
-    hash = StringField(required=True)
-    user = StringField(required=False)
-    dependencies = ListField(StringField())
-    exporters = ListField(ReferenceField(Exporter, reverse_delete_rule=PULL))
-    XSLTFiles = ListField(ReferenceField(ExporterXslt, reverse_delete_rule=PULL))
-    ResultXsltList = ReferenceField(ResultXslt, reverse_delete_rule=NULLIFY)
-    ResultXsltDetailed = ReferenceField(ResultXslt, reverse_delete_rule=NULLIFY)
+    title = dme_fields.StringField()
+    filename = dme_fields.StringField()
+    content = dme_fields.StringField()
+    templateVersion = dme_fields.StringField(blank=True)
+    version = dme_fields.IntField(blank=True)
+    hash = dme_fields.StringField()
+    user = dme_fields.StringField(blank=True)
+    dependencies = dme_fields.ListField(StringField(), blank=True)
+    exporters = dme_fields.ListField(ReferenceField(Exporter, reverse_delete_rule=PULL), blank=True)
+    XSLTFiles = dme_fields.ListField(ReferenceField(ExporterXslt, reverse_delete_rule=PULL), blank=True)
+    ResultXsltList = dme_fields.ReferenceField(ResultXslt, reverse_delete_rule=NULLIFY, blank=True)
+    ResultXsltDetailed = dme_fields.ReferenceField(ResultXslt, reverse_delete_rule=NULLIFY, blank=True)
 
 
 def delete_template(object_id):
@@ -119,13 +129,49 @@ def delete_type_and_version(object_id):
     type.delete()
 
 
-def create_template(content, name, filename, dependencies=[], user=None):
-    hash_value = XSDhash.get_hash(content)
+def is_schema_valid(object_type, content, name=None):
+    # is the name unique?
+    if name is not None:
+        if object_type.lower() == 'template':
+            names = Template.objects.all().values_list('title')
+        elif object_type.lower() == 'type':
+            names = Type.objects.all().values_list('title')
+        if name in names:
+            raise MDCSError('A {} with the same name already exists'.format(object_type))
+
+    # is it a valid XML document?
+    try:
+        try:
+            xsd_tree = etree.parse(BytesIO(content.encode('utf-8')))
+        except Exception:
+            xsd_tree = etree.parse(BytesIO(content))
+    except Exception:
+        raise XMLError('Uploaded file is not well formatted XML.')
+
+    # is it supported by the MDCS?
+    errors = common.getValidityErrorsForMDCS(xsd_tree, object_type)
+    if len(errors) > 0:
+        errors_str = ", ".join(errors)
+        raise MDCSError(errors_str)
+
+    # is it a valid XML schema?
+    error = validate_xml_schema(xsd_tree)
+    if error is not None:
+        raise XSDError(error)
+
+
+def create_template(content, name, filename, dependencies=[], user=None, validation=True):
+    if validation:
+        is_schema_valid('Template', content, name)
+    flattener = XSDFlattenerDatabaseOrURL(content.encode('utf-8'))
+    content_encoded = flattener.get_flat()
+    hash_value = XSDhash.get_hash(content_encoded)
     # save the template
     template_versions = TemplateVersion(nbVersions=1, isDeleted=False).save()
     new_template = Template(title=name, filename=filename, content=content,
-                            version=1, templateVersion=str(template_versions.id), hash=hash_value, user=user).save()
-    new_template.dependencies = dependencies
+                            version=1, templateVersion=str(template_versions.id),
+                            hash=hash_value, user=user, dependencies=dependencies).save()
+
     # Add default exporters
     try:
         exporters = Exporter.objects.filter(available_for_all=True)
@@ -141,12 +187,14 @@ def create_template(content, name, filename, dependencies=[], user=None):
 
 
 def create_type(content, name, filename, buckets=[], dependencies=[], user=None):
+    is_schema_valid('Type', content, name)
     hash_value = XSDhash.get_hash(content)
     # save the type
     type_versions = TypeVersion(nbVersions=1, isDeleted=False).save()
     new_type = Type(title=name, filename=filename, content=content,
-                    version=1, typeVersion=str(type_versions.id), hash=hash_value, user=user).save()
-    new_type.dependencies = dependencies
+                    version=1, typeVersion=str(type_versions.id), hash=hash_value,
+                    user=user, dependencies=dependencies).save()
+
     # Add to the selected buckets
     for bucket_id in buckets:
         bucket = Bucket.objects.get(pk=bucket_id)
@@ -160,14 +208,17 @@ def create_type(content, name, filename, buckets=[], dependencies=[], user=None)
     return new_type
 
 
-def create_template_version(content, filename, versions_id):
-    hash_value = XSDhash.get_hash(content)
+def create_template_version(content, filename, versions_id, dependencies=[]):
+    is_schema_valid('Template', content)
+    flattener = XSDFlattenerDatabaseOrURL(content.encode('utf-8'))
+    content_encoded = flattener.get_flat()
+    hash_value = XSDhash.get_hash(content_encoded)
     template_versions = TemplateVersion.objects.get(pk=versions_id)
     template_versions.nbVersions += 1
     current_template = Template.objects.get(pk=template_versions.current)
     new_template = Template(title=current_template.title, filename=filename, content=content,
                             version=template_versions.nbVersions, templateVersion=str(versions_id),
-                            hash=hash_value).save()
+                            hash=hash_value, dependencies=dependencies).save()
 
     template_versions.versions.append(str(new_template.id))
     template_versions.save()
@@ -175,14 +226,15 @@ def create_template_version(content, filename, versions_id):
     return new_template
 
 
-def create_type_version(content, filename, versions_id):
+def create_type_version(content, filename, versions_id, dependencies=[]):
+    is_schema_valid('Type', content)
     hash_value = XSDhash.get_hash(content)
     type_versions = TypeVersion.objects.get(pk=versions_id)
     type_versions.nbVersions += 1
     current_type = Type.objects.get(pk=type_versions.current)
     new_type = Type(title=current_type.title, filename=filename, content=content,
                     version=type_versions.nbVersions, typeVersion=str(versions_id),
-                    hash=hash_value).save()
+                    hash=hash_value, dependencies=dependencies).save()
 
     type_versions.versions.append(str(new_type.id))
     type_versions.save()
@@ -306,26 +358,22 @@ class Help(Document):
     content = StringField()
 
 
-class Bucket(Document):
+class Bucket(dme_Document):
     """Represents a bucket to store types by domain"""
-    label = StringField(required=True, unique=True)
-    color = StringField(required=True, unique=True)
-    types = ListField()
+    label = dme_fields.StringField(unique=True)
+    color = dme_fields.StringField(unique=True)
+    types = dme_fields.ListField(blank=True)
 
 
-from curate.models import SchemaElement
-
-
-class FormData(Document):
+class FormData(dme_Document):
     """Stores data being entered and not yet curated"""
-    user = StringField(required=True)
-    template = StringField(required=True)
-    name = StringField(required=True, unique_with=['user', 'template'])
-    # elements = DictField()
-    schema_element_root = ReferenceField(SchemaElement, required=False)
-    xml_data = StringField(default='')
-    xml_data_id = StringField()
-    isNewVersionOfRecord = BooleanField(required=True, default=False)
+    user = dme_fields.StringField()
+    template = dme_fields.StringField()
+    name = dme_fields.StringField(unique_with=['user', 'template'])
+    schema_element_root = dme_fields.ReferenceField(SchemaElement, blank=True)
+    xml_data = dme_fields.StringField(default='')
+    xml_data_id = dme_fields.StringField(blank=True)
+    isNewVersionOfRecord = dme_fields.BooleanField(default=False)
 
 
 def postprocessor(path, key, value):
@@ -414,7 +462,7 @@ class XMLdata(object):
 
     def save(self):
         """save into mongo db"""
-        # insert the content into mongo db                                                                                                                                                                                    
+        # insert the content into mongo db
         self.content['lastmodificationdate'] = datetime.datetime.now()
         docID = self.xmldata.insert(self.content)
         return docID
@@ -426,13 +474,13 @@ class XMLdata(object):
              /!\ Doesn't return the same kind of objects as mongoengine.Document.objects()
         """
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
         # find all objects of the collection
-        cursor = xmldata.find(as_class = OrderedDict)
+        cursor = xmldata.find()
         # build a list with the objects        
         results = []
         for result in cursor:
@@ -447,13 +495,13 @@ class XMLdata(object):
              /!\ Doesn't return the same kind of objects as mongoengine.Document.objects()
         """
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
         # find all objects of the collection
-        cursor = xmldata.find(params, as_class = OrderedDict)
+        cursor = xmldata.find(params)
         # build a list with the objects        
         results = []
         for result in cursor:
@@ -465,13 +513,13 @@ class XMLdata(object):
     def executeQuery(query):
         """queries mongo db and returns results data"""
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
         # query mongo db
-        cursor = xmldata.find(query,as_class = OrderedDict)  
+        cursor = xmldata.find(query)
         # build a list with the xml representation of objects that match the query      
         queryResults = []
         for result in cursor:
@@ -483,13 +531,13 @@ class XMLdata(object):
     def executeQueryFullResult(query):
         """queries mongo db and returns results data"""
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
         # query mongo db
-        cursor = xmldata.find(query,as_class = OrderedDict)
+        cursor = xmldata.find(query)
         # build a list with the xml representation of objects that match the query
         results = []
         for result in cursor:
@@ -502,12 +550,12 @@ class XMLdata(object):
             Returns the object with the given id
         """
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
-        return xmldata.find_one({'_id': ObjectId(postID)}, as_class = OrderedDict)
+        return xmldata.find_one({'_id': ObjectId(postID)})
 
 
     @staticmethod
@@ -516,13 +564,13 @@ class XMLdata(object):
             Returns the object with the given id
         """
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
         listIDs = [ObjectId(x) for x in listIDs]
-        return xmldata.find({'_id': { '$in': listIDs }}, as_class = OrderedDict).distinct(distinctBy)
+        return xmldata.find({'_id': {'$in': listIDs}}).distinct(distinctBy)
 
     @staticmethod
     def getMinValue(attr):
@@ -535,13 +583,13 @@ class XMLdata(object):
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
-        cursor  = xmldata.aggregate(
+        cursor = xmldata.aggregate(
            [
              {
                '$group':
                {
                  '_id': {},
-                 'minAttr': { '$min': '$'+attr}
+                 'minAttr': {'$min': '$'+attr}
                }
              }
            ]
@@ -587,7 +635,7 @@ class XMLdata(object):
             data = xmltodict.parse(xml, postprocessor=postprocessor)
 
         if data is not None:
-            xmldata.update({'_id': ObjectId(postID)}, {"$set":data}, upsert=False)
+            xmldata.update({'_id': ObjectId(postID)}, {"$set": data}, upsert=False)
 
     @staticmethod
     def update_content(postID, content=None, title=None):
@@ -621,9 +669,9 @@ class XMLdata(object):
         # get the xmldata collection
         xmldata = db['xmldata']
         now = datetime.datetime.now()
-        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'publicationdate': now,
-                                                           'ispublished': True,
-                                                           'oai_datestamp': now}}, upsert=False)
+        xmldata.update({'_id': ObjectId(postID)}, {'$set': {'publicationdate': now,
+                                                            'ispublished': True,
+                                                            'oai_datestamp': now}}, upsert=False)
 
     @staticmethod
     def update_publish_draft(postID, content=None, user=None):
@@ -660,7 +708,7 @@ class XMLdata(object):
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
-        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'ispublished': False}}, upsert=False)
+        xmldata.update({'_id': ObjectId(postID)}, {'$set': {'ispublished': False}}, upsert=False)
 
     @staticmethod
     def update_user(postID, user=None):
@@ -673,39 +721,42 @@ class XMLdata(object):
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
-        xmldata.update({'_id': ObjectId(postID)}, {'$set':{'iduser': user}}, upsert=False)
+        xmldata.update({'_id': ObjectId(postID)}, {'$set': {'iduser': user}}, upsert=False)
 
     @staticmethod
-    def executeFullTextQuery(text, templatesID, refinements={}):
+    def executeFullTextQuery(text, templatesID, refinements={}, only_content=False):
         """
         Execute a full text query with possible refinements
         """
-        #create a connection
-        client = MongoClient(MONGODB_URI)
+        # create a connection
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['xmldata']
-        wordList = re.sub("[^\w]", " ",  text).split()
+        wordList = re.sub("[^\w]", " ", text).split()
         wordList = ['"{0}"'.format(x) for x in wordList]
         wordList = ' '.join(wordList)
-    
+
         if len(wordList) > 0:
-            full_text_query = {'$text': {'$search': wordList}, 'schema' : {'$in': templatesID}, }
+            full_text_query = {'$text': {'$search': wordList}, 'schema': {'$in': templatesID}, }
         else:
-            full_text_query = {'schema' : {'$in': templatesID} } 
-        
+            full_text_query = {'schema': {'$in': templatesID}}
+
         if len(refinements.keys()) > 0:
             full_text_query.update(refinements)
 
         # only get published and active resources
         full_text_query.update({'ispublished': True, 'status': {'$ne': Status.DELETED}})
-        cursor = xmldata.find(full_text_query, as_class = OrderedDict).sort('publicationdate', DESCENDING)
-        
+        if only_content:
+            cursor = xmldata.find(full_text_query, {"content": 1}).sort('publicationdate', DESCENDING)
+        else:
+            cursor = xmldata.find(full_text_query).sort('publicationdate', DESCENDING)
         results = []
         for result in cursor:
             results.append(result)
         return results
+
 
     @staticmethod
     def change_status(id, status, ispublished=False):
@@ -731,6 +782,7 @@ class OaiSettings(Document):
     repositoryIdentifier = StringField(required=True)
     enableHarvesting = BooleanField()
 
+
 class OaiIdentify(Document):
     """
         An identity object
@@ -750,30 +802,33 @@ class OaiIdentify(Document):
     scheme = StringField(required=False)
     raw = DictField(required=False)
 
-class OaiSet(Document):
+
+class OaiSet(dme_Document):
     """
         A set object
     """
-    setSpec  = StringField(required=True, unique=True)
-    setName = StringField(required=True, unique=True)
-    raw = DictField(required=True)
-    registry = StringField(required=False)
-    harvest = BooleanField()
+    setSpec = dme_fields.StringField(unique=True)
+    setName = dme_fields.StringField(unique=True)
+    raw = dme_fields.DictField()
+    registry = dme_fields.StringField(blank=True)
+    harvest = dme_fields.BooleanField(blank=True)
 
-class OaiMetadataFormat(Document):
+
+class OaiMetadataFormat(dme_Document):
     """
         A OaiMetadataFormat object
     """
-    metadataPrefix  = StringField(required=True)
-    schema = StringField(required=True)
-    xmlSchema = StringField(required=False)
-    metadataNamespace  = StringField(required=True)
-    raw = DictField(required=True)
-    template = ReferenceField(Template, reverse_delete_rule=PULL)
-    registry = StringField(required=False)
-    hash = StringField(required=False)
-    harvest = BooleanField()
-    lastUpdate = DateTimeField(required=False)
+    metadataPrefix = dme_fields.StringField()
+    schema = dme_fields.StringField()
+    xmlSchema = dme_fields.StringField(blank=True)
+    metadataNamespace = dme_fields.StringField()
+    raw = dme_fields.DictField()
+    template = dme_fields.ReferenceField(Template, reverse_delete_rule=PULL, blank=True)
+    registry = dme_fields.StringField(blank=True)
+    hash = dme_fields.StringField(blank=True)
+    harvest = dme_fields.BooleanField(blank=True)
+    lastUpdate = dme_fields.DateTimeField(blank=True)
+
 
 class OaiMyMetadataFormat(Document):
     """
@@ -787,6 +842,7 @@ class OaiMyMetadataFormat(Document):
     isTemplate = BooleanField()
     template = ReferenceField(Template, reverse_delete_rule=CASCADE)
 
+
 class OaiMySet(Document):
     """
         A set object
@@ -795,6 +851,7 @@ class OaiMySet(Document):
     setName = StringField(required=True, unique=True)
     templates = ListField(ReferenceField(Template, reverse_delete_rule=PULL), required=True)
     description = StringField(required=False)
+
 
 class OaiRecord(Document):
     """
@@ -956,12 +1013,12 @@ class OaiRecord(Document):
         xmldata.create_index([('$**', TEXT)], default_language="en", language_override="en")
 
     @staticmethod
-    def executeFullTextQuery(text, listMetadataFormatId, refinements={}):
+    def executeFullTextQuery(text, listMetadataFormatId, refinements={}, only_content=False):
         """
         Execute a full text query with possible refinements
         """
         #create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
@@ -980,13 +1037,18 @@ class OaiRecord(Document):
             full_text_query.update(refinements)
 
         # only no deleted records
-        full_text_query.update({'deleted': False})
-        cursor = xmlrecord.find(full_text_query, as_class = OrderedDict)
+        full_text_query.update({'deleted':  False})
+
+        if only_content:
+            cursor = xmlrecord.find(full_text_query, {"metadata": 1 })
+        else:
+            cursor = xmlrecord.find(full_text_query)
 
         results = []
         for result in cursor:
             results.append(result)
         return results
+
 
 class OaiRegistry(Document):
     """
@@ -1004,11 +1066,13 @@ class OaiRegistry(Document):
     isDeactivated = BooleanField(required=True)
     isQueued = BooleanField()
 
-class OaiXslt(Document):
+
+class OaiXslt(dme_Document):
     """Represents an xslt file for Oai-Pmh"""
-    name = StringField(required=True, unique=True)
-    filename = StringField(required=True)
-    content = StringField(required=True)
+    name = dme_fields.StringField(unique=True)
+    filename = dme_fields.StringField()
+    content = dme_fields.StringField()
+
 
 class OaiTemplMfXslt(Document):
     """Represents an xslt file for Oai-Pmh"""
@@ -1016,6 +1080,7 @@ class OaiTemplMfXslt(Document):
     myMetadataFormat = ReferenceField(OaiMyMetadataFormat, reverse_delete_rule=CASCADE)
     xslt = ReferenceField(OaiXslt, reverse_delete_rule=CASCADE, unique_with=['template', 'myMetadataFormat'])
     activated = BooleanField()
+
 
 class OaiMetadataformatSet(Document):
     """

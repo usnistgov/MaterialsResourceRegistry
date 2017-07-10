@@ -38,7 +38,9 @@ from django.contrib import messages
 from utils.XSDParser.parser import generate_form
 from utils.XSDParser.renderer import DefaultRenderer
 from utils.XSDParser.renderer.checkbox import CheckboxRenderer
-
+from utils.XSDRefinements import Tree, XSDRefinements
+import hashlib
+from itertools import groupby
 
 # Class definition
 class ElementInfo:
@@ -215,6 +217,8 @@ def load_config():
         'PARSER_COLLAPSE': False,
         'PARSER_AUTO_KEY_KEYREF': False,
         'PARSER_IMPLICIT_EXTENSION_BASE': False,
+        'PARSER_DOWNLOAD_DEPENDENCIES': settings.PARSER_DOWNLOAD_DEPENDENCIES if
+        hasattr(settings, 'PARSER_DOWNLOAD_DEPENDENCIES') else False,
     }
 
 
@@ -422,44 +426,25 @@ def get_results_by_instance_keyword(request):
     request.session['instancesExplore'] = json_instances
     sessionName = "resultsExplore" + instance['name']
 
+    keyword = request.POST.get('keyword', '')
+    schemas = request.POST.getlist('schemas[]', [])
+    user_schemas = request.POST.getlist('userSchemas[]', [])
+    refinements = refinements_to_mongo(json.loads(request.POST.get('refinements', '{}')))
+    if 'onlySuggestions' in request.POST:
+        onlySuggestions = json.loads(request.POST['onlySuggestions'])
+    else:
+        onlySuggestions = False
 
-    try:
-        keyword = request.GET['keyword']
-        schemas = request.GET.getlist('schemas[]')
-        userSchemas = request.GET.getlist('userSchemas[]')
-        refinements = refinements_to_mongo(request.GET.getlist('refinements[]'))
-        onlySuggestions = json.loads(request.GET['onlySuggestions'])
-    except:
-        keyword = ''
-        schemas = []
-        userSchemas = []
-        refinements = {}
-        onlySuggestions = True
-
-    #We get all template versions for the given schemas
-    #First, we take care of user defined schema
-    templatesIDUser = Template.objects(title__in=userSchemas).distinct(field="id")
-    templatesIDUser = [str(x) for x in templatesIDUser]
-
-    #Take care of the rest, with versions
-    templatesVersions = Template.objects(title__in=schemas).distinct(field="templateVersion")
-
-    #We get all templates ID, for all versions
-    allTemplatesIDCommon = TemplateVersion.objects(pk__in=templatesVersions, isDeleted=False).distinct(field="versions")
-    #We remove the removed version
-    allTemplatesIDCommonRemoved = TemplateVersion.objects(pk__in=templatesVersions, isDeleted=False).distinct(field="deletedVersions")
-    templatesIDCommon = list(set(allTemplatesIDCommon) - set(allTemplatesIDCommonRemoved))
-
-    templatesID = templatesIDUser + templatesIDCommon
-    instanceResults = XMLdata.executeFullTextQuery(keyword, templatesID, refinements)
-    if len(instanceResults) > 0:
+    templates_id = _get_templates_id(schemas=schemas, user_schemas=user_schemas)
+    instance_results = XMLdata.executeFullTextQuery(keyword, templates_id, refinements)
+    if len(instance_results) > 0:
         if not onlySuggestions:
             xsltPath = os.path.join(settings.SITE_ROOT, 'static/resources/xsl/xml2html.xsl')
             xslt = etree.parse(xsltPath)
             transform = etree.XSLT(xslt)
             template = loader.get_template('explore/explore_result_keyword.html')
 
-        for instanceResult in instanceResults:
+        for instanceResult in instance_results:
             if not onlySuggestions:
                 custom_xslt = False
                 results.append({'title': instanceResult['title'],
@@ -480,12 +465,19 @@ def get_results_by_instance_keyword(request):
                     #We use the default one
                     newdom = transform(dom)
                     custom_xslt = False
-
+                modification = request.user.is_staff or (str(instanceResult['iduser']) == str(request.user.id))
+                # FIXME: DO NOT PUT DIRECTLY THE PATH
+                try:
+                    local_id = str(instanceResult['content']['Resource']['@localid'])
+                except:
+                    local_id = None
                 context = RequestContext(request, {'id': str(instanceResult['_id']),
+                                                   'local_id': local_id,
                                                    'xml': str(newdom),
                                                    'title': instanceResult['title'],
                                                    'custom_xslt': custom_xslt,
-                                                   'template_name': schema.title})
+                                                   'template_name': schema.title,
+                                                   'modification': modification})
 
                 resultString += template.render(context)
             else:
@@ -521,7 +513,71 @@ def get_results_by_instance_keyword(request):
 
     print 'END def getResultsKeyword(request)'
 
-    return HttpResponse(json.dumps({'resultsByKeyword' : resultsByKeyword, 'resultString' : resultString, 'count' : len(instanceResults) + nbOAI}), content_type='application/javascript')
+    return HttpResponse(json.dumps({'resultsByKeyword' : resultsByKeyword, 'resultString' : resultString,
+                                    'count' : len(instance_results) + nbOAI}), content_type='application/javascript')
+
+
+def get_results_occurrences(request):
+    print 'BEGIN def getResultsKeyword(request)'
+
+    tree_info = []
+    tree_count = []
+    cache_instances = {}
+    keyword = request.POST.get('keyword', '')
+    schemas = request.POST.getlist('schemas[]', [])
+    user_schemas = request.POST.getlist('userSchemas[]', [])
+    refinements = json.loads(request.POST.get('refinements', '{}'))
+    all_refinements = json.loads(request.POST.get('allRefinements', '{}'))
+    templates_id = _get_templates_id(schemas=schemas, user_schemas=user_schemas)
+    splitter = ":"
+    try:
+        for current in all_refinements:
+            refine = []
+            for x in refinements:
+                if x['key'] != current['key']:
+                    refine.append(x)
+
+            list_refinements = refinements_to_mongo(refine)
+            json_refinements = json.dumps(list_refinements)
+            if not cache_instances.has_key(json_refinements):
+                instance_results = XMLdata.executeFullTextQuery(keyword, templates_id, list_refinements,
+                                                                only_content=True)
+                cache_instances[json_refinements] = instance_results
+            else:
+                instance_results = cache_instances[json_refinements]
+            for refinement in current['value']:
+                ids = _get_list_ids_for_refinement(instance_results, refinement)
+                tree_count.append({"refinement": refinement, "ids": ids})
+                result_json = {'text_id': hashlib.sha1(refinement).hexdigest(), 'nb_occurrences': len(ids)}
+                tree_info.append(result_json)
+
+        # For categories
+        max_level = max(len(x['refinement'].split(splitter)) for x in tree_count)
+        for i in range(max_level, 0, -1):
+            grouper = lambda x: ":".join(x['refinement'].split(splitter)[:i])
+            for key, grp in groupby(sorted(tree_count, key=grouper), grouper):
+                if len(key.split(splitter)) == i:
+                    ids = []
+                    for item in grp:
+                        ids.extend(item["ids"])
+                    key_category = "{0}_{1}".format(key, Tree.TreeInfo.get_category_label())
+                    result_json = {'text_id': hashlib.sha1(key_category).hexdigest(),
+                                   'nb_occurrences': len(sorted(set(ids)))}
+                    tree_info.append(result_json)
+
+        # Call to OAI-PMH
+        json_obj = json.loads(OAIExplore.get_results_occurrences(request))
+        for record in json_obj['items']:
+            to_modify = [x for x in tree_info if x['text_id'] == record["text_id"]]
+            if len(to_modify) > 0:
+                to_modify[0]['nb_occurrences'] += record['nb_occurrences']
+            else:
+                tree_info.append(record)
+    except Exception, e:
+        pass
+
+
+    return HttpResponse(json.dumps({'items': tree_info}), content_type='application/javascript')
 
 
 ################################################################################
@@ -538,7 +594,7 @@ def get_results_by_instance(request):
     num_instance = request.GET['numInstance']
     instances = request.session['instancesExplore']
     resultString = ""
-
+    hasResult = False
     for i in range(int(num_instance)):
         results = []
         instance = json.loads(instances[int(i)])
@@ -568,6 +624,7 @@ def get_results_by_instance(request):
             instanceResults = XMLdata.executeQueryFullResult(query)
 
             if len(instanceResults) > 0:
+                hasResult = True
                 template = loader.get_template('explore/explore_result.html')
                 xsltPath = os.path.join(settings.SITE_ROOT, 'static/resources/xsl/xml2html.xsl')
                 xslt = etree.parse(xsltPath)
@@ -594,11 +651,13 @@ def get_results_by_instance(request):
                         newdom = transform(dom)
                         custom_xslt = False
 
+                    modification = request.user.is_staff or (str(instanceResult['iduser']) == str(request.user.id))
                     context = RequestContext(request, {'id':str(instanceResult['_id']),
                                                'xml': str(newdom),
                                                'title': instanceResult['title'],
                                                'custom_xslt': custom_xslt,
-                                               'template_name': schema.title})
+                                               'template_name': schema.title,
+                                                'modification': modification})
 
                     resultString+= template.render(context)
 
@@ -609,20 +668,22 @@ def get_results_by_instance(request):
         else:
             url = instance['protocol'] + "://" + instance['address'] + ":" + str(instance['port']) + "/rest/explore/query-by-example"
             query = copy.deepcopy(request.session['queryExplore'])
-            data = {"query":str(query)}
+            data = {"query": json.dumps(query)}
             headers = {'Authorization': 'Bearer ' + instance['access_token']}
             r = requests.post(url, data=data, headers=headers)   
             result = r.text
             instanceResults = json.loads(result,object_pairs_hook=OrderedDict)
             if len(instanceResults) > 0:
-                template = loader.get_template('explore_result.html')
-                xsltPath = os.path.join(settings.SITE_ROOT, 'static', 'resources', 'xsl', 'xml2html.xsl')
+                template = loader.get_template('explore/explore_result.html')
+                xsltPath = os.path.join(settings.SITE_ROOT, 'static/resources/xsl/xml2html.xsl')
                 xslt = etree.parse(xsltPath)
                 transform = etree.XSLT(xslt)
                 for instanceResult in instanceResults:
                     custom_xslt = False
-                    results.append({'title':instanceResult['title'], 'content':instanceResult['content'],'id':str(instanceResult['_id'])})
-                    dom = etree.XML(str(XMLdata.unparse(instanceResult['content']).encode('utf-8')))
+                    results.append({'title': instanceResult['title'],
+                                    'content': instanceResult['content'],
+                                    'id': str(instanceResult['_id'])})
+                    dom = etree.XML(instanceResult['content'].encode('utf-8'))
                     #Check if a custom list result XSLT has to be used
                     try:
                         schema = Template.objects.get(pk=instanceResult['schema'])
@@ -638,10 +699,12 @@ def get_results_by_instance(request):
                         newdom = transform(dom)
                         custom_xslt = False
 
+                    modification = request.user.is_staff or (str(instanceResult['iduser']) == str(request.user.id))
                     context = RequestContext(request, {'id': str(instanceResult['_id']),
                                                        'xml': str(newdom),
                                                        'title': instanceResult['title'],
-                                                       'custom_xslt': custom_xslt})
+                                                       'custom_xslt': custom_xslt,
+                                                       'modification': modification})
 
                     resultString += template.render(context)
                 resultString += "<br/>"
@@ -651,7 +714,7 @@ def get_results_by_instance(request):
         request.session[sessionName] = results
     
     print 'END def getResults(request)'
-    response_dict = {'results': resultString}
+    response_dict = {'results': resultString, 'hasResult': hasResult}
     return HttpResponse(json.dumps(response_dict), content_type='application/javascript')
  
  
@@ -2357,85 +2420,28 @@ def subElementfieldsToPrettyQuery(request, liElements, list_leaves_id):
 ################################################################################
 def load_refinements(request):
     schema_name = request.GET['schema']
-    schemas = Template.objects(title=schema_name)
-    schema_id = TemplateVersion.objects().get(pk=schemas[0].templateVersion).current
+    tree_info = []
+    tree_items = []
 
-    schema = Template.objects().get(pk=schema_id)
+    category = True
+    refinements_trees = XSDRefinements.loads_refinements_trees(schema_name, category=category)
+    for root, tree in refinements_trees.iteritems():
+        item_info = {
+            'enum_name': root.title,
+            'id_label': hashlib.sha1(root.title).hexdigest()
+        }
+        tree_items.append(item_info)
 
-    xmlDocTree = etree.parse(BytesIO(schema.content.encode('utf-8')))
+        result_json = {}
+        result_json['div_id'] = item_info['id_label']
+        result_json['json_data'] = Tree.print_tree(tree, nb_occurrences_text=True, category=category)
+        tree_info.append(result_json)
 
-    # find the namespaces
-    namespaces = common.get_namespaces(BytesIO(schema.content.encode('utf-8')))
+    template = loader.get_template('explore/explore_fancy_tree.html')
+    context = Context({'items': tree_items})
 
-    target_ns_prefix = common.get_target_namespace_prefix(namespaces, xmlDocTree)
-    target_ns_prefix = "{}:".format(target_ns_prefix) if target_ns_prefix != '' else ''
-
-    # building refinement options based on the schema
-    refinement_options = "<a onclick='clearRefinements();' style='cursor:pointer;'>Clear Refinements</a> <br/><br/>"
-
-    # TODO: change enumeration look up by something more generic (using annotations in the schema)
-    # looking for enumerations
-    simple_types = xmlDocTree.findall("./{0}simpleType".format(LXML_SCHEMA_NAMESPACE))
-    for simple_type in simple_types:
-        try:
-            enums = simple_type.findall("./{0}restriction/{0}enumeration".format(LXML_SCHEMA_NAMESPACE))
-            refinement = ""
-            if len(enums) > 0:
-                # build dot notation query
-                # find the element using the enumeration
-                element = xmlDocTree.findall(".//{0}element[@type='{1}']".format(LXML_SCHEMA_NAMESPACE,
-                                                                                 target_ns_prefix + simple_type.attrib['name']))
-                if len(element) > 1:
-                    print "error: more than one element using the enumeration (" + str(len(element)) + ")"
-                else:
-                    element = element[0]
-
-                    # get the label of refinements
-                    app_info = common.getAppInfo(element)
-                    label = app_info['label'] if 'label' in app_info else element.attrib['name']
-                    label = label if label is not None else ''
-                    query = []
-                    while element is not None:
-                        if element.tag == "{0}element".format(LXML_SCHEMA_NAMESPACE):
-                            query.insert(0, element.attrib['name'])
-                        elif element.tag == "{0}simpleType".format(LXML_SCHEMA_NAMESPACE)\
-                                or element.tag == "{0}complexType".format(LXML_SCHEMA_NAMESPACE):
-                            try:
-                                element = xmlDocTree.findall(".//{0}element[@type='{1}']".format(LXML_SCHEMA_NAMESPACE,
-                                                                                                 target_ns_prefix + element.attrib['name']))
-                                if len(element) > 1:
-                                    print "error: more than one element using the enumeration (" + str(len(element)) + ")"
-                                else:
-                                    element = element[0]
-                                    query.insert(0, element.attrib['name'])
-                            except:
-                                pass
-                        elif element.tag == "{0}extension".format(LXML_SCHEMA_NAMESPACE):
-                            try:
-                                element = xmlDocTree.findall(".//{0}element[@type='{1}']".format(LXML_SCHEMA_NAMESPACE,
-                                                                                                 element.attrib['base']))
-                                if len(element) > 1:
-                                    print "error: more than one element using the enumeration (" + str(len(element)) + ")"
-                                else:
-                                    element = element[0]
-                                    query.insert(0, element.attrib['name'])
-                            except:
-                                pass
-                        element = element.getparent()
-
-                dot_query = ".".join(query)
-
-                # get the name of the enumeration
-                refinement += "<div class='refine_criteria' query='" + dot_query + "'>" + label + ": <br/>"
-                for enum in sorted(enums, key=lambda x: x.attrib['value']):
-                    refinement += "<input type='checkbox' value='" + enum.attrib['value'] + "' onchange='get_results_keyword_refined();'> " + enum.attrib['value'].title() + "<br/>"
-                refinement += "<br/>"
-                refinement += "</div>"
-        except:
-            print "ERROR AUTO GENERATION OF REFINEMENTS."
-        refinement_options += refinement
-
-    return HttpResponse(json.dumps({'refinements': refinement_options}), content_type='application/javascript')
+    return HttpResponse(json.dumps({'items': tree_info,
+                                    'template': template.render(context)}), content_type='application/javascript')
 
 
 ################################################################################
@@ -2448,29 +2454,37 @@ def load_refinements(request):
 #
 ################################################################################
 def refinements_to_mongo(refinements):
+    mongo_or = []
+    mongo_and = {}
     try:
         # transform the refinement in mongo query
-        mongo_queries = dict()
-        mongo_in = {}
         for refinement in refinements:
-            splited_refinement = refinement.split(':')
-            dot_notation = splited_refinement[0]
-            dot_notation = "content." + dot_notation
-            value = splited_refinement[1]
-            if dot_notation in mongo_queries:
-                mongo_queries[dot_notation].append(value)
-            else:
-                mongo_queries[dot_notation] = [value]
+            mongo_queries = dict()
+            mongo_in = {}
+            ref_value = refinement['value']
+            for elt in ref_value:
+                splited_refinement = elt.split('==')
+                dot_notation = splited_refinement[0]
+                dot_notation = "content." + dot_notation
+                value = splited_refinement[1]
+                if dot_notation in mongo_queries:
+                    mongo_queries[dot_notation].append(value)
+                else:
+                    mongo_queries[dot_notation] = [value]
 
-        for query in mongo_queries:
-            key = query
-            values = ({ '$in' : mongo_queries[query]})
-            mongo_in[key] = values
+            for query in mongo_queries:
+                key = query
+                values = ({'$in': mongo_queries[query]})
+                mongo_in[key] = values
 
-        mongo_or = {'$and' : [mongo_in]}
-        return mongo_or
+            mongo_or.append({'$or': [{x: mongo_in[x]} for x in mongo_in]})
+
+        if len(mongo_or) > 0:
+            mongo_and = {'$and': mongo_or}
+
+        return mongo_and
     except:
-        return []
+        return {}
 
 
 ################################################################################
@@ -2615,3 +2629,100 @@ def update_publish(request):
 def update_unpublish(request):
     XMLdata.update_unpublish(request.GET['result_id'])
     return HttpResponse(json.dumps({}), content_type='application/javascript')
+
+
+def _get_templates_id(schemas, user_schemas):
+    # We get all template versions for the given schemas
+    # First, we take care of user defined schema
+    templates_id_user = Template.objects(title__in=user_schemas).distinct(field="id")
+    templates_id_user = [str(x) for x in templates_id_user]
+    # Take care of the rest, with versions
+    templates_versions = Template.objects(title__in=schemas).distinct(field="templateVersion")
+    # We get all templates ID, for all versions
+    all_templates_id_common = TemplateVersion.objects(pk__in=templates_versions, isDeleted=False)\
+        .distinct(field="versions")
+    # We remove the removed version
+    all_templates_id_common_removed = TemplateVersion.objects(pk__in=templates_versions, isDeleted=False)\
+        .distinct( field="deletedVersions")
+    templates_id_common = list(set(all_templates_id_common) - set(all_templates_id_common_removed))
+    templates_id = templates_id_user + templates_id_common
+
+    return templates_id
+
+
+def _get_list_ids_for_refinement(dictionary, refinement):
+    ids = []
+    try:
+        key = "content."+refinement.split("==")[0]
+        value = refinement.split("==")[1]
+        for item in dictionary:
+            try:
+                _id = str(item['_id'])
+                for index in key.split("."):
+                    if index in item:
+                        item = item[index]
+                    else:
+                        break
+
+                if isinstance(item, list):
+                    for elt in item:
+                        if isinstance(elt, dict) and index in elt and elt[index] == value:
+                                ids.append(_id)
+                        elif elt == value:
+                            ids.append(_id)
+                elif item == value:
+                    ids.append(_id)
+            except (IndexError, Exception):
+                pass
+    except Exception:
+        pass
+
+    return ids
+
+
+def update_url(request):
+    url = ''
+    refinements = request.GET.getlist('refinements[]', [])
+    keyword = request.GET.getlist('keyword', [])
+    oai = request.GET.getlist('oai[]', [])
+
+    url = update_url_with_refinements(refinements, url)
+    url = update_url_with_keyword(keyword, url)
+    url = update_url_with_oai(oai, url)
+
+    return HttpResponse(json.dumps({'url': url}), content_type='application/javascript')
+
+
+def update_url_with_oai(oais, url):
+    for index, oai in enumerate(oais):
+        if index == 0 and url == '':
+            url += '?'
+        else:
+            url += '&'
+
+        url += 'data_provider=' + oai
+    return url
+
+
+def update_url_with_keyword(keywords, url):
+    if len(keywords) == 1 and keywords[0] == '':
+        return url
+    for index, keyword in enumerate(keywords):
+        if index == 0 and url == '':
+            url += '?'
+        else:
+            url += '&'
+
+        url += 'keyword=' + keyword
+    return url
+
+
+def update_url_with_refinements(refinements, url):
+    for index, refinement in enumerate(refinements):
+        if index == 0 and url == '':
+            url += '?'
+        else:
+            url += '&'
+
+        url += refinement.replace('==', '=')
+    return url

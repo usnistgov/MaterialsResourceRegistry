@@ -25,7 +25,7 @@
 {% endblock %}
 {% block title %}
     {% if user.is_staff %}
-        <h1><span>My Drafts / Other users Drafts</span></h1>
+        <h1><span>My Drafts / Other Users' Drafts</span></h1>
     {% else %}
         <h1><span>My Drafts</span></h1>
     {% endif %}
@@ -55,12 +55,12 @@
     <div class="clear"></div>
     {% if user.is_staff %}
         <span>
-            <div class="tpl-title">Other users Drafts</div>
+            <div class="tpl-title">Other Users' Drafts</div>
         </span>
         {% if otherUsersForms%}
             {% include 'dashboard/my_dashboard_my_forms_table.html' with forms=otherUsersForms %}
         {%else%}
-            No other users drafts found
+            No other users' drafts found
         {%endif%}
     {%endif%}
 {% endblock %}

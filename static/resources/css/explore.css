@@ -98,3 +98,134 @@ div#templates ul {
 div#form_start_current ul {
 	list-style:none;
 }
+
+input.cmn-toggle-round3 + label {
+  padding: 2px;
+  width: 30px;
+  height: 13px;
+  background-color: #dddddd;
+  border-radius: 25px;
+}
+input.cmn-toggle-round3 + label:before,
+input.cmn-toggle-round3 + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round3 + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 13px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round3 + label:after {
+  width: 14px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round3:checked + label:before {
+  background: #0099CC no-repeat url('../img/check.png');
+  background-size:  12px;
+  background-position: 15%;
+}
+input.cmn-toggle-round3:checked + label:after {
+  margin-left: 17px;
+}
+.ui-autocomplete-loading {
+	background: white;
+}
+
+a[class=""] .fa-chevron-down {
+   display: none;
+}
+a[class="collapsed"] .fa-chevron-up {
+   display: none;
+}
+
+.title {
+    font-size: 1.2em;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.harvested, .harvested a {
+    color: #CD5C5C;
+}
+
+.harvested a {
+    cursor: pointer;
+    cursor: hand;
+}
+
+.collapseXSLT {
+    color: #000000;
+    display: block;
+    width: auto;
+    background-image: none;
+    height: 0em;
+}
+
+.keywords {
+    color: #000000;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.description {
+    text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.2em;
+    margin-bottom: 0em;
+}
+
+.black {
+    color: #000000;
+}
+
+.white-bg {
+    background-color:#ffffff;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.shortcontent, .allcontent {
+    display: inline;
+}
+
+.clearTree {
+    float: right;
+    margin: 0px;
+    padding:0px;
+    color: black;
+    font-size: small;
+}
+
+#results_infos {
+    color: black;
+    float: right;
+}
+
+ul.fancytree-container{
+    width: 17em;
+}
+
+span.fancytree-title{
+    white-space: normal;
+    width: 12em;
+}
+
+#myFilters.ui-widget-content {
+    border: none;
+    font-size: small;
+}
+
+#icons_table, .main_table {
+    margin-top: -1.5em;
+}

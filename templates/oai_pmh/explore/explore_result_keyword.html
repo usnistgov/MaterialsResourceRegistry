@@ -10,7 +10,7 @@
 <div id="{{id}}" name="result">
     <input type='checkbox' name='checks' result_id='{{id}}'/>
     <span class='expand' style='cursor:pointer;' onclick='showhideResults(event);'></span>
-    <span style='font-weight:bold;'><a href="detail_result_keyword?id={{id}}">{{title}}</a></span>
+    <span style='font-weight:bold;'><a href="{% url 'oai-explore-detail-result-keyword' id %}">{{title}}</a></span>
     <br>
     <span style='color:grey;'>{{registry_name}}  -  {{schema_name}}</span>
     <div class='xmlResult' readonly='true' style='display:none;'>

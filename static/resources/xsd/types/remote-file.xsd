@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"
+    elementFormDefault="unqualified">
+
+    <xsd:complexType name="remote-file-type">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="name" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="description" type="xsd:string"
+                xmlns:ns0="http://mdcs.ns" ns0:_mod_mdcs_="/registry/description"/>
+            <xsd:element minOccurs="0" name="type" type="xsd:string"/>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="comment" type="xsd:string"/>
+            <xsd:element xmlns:ns0="http://mdcs.ns" minOccurs="0" name="downloadURL"
+                type="xsd:anyURI" ns0:_mod_mdcs_="/curator/advanced-blob-hoster">
+                <xsd:annotation>
+                    <xsd:documentation>URL providing direct access to a downloadable file of a
+                        dataset.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="accessURL" type="xsd:anyURI">
+                <xsd:annotation>
+                    <xsd:documentation>URL providing indirect access to a dataset, for example via
+                        API or a graphical interface.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="local" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

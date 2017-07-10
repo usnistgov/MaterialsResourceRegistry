@@ -18,13 +18,12 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest
 from django.template import RequestContext, loader
 from django.shortcuts import redirect
-from requests import status_codes
-
 from mgi.common import LXML_SCHEMA_NAMESPACE, SCHEMA_NAMESPACE
+from mgi.exceptions import XSDError
 from mgi.models import Request, Message, PrivacyPolicy, TermsOfUse, Help, Template, TemplateVersion, Type, \
     TypeVersion, Module, Bucket, Instance, Exporter, ExporterXslt, ResultXslt, create_template, create_type, \
     create_template_version, create_type_version, OaiXslt, template_list_current, type_list_current
-from forms import UploadResultXSLTForm, PrivacyPolicyForm, TermsOfUseForm, HelpForm, RepositoryForm, \
+from forms import PrivacyPolicyForm, TermsOfUseForm, HelpForm, RepositoryForm, \
     RefreshRepositoryForm, UploadXSLTForm, UploadResultXSLTForm, UploadTemplateForm, UploadTypeForm, \
     UploadVersionForm
 from django.contrib import messages
@@ -324,20 +323,8 @@ def upload_xsd(request):
                     form = UploadTypeForm(request.POST, request.FILES)
 
                 if form.is_valid():
-                    # check that the name is unique
-                    if object_type == 'Template':
-                        names = Template.objects.all().values_list('title')
-                    elif object_type == 'Type':
-                        names = Type.objects.all().values_list('title')
+                    # get the schema name
                     name = request.POST['name']
-                    if name in names:
-                        context = RequestContext(request, {
-                            'upload_form': form,
-                            'object_type':  object_type,
-                            'errors': 'A {} with the same name already exists.'.format(object_type),
-                        })
-                        return HttpResponse(template.render(context))
-
                     # get the file from the form
                     xsd_file = request.FILES['xsd_file']
                     # put the cursor at the beginning of the file
@@ -345,33 +332,24 @@ def upload_xsd(request):
                     # read the content of the file
                     xsd_data = xsd_file.read()
 
-                    # is it a valid XML document ?
                     try:
-                        xsd_tree = etree.parse(BytesIO(xsd_data.encode('utf-8')))
-                    except Exception, e:
-                        context = RequestContext(request, {
-                            'upload_form': form,
-                            'object_type':  object_type,
-                            'errors': 'Uploaded file is not well formatted XML.',
-                        })
-                        return HttpResponse(template.render(context))
-
-                    # is it supported by the MDCS ?
-                    errors = common.getValidityErrorsForMDCS(xsd_tree, object_type)
-                    if len(errors) > 0:
-                        errors_str = ", ".join(errors)
-                        context = RequestContext(request, {
-                            'upload_form': form,
-                            'object_type':  object_type,
-                            'errors': errors_str,
-                        })
-                        return HttpResponse(template.render(context))
-
-                    # is it a valid XML schema?
-
-                    error = validate_xml_schema(xsd_tree)
-
-                    if error is not None:
+                        if object_type == 'Template':
+                            create_template(xsd_data, name, xsd_file.name)
+                            # XML schema loaded with success
+                            messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
+                            return redirect('/admin/xml-schemas/manage-schemas')
+                        elif object_type == 'Type':
+                            buckets = request.POST.getlist('buckets')
+                            create_type(xsd_data, name, xsd_file.name, buckets)
+                            # XML schema loaded with success
+                            messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
+                            return redirect('/admin/xml-schemas/manage-types')
+                    except XSDError, e:
+                        error = e.message
+                        try:
+                            xsd_tree = etree.parse(BytesIO(xsd_data.encode('utf-8')))
+                        except:
+                            xsd_tree = etree.parse(BytesIO(xsd_data))
                         # a problem with includes/imports has been detected
                         # get the imports
                         imports = xsd_tree.findall("{}import".format(LXML_SCHEMA_NAMESPACE))
@@ -418,19 +396,18 @@ def upload_xsd(request):
                             context = RequestContext(request, {
                                 'upload_form': form,
                                 'object_type':  object_type,
-                                'errors': utils.html.escape(error),
+                                'errors': error.replace('"', '\''),
                             })
                             return HttpResponse(template.render(context))
-                    else:
-                        # XML schema loaded with success
-                        messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
-                        if object_type == 'Template':
-                            create_template(xsd_data, name, xsd_file.name)
-                            return redirect('/admin/xml-schemas/manage-schemas')
-                        elif object_type == 'Type':
-                            buckets = request.POST.getlist('buckets')
-                            create_type(xsd_data, name, xsd_file.name, buckets)
-                            return redirect('/admin/xml-schemas/manage-types')
+                    except Exception, e:
+                        error = e.message
+                        context = RequestContext(request, {
+                            'upload_form': form,
+                            'object_type':  object_type,
+                            'errors': error.replace('"', '\''),
+                        })
+                        return HttpResponse(template.render(context))
+
                 else:
                     context = RequestContext(request, {
                         'upload_form': form,
@@ -515,40 +492,34 @@ def manage_versions(request):
                     # read the content of the file
                     xsd_data = xsd_file.read()
 
-                    # is it a valid XML document ?
+                    # XML schema loaded with success
                     try:
-                        xsd_tree = etree.parse(BytesIO(xsd_data.encode('utf-8')))
-                    except Exception, e:
-                        context = RequestContext(request, {
-                            'upload_form': form,
-                            'versions': versions,
-                            'object_versions': object_versions,
-                            'object_type': object_type,
-                            'object_id': object_id,
-                            'errors': 'Uploaded file is not well formatted XML.',
-                        })
-                        return HttpResponse(template.render(context))
+                        if object_type == 'Template':
+                            new_object = create_template_version(xsd_data, xsd_file.name, object_versions.id)
+                            object_versions = TemplateVersion.objects.get(pk=new_object.templateVersion)
+                            versions = get_versions(object_versions, object_type)
+                        elif object_type == 'Type':
+                            new_object = create_type_version(xsd_data, xsd_file.name, object_versions.id)
+                            object_versions = TypeVersion.objects.get(pk=new_object.typeVersion)
+                            versions = get_versions(object_versions, object_type)
 
-                    # is it supported by the MDCS ?
-                    errors = common.getValidityErrorsForMDCS(xsd_tree, object_type)
-                    if len(errors) > 0:
-                        errors_str = ", ".join(errors)
+                        # XML schema loaded with success
+                        messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
 
                         context = RequestContext(request, {
                             'upload_form': form,
                             'versions': versions,
                             'object_versions': object_versions,
                             'object_type': object_type,
-                            'object_id': object_id,
-                            'errors': errors_str,
+                            'object_id': str(new_object.id),
                         })
                         return HttpResponse(template.render(context))
-
-                    # is it a valid XML schema?
-
-                    error = validate_xml_schema(xsd_tree)
-
-                    if error is not None:
+                    except XSDError, e:
+                        error = e.message
+                        try:
+                            xsd_tree = etree.parse(BytesIO(xsd_data.encode('utf-8')))
+                        except:
+                            xsd_tree = etree.parse(BytesIO(xsd_data))
                         # a problem with includes/imports has been detected
                         # get the imports
                         imports = xsd_tree.findall("{}import".format(LXML_SCHEMA_NAMESPACE))
@@ -602,27 +573,18 @@ def manage_versions(request):
                                 'object_versions': object_versions,
                                 'object_type':  object_type,
                                 'object_id': str(object_id),
-                                'errors': utils.html.escape(error),
+                                'errors': error.replace('"', '\''),
                             })
                             return HttpResponse(template.render(context))
-                    else:
-                        # XML schema loaded with success
-                        messages.add_message(request, messages.INFO, '{} uploaded with success.'.format(object_type))
-                        if object_type == 'Template':
-                            new_object = create_template_version(xsd_data, xsd_file.name, object_versions.id)
-                            object_versions = TemplateVersion.objects.get(pk=new_object.templateVersion)
-                            versions = get_versions(object_versions, object_type)
-                        elif object_type == 'Type':
-                            new_object = create_type_version(xsd_data, xsd_file.name, object_versions.id)
-                            object_versions = TypeVersion.objects.get(pk=new_object.typeVersion)
-                            versions = get_versions(object_versions, object_type)
-
+                    except Exception, e:
+                        error = e.message
                         context = RequestContext(request, {
                             'upload_form': form,
                             'versions': versions,
                             'object_versions': object_versions,
                             'object_type': object_type,
-                            'object_id': str(new_object.id),
+                            'object_id': object_id,
+                            'errors': error.replace('"', '\''),
                         })
                         return HttpResponse(template.render(context))
                 else:

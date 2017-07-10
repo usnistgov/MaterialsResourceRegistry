@@ -189,13 +189,13 @@ class RegressionTest(LiveServerTestCase, TestCase):
     def createTemplateWithTemplateVersionValidContent(self, templateVersionId):
         hash = XSDhash.get_hash(TEMPLATE_VALID_CONTENT)
         template = Template(title='test', filename='test', content=TEMPLATE_VALID_CONTENT, version=1, templateVersion=templateVersionId, hash=hash).save()
-        TemplateVersion.objects.get(pk=templateVersionId).update(set__current=template.id)
+        TemplateVersion.objects.get(pk=templateVersionId).update(set__current=str(template.id))
         return template
 
     def createTemplateWithTemplateVersionInvalidContent(self, templateVersionId):
         hash = XSDhash.get_hash(TEMPLATE_VALID_CONTENT)
         template = Template(title='test', filename='test', content=TEMPLATE_INVALID_CONTENT, version=1, templateVersion=templateVersionId, hash=hash).save()
-        TemplateVersion.objects.get(pk=templateVersionId).update(set__current=template.id)
+        TemplateVersion.objects.get(pk=templateVersionId).update(set__current=str(template.id))
         return template
 
     def createTemplateVersion(self):

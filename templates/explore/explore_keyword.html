@@ -25,10 +25,11 @@
 {% endcomment %}
 
 {% block extrastyle %}
-<link rel="stylesheet" type="text/css" href="{% static 'resources/css/explore.css' %}"  media="screen" />
-<link rel="stylesheet" type="text/css" href="{% static 'resources/css/XMLTree.css' %}"  media="screen" />
-<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/keyword.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/explore.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'libs/fancytree/skin-bootstrap/ui.fancytree.css' %}"  class="skinswitcher">
+<link rel="stylesheet" type="text/css" href="{% static 'css/nmrr/selection.css' %}"  media="screen" />
 <link rel="stylesheet" type="text/css" href="{% static 'resources/css/lib/jquery.tagit.css' %}"  media="screen" />
+<link rel="stylesheet" type="text/css" href="{% static 'libs/bootstrap/3.3.5/css/glyphicon.css' %}">
 {% endblock %}
 
 {% block title %}<h3>Search for Resources</h3>{% endblock %}
@@ -36,6 +37,7 @@
 
 
 {% block content %}
+{% csrf_token %}
 <div id="search">
 		<div class="toolbar" style="display: block;">
 			<div class="alert alert-warning" id="banner_results_wait" style="display: none;">
@@ -65,108 +67,147 @@
 		<div style="display: none;">{{search_Form.my_schemas}}</div>
         <div id="form_result_start_current"></div>
 </div>
-<div id="results_infos" style="color:grey;"></div>
-<div class="clearer">&nbsp;</div>
 <table id="icons_table">
-<tr>
-<td align="center" class="selected_resource" value="all">
-<img onclick="selectRadio('all');" width="100" src="/static/img/allresources.png"><br/>
-All Resources
-</td>
-<td align="center" value="organization">
-<img onclick="selectRadio('organization');" width="100" src="/static/img/organization.png"><br>
-Organizations
-</td>
-<td align="center" value="datacollection">
-<img onclick="selectRadio('datacollection');" width="100" src="/static/img/datacollection.png"><br>
-Data Collections
-</td>
-<td align="center" value="dataset">
-<img onclick="selectRadio('dataset');" width="100" src="/static/img/dataset.png"><br>
-Datasets
-</td>
-<td align="center" value="service">
-<img onclick="selectRadio('service');" width="100" src="/static/img/service.png"><br>
-Services
-</td>
-<td align="center" value="informational">
-<img onclick="selectRadio('informational');" width="100" src="/static/img/informational.png"><br>
-Informational Sites
-</td>
-<td align="center" value="software">
-<img onclick="selectRadio('software');" width="100" src="/static/img/software.jpg"><br>
-Software
-</td>
-</tr>
+	<tr>
+		<td align="center" value="all" onclick="selectType('all', this);">
+			<img width="100" src="/static/img/allresources.png">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br/>
+			All Resources
+		</td>
+		<td align="center" value="Resource.role.type==Organization" onclick="selectType('Resource.role.type==Organization', this);">
+			<img width="100" src="/static/img/organization.png">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br>
+			Organizations
+		</td>
+		<td align="center" value="Resource.role.type==Collection" onclick="selectType('Resource.role.type==Collection', this);">
+			<img width="100" src="/static/img/datacollection.png">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br>
+			Data Collections
+		</td>
+		<td align="center" value="Resource.role.type==Dataset" onclick="selectType('Resource.role.type==Dataset', this);">
+			<img width="100" src="/static/img/dataset.png">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br>
+			Datasets
+		</td>
+		<td align="center" value="Resource.role.type==Service" onclick="selectType('Resource.role.type==Service', this);">
+			<img width="100" src="/static/img/service.png">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br>
+			Services
+		</td>
+		<td align="center" value="Resource.role.type==Web Site" onclick="selectType('Resource.role.type==Web Site', this);">
+			<img width="100" src="/static/img/informational.png">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br>
+			Informational Sites
+		</td>
+		<td align="center" value="Resource.role.type==Software" onclick="selectType('Resource.role.type==Software', this);">
+			<img width="100" src="/static/img/software.jpg">
+			<div class="tick" align="right">
+			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+			</div>
+			<br>
+			Software
+		</td>
+	</tr>
 </table>
-<br/><br/>
-
-<table>
-<tr>
-<td style="background-color:#fafafa;">
-<select id="results_view" name="results_view">
-<option value="simple"> Brief Results View
-<option value="detailed"> Detailed Results View
-<option value="custom"> Custom View
-</select>
-<table style="margin-top:-40px;">
-<tr>
-<td style="width:220px">
-<br/>
-<a id="config_custom" onclick="configure_custom_view();" style="display:none;cursor: pointer;">Change Custom View</a>
-<br/><br/>
 <div>
-Resource Type:
-<form id="refine_resource_type">
-<input type="radio" name="resource_type" value="all"> All Resources<br/>
-<input type="radio" name="resource_type" value="organization"> Organization<br/>
-<input type="radio" name="resource_type" value="datacollection"> Data Collection<br/>
-<input type="radio" name="resource_type" value="repository"> Repository<br/>
-<input type="radio" name="resource_type" value="projectarchive"> Project Archive<br/>
-<input type="radio" name="resource_type" value="database"> Database<br/>
-<input type="radio" name="resource_type" value="dataset"> Dataset<br/>
-<input type="radio" name="resource_type" value="service"> Service<br/>
-<input type="radio" name="resource_type" value="informational"> Informational Site<br/>
-<input type="radio" name="resource_type" value="software"> Software<br/>
-<br/>
-</form>
-{% if search_Form.form_oai_pmh.my_registries %}
-<div id="id_my_registries">
-	Data Providers:
-		<br/>
-	{% for value, label in search_Form.form_oai_pmh.my_registries.field.choices %}
-		<input type='checkbox' checked_id="id_my_registries_{{ forloop.counter0 }}" name="my_registries" value='{{value}}' onchange='get_results_keyword_refined();'> {{label}} <br/>
-	{% endfor %}
+	<span id="filters_refinements">
+		<text>Search criteria used
+			(<a href="javascript:void(0)" onclick="clearAllTrees();" class="clearAll">Clear all</a>):
+		</text>
+		<div id="results_infos"></div>
+		<ul id="myFilters">
+		</ul>
+	</span>
 </div>
-{% endif %}
-</div>
-<br/><br/>
-<div id="refine_common"></div>
-<div id="refine_resource"></div>
-</td>
-<td style="background-color:#e0e0e0">
-<div id="results">
-Please wait...
-</div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
+<table class="main_table">
+	<tr>
+		<td style="background-color:#fafafa;">
+			<!--<select id="results_view" name="results_view">-->
+			<!--<option value="simple"> Brief Results View-->
+			<!--<option value="detailed"> Detailed Results View-->
+			<!--<option value="custom"> Custom View-->
+			<!--</select>-->
+			<table>
+				<tr>
+					<td style="width:220px">
+						<!--<br/>-->
+						<!--<a id="config_custom" onclick="configure_custom_view();" style="display:none;cursor: pointer;">Change Custom View</a>-->
+						<!--<br/><br/>-->
+						<div style="display: none;">
+							Resource Type:
+							<form id="refine_resource_type">
+								<input type="radio" name="resource_type" value="all"> All Resources<br/>
+								<input type="radio" name="resource_type" value="organization"> Organization<br/>
+								<input type="radio" name="resource_type" value="datacollection"> Data Collection<br/>
+								<input type="radio" name="resource_type" value="repository"> Repository<br/>
+								<input type="radio" name="resource_type" value="projectarchive"> Project Archive<br/>
+								<input type="radio" name="resource_type" value="database"> Database<br/>
+								<input type="radio" name="resource_type" value="dataset"> Dataset<br/>
+								<input type="radio" name="resource_type" value="service"> Service<br/>
+								<input type="radio" name="resource_type" value="informational"> Informational Site<br/>
+								<input type="radio" name="resource_type" value="software"> Software<br/>
+								<br/>
+							</form>
+						</div>
+						<div id="refine_common"></div>
+						<div id="refine_resource">
+						</div>
+						<hr/>
+						{% if search_Form.form_oai_pmh.my_registries %}
+						<div id="id_my_registries">
+							Data Providers:
+								<br/>
+							{% for value, label in search_Form.form_oai_pmh.my_registries.field.choices %}
+								<input type='checkbox' checked_id="id_my_registries_{{ forloop.counter0 }}"
+									   name="my_registries" value='{{value}}' onchange='get_results_keyword_refined();'>
+								<label style="padding-left: 10px; display:inline;" for="id_my_registries_{{ forloop.counter0 }}">{{label}}</label>
+								<br/>
+							{% endfor %}
+						</div>
+						<br/>
+						{% endif %}
+					</td>
+					<td style="background-color:#FFFFFF">
+						<div id="results">
+						Please wait...
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
 </table>
 
 {% endblock %}
 
 {% block popups %}
 <div id="dialog-detail-result" title="Resource Details" style="display:none;">
-<div id="result_detail">
-</div>
+	<div id="result_detail">
+	</div>
 </div>
 
 <div id="dialog-custom-view" title="Custom View" style="display:none;">
-Select the fields that you want to display in the result page and click on 'Apply'. <br/><br/>
-<div id="custom_view">
-</div>
+	Select the fields that you want to display in the result page and click on 'Apply'. <br/><br/>
+	<div id="custom_view">
+	</div>
 </div>
 
 <div id="dialog-custom-view-error" title="Custom View" style="display:none;">
@@ -177,11 +218,20 @@ No Custom View available for this type of resource.
 {% block extrajs %}
 <script src="{% static 'inc/controllers/js/explore.js' %}"></script>
 <script src="{% static 'libs/tags/tag-it.js' %}"></script>
+<script src="{% static 'libs/tags/tag-it_custom_extensions.js' %}"></script>
 <script src="{% static 'inc/controllers/js/nmrr/nmrr_explore.js' %}"></script>
 <script src="{% static 'inc/controllers/js/nmrr/oai_pmh_explore.js' %}"></script>
+<script src="{% static 'libs/jquery-shorten/1.1.0/jquery.shorten.js' %}"></script>
+<script src="{% static 'libs/fancytree/jquery.fancytree.js' %}"></script>
+<script src="{% static 'libs/fancytree/jquery.fancytree.glyph.js' %}"></script>
+<script src="{% static 'libs/fancytree/jquery.fancytree.wide.js' %}"></script>
+<script src="{% static 'libs/fancytree/jquery.fancytree.customtag.js' %}"></script>
+<script src="{% static 'libs/history/jquery.history.js' %}"></script>
+
 <script>
     initAutocomplete();
-    initSearch();
+    initSearch('{{listRefinements}}', '{{keyword}}', '{{resource}}', '{{data_provider}}');
+	initTagFilters();
 </script>
 {% endblock %}
 

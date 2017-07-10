@@ -43,7 +43,7 @@ class OpenForm(forms.Form):
         if 'forms' in kwargs:
             qs = kwargs.pop('forms')
         else:
-            qs = FormData.objects().none()   
+            qs = FormData.objects().none()
         super(OpenForm, self).__init__(*args, **kwargs)
         self.fields['forms'].queryset = qs
 

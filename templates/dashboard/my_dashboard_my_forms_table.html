@@ -3,7 +3,7 @@
 <table class="data-table">
     <tr>
         <th width="175em">Name</th>
-        <th width="100em">Template</th>
+        <th width="100em">Role</th>
         {% if user.is_staff %}
             <th width="100em">
                 User
@@ -16,7 +16,7 @@
         {% cycle 'even' '' as rowcolors silent %}
         <tr class="{{ rowcolors }}">
             <td style="word-break: break-all;">{{ form.form.name }}</td>
-            <td style="word-break: break-all;">{{ form.template_name}}</td>
+            <td style="word-break: keep-all;">{{ form.template_roles}} </td>
             {% if user.is_staff %}
                 <td>
                     {{usernames|get:key}}

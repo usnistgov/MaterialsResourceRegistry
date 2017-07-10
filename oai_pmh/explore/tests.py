@@ -20,11 +20,12 @@ from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 from testing.models import FAKE_ID
 
+
 class tests_OAI_PMH_ajax(OAI_PMH_Test):
 
     def test_results_by_instance_keyword_no_data(self):
         url = '/oai_pmh/explore/get_results_by_instance_keyword/'
-        req = RequestFactory().get(url)
+        req = RequestFactory().post(url)
         req.session = {}
         req.user = User.objects.get(username='admin')
         r = get_results_by_instance_keyword(req)
@@ -40,7 +41,7 @@ class tests_OAI_PMH_ajax(OAI_PMH_Test):
         self.dump_oai_my_metadata_format()
         data = {'keyword': 'MGI', 'schemas[]': ['software', 'service']}
         url = '/oai_pmh/explore/get_results_by_instance_keyword/'
-        req = RequestFactory().get(url, data=data)
+        req = RequestFactory().post(url, data=data)
         req.session = {}
         req.user = User.objects.get(username='admin')
         r = get_results_by_instance_keyword(req)
@@ -57,7 +58,7 @@ class tests_OAI_PMH_ajax(OAI_PMH_Test):
         self.dump_oai_my_metadata_format()
         data = {'keyword': 'MGI', 'schemas[]': ['software', 'service'], 'registries[]': []}
         url = '/oai_pmh/explore/get_results_by_instance_keyword/'
-        req = RequestFactory().get(url, data=data)
+        req = RequestFactory().post(url, data=data)
         req.session = {}
         req.user = User.objects.get(username='admin')
         r = get_results_by_instance_keyword(req)
@@ -70,7 +71,7 @@ class tests_OAI_PMH_ajax(OAI_PMH_Test):
         self.dump_oai_my_metadata_format()
         data = {'keyword': 'MGI', 'schemas[]': ['software', 'service'], 'registries[]': [FAKE_ID]}
         url = '/oai_pmh/explore/get_results_by_instance_keyword/'
-        req = RequestFactory().get(url, data=data)
+        req = RequestFactory().post(url, data=data)
         req.session = {}
         req.user = User.objects.get(username='admin')
         r = get_results_by_instance_keyword(req)
@@ -84,7 +85,7 @@ class tests_OAI_PMH_ajax(OAI_PMH_Test):
         registry = OaiRegistry.objects.first()
         data = {'keyword': 'MGI', 'schemas[]': ['software', 'service'], 'registries[]': [str(registry.id)]}
         url = '/oai_pmh/explore/get_results_by_instance_keyword/'
-        req = RequestFactory().get(url, data=data)
+        req = RequestFactory().post(url, data=data)
         req.session = {}
         req.user = User.objects.get(username='admin')
         r = get_results_by_instance_keyword(req)
@@ -97,7 +98,7 @@ class tests_OAI_PMH_ajax(OAI_PMH_Test):
         self.dump_oai_my_metadata_format()
         data = {'keyword': 'MGI', 'schemas[]': ['software', 'service'], 'onlySuggestions': json.dumps(True)}
         url = '/oai_pmh/explore/get_results_by_instance_keyword/'
-        req = RequestFactory().get(url, data=data)
+        req = RequestFactory().post(url, data=data)
         req.session = {}
         req.user = User.objects.get(username='admin')
         r = get_results_by_instance_keyword(req)
@@ -180,9 +181,8 @@ class tests_OAI_PMH_explore(OAI_PMH_Test):
 
     def test_explore_detail_result_keyword_no_title(self):
         self.dump_oai_registry()
-        url = '/oai_pmh/explore/detail_result_keyword'
-        data = {'id': '5731fe36a530af33ed232f82'}
-        r = self.doRequestGetAdminClientLogged(url=url, data=data)
+        url = '/oai_pmh/explore/detail_result_keyword/5731fe36a530af33ed232f82'
+        r = self.doRequestGetAdminClientLogged(url=url)
         self.isStatusOK(r.status_code)
         self.assertIsNotNone(r.context)
         self.assertIsNotNone(r.context[0].dicts[1].get('XMLHolder'))
@@ -190,8 +190,8 @@ class tests_OAI_PMH_explore(OAI_PMH_Test):
 
     def test_explore_detail_result_keyword_with_title(self):
         self.dump_oai_registry()
-        url = '/oai_pmh/explore/detail_result_keyword'
-        data = {'id': '5731fe36a530af33ed232f82', 'title': 'test_title'}
+        url = '/oai_pmh/explore/detail_result_keyword/5731fe36a530af33ed232f82'
+        data = {'title': 'test_title'}
         r = self.doRequestGetAdminClientLogged(url=url, data=data)
         self.isStatusOK(r.status_code)
         self.assertIsNotNone(r.context)

@@ -14,8 +14,11 @@
 #
 ################################################################################
 from django.db import models
-from mongoengine.document import Document
-from mongoengine.fields import StringField, ListField, ReferenceField, DictField
+# from mongoengine.document import Document
+from django_mongoengine import Document
+from django_mongoengine import fields
+# from mongoengine.fields import StringField, ListField, ReferenceField, DictField
+
 import mgi.rights as RIGHTS
 
 class Curate(models.Model):
@@ -31,7 +34,9 @@ class Curate(models.Model):
 
 
 class SchemaElement(Document):
-    tag = StringField(required=True)
-    value = StringField(default=None)
-    options = DictField()
-    children = ListField(ReferenceField('SchemaElement'))
+    tag = fields.StringField()
+    value = fields.StringField(default=None, blank=True)
+
+    options = fields.DictField(blank=True)
+
+    children = fields.ListField(fields.ReferenceField('SchemaElement'), blank=True)

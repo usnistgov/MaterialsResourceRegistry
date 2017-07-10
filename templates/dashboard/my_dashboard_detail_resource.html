@@ -20,8 +20,8 @@
 #
 ################################################################################
 -->
-{% endcomment %}
 {% block title %}<h1><span>My {% if type == "record" %}{{type}} {%else%} draft {% endif%}: {{title}}</span></h1>{% endblock %}
+{% endcomment %}
 {% block menu %}{% include 'nmrr/menus/main.html' with active_tab='profile' %}{% endblock %}
 
 

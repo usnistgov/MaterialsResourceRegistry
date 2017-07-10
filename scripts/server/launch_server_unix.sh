@@ -121,8 +121,8 @@ if [[ -n $PROC ]]; then
 	PROC_PYTHON=true
 fi
 
-if [[ $PROC_PYTHON = true -o $PROC_CELERY = true -o $PROC_MONGO = true ]]; then
-	if [[ $NO_INPUT = false ]]; then
+if [[ $PROC_PYTHON = true || $PROC_CELERY = true || $PROC_MONGO = true ]]; then
+	if [[ $NO_INPUT=false ]]; then
 		echo "You have to stop all running processes before launching the server."
 		read -p "Would you like to stop all running processes ? (y or Y for yes) " -n 1 -r
 		echo    # (optional) move to a new line
@@ -132,7 +132,7 @@ if [[ $PROC_PYTHON = true -o $PROC_CELERY = true -o $PROC_MONGO = true ]]; then
 		fi
 	fi
 	echo "  --------------------Kill processes----------------------"
-	if [[ $PROC_CELERY = true ]] ; then
+	if [[ $PROC_CELERY=true ]] ; then
 	    echo "  ----------------------Stop celery----------------------"
         cd $PATH_TO_PROJECT
         until $CELERY multi stopwait worker -A $PROJ -l info -Ofair --purge;
@@ -141,17 +141,17 @@ if [[ $PROC_PYTHON = true -o $PROC_CELERY = true -o $PROC_MONGO = true ]]; then
         done
         PROC="$(pgrep -f celery)"
         if [[ -n $PROC ]]; then
-            pkill -TERM -f celery
+            sudo pkill -TERM -f celery
         fi
         echo "  -------------------------------------------------------"
     fi
-	if [[ $PROC_PYTHON = true ]] ; then
+	if [[ $PROC_PYTHON=true ]] ; then
         echo "  ------------------Stop django server-------------------"
-        pkill -TERM -f runserver
+        sudo pkill -TERM -f runserver
 	fi
-	if [[ $PROC_MONGO = true ]] ; then
+	if [[ $PROC_MONGO=true ]] ; then
         echo "  ----------------------Kill mongo-----------------------"
-        pkill -9 mongod
+        sudo pkill -15 mongod
     fi
 	echo "Resuming launch server..."
 fi
@@ -167,7 +167,7 @@ do
 	sleep 1;
 done
 
-if [[ ! NO_CELERY ]] ; then
+if [[ $NO_CELERY=true ]] ; then
 echo "  ---------------------Start celery-----------------------"
     $CELERY multi start -A $PROJ worker -l info -Ofair --purge & disown
     until $CELERY -A $PROJ status 2>/dev/null;

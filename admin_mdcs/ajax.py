@@ -76,10 +76,10 @@ def resolve_dependencies(request):
         if 'uploadVersion' in request.session and request.session['uploadVersion'] is not None:
             object_versions_id = request.session['uploadVersion']
             if object_type == 'Template':
-                new_template = create_template_version(object_content, filename, object_versions_id)
+                new_template = create_template_version(object_content, filename, object_versions_id, dependencies)
                 redirect = '/admin/manage_versions?type={0}&id={1}'.format(object_type, str(new_template.id))
             elif object_type == 'Type':
-                new_type = create_type_version(object_content, filename, object_versions_id)
+                new_type = create_type_version(object_content, filename, object_versions_id, dependencies)
                 redirect = '/admin/manage_versions?type={0}&id={1}'.format(object_type, str(new_type.id))
         # create new object
         else:

@@ -58,8 +58,9 @@ until $CELERY multi stopwait worker -A $PROJ -l info -Ofair --purge;
 do
 	sleep 1;
 done
-echo "  -------------------------------------------------------"
 echo "  ------------------Stop django server-------------------"
-pkill -TERM -f runserver
+sudo pkill -TERM -f runserver
 echo "  ----------------------Stop mongo-----------------------"
-pkill -TERM mongod
+sudo pkill -TERM mongod
+
+exit 0;

@@ -4,7 +4,9 @@ from django.template import loader
 from os.path import join
 from curate.models import SchemaElement
 from bson.objectid import ObjectId
+from mgi.exceptions import MDCSError
 from utils.XSDParser.renderer import DefaultRenderer
+import numbers
 
 
 class AbstractXmlRenderer(DefaultRenderer):
@@ -151,10 +153,13 @@ class XmlRenderer(AbstractXmlRenderer):
                         xmlns = ' xmlns="{}"'.format(element.options['xmlns'])
                         content[0] += xmlns
 
-                if child.tag == 'module' and child.options['multiple']:
+                # content[2] has the value returned by a module (the entire tag, when multiple is True)
+                if content[2] != '':
+                    if content[0] != '' or content[1] != '':
+                        raise MDCSError('ERROR: More values than expected were returned (Module multiple).')
                     xml_string += content[2]
                 else:
-                    xml_string += self._render_xml(element_name, content[0], content[1]) + content[2]
+                    xml_string += self._render_xml(element_name, content[0], content[1])
 
         return xml_string
 
@@ -210,7 +215,11 @@ class XmlRenderer(AbstractXmlRenderer):
                         else:
                             xmlns = ''
 
+                if isinstance(attr_value, numbers.Number):
+                    attr_value = str(attr_value)
+
                 attr_list.append(xmlns + " " + attr_key + "='" + attr_value + "'")
+
                 # TODO: check that sibling attributes are not declaring the same namespaces
             else:
                 attr_list.append(attr_key + '="' + attr_value + '"')

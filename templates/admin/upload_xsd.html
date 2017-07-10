@@ -48,7 +48,7 @@
     {% csrf_token %}
     {{upload_form}}
     <div id="upload_errors" style="color:red;">
-        {{errors}}
+        {{ errors | safe}}
     </div>
     <br/>
     <input type="submit" class="btn" value="Upload {{object_type}}"/>

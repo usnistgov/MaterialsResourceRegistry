@@ -60,16 +60,16 @@ def load_metadata_prefixes():
                             isDefault=True).save()
         #Add NMRR templates as metadata prefixes
         templates = {
-            'all': {'path': 'AllResources.xsd', 'metadataPrefix': 'oai_all'},
-            'organization': {'path': 'Organization.xsd', 'metadataPrefix': 'oai_org'},
-            'datacollection': {'path': 'DataCollection.xsd', 'metadataPrefix': 'oai_datacol'},
-            'repository': {'path': 'Repository.xsd', 'metadataPrefix': 'oai_repo'},
-            'projectarchive': {'path': 'ProjectArchive.xsd', 'metadataPrefix': 'oai_proj'},
-            'database': {'path': 'Database.xsd', 'metadataPrefix': 'oai_database'},
-            'dataset': {'path': 'Dataset.xsd', 'metadataPrefix': 'oai_dataset'},
-            'service': {'path': 'Service.xsd', 'metadataPrefix': 'oai_serv'},
-            'informational': {'path': 'Informational.xsd', 'metadataPrefix': 'oai_info'},
-            'software': {'path': 'Software.xsd', 'metadataPrefix': 'oai_soft'},
+            'all': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_all'},
+            'organization': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_org'},
+            'datacollection': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_datacol'},
+            'repository': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_repo'},
+            'projectarchive': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_proj'},
+            'database': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_database'},
+            'dataset': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_dataset'},
+            'service': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_serv'},
+            'informational': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_info'},
+            'software': {'path': 'res-md.xsd', 'metadataPrefix': 'oai_soft'},
         }
 
         for template_name, info in templates.iteritems():
@@ -104,16 +104,16 @@ def load_sets():
     if len(sets) == 0:
         #Add NMRR templates as sets
         templates = {
-            'all': {'path': 'AllResources.xsd', 'setSpec': 'all', 'setName': 'all', 'description': 'Get all records'},
-            'organization': {'path': 'Organization.xsd', 'setSpec': 'org', 'setName': 'organization', 'description': 'Get organization records'},
-            'datacollection': {'path': 'DataCollection.xsd', 'setSpec': 'datacol', 'setName': 'datacollection', 'description': 'Get datacollection records'},
-            'repository': {'path': 'Repository.xsd', 'setSpec': 'repo', 'setName': 'repository', 'description': 'Get repository records'},
-            'projectarchive': {'path': 'ProjectArchive.xsd', 'setSpec': 'proj', 'setName': 'projectarchive', 'description': 'Get projectarchive records'},
-            'database': {'path': 'Database.xsd', 'setSpec': 'database', 'setName': 'database', 'description': 'Get database records'},
-            'dataset': {'path': 'Dataset.xsd', 'setSpec': 'dataset', 'setName': 'dataset', 'description': 'Get dataset records'},
-            'service': {'path': 'Service.xsd', 'setSpec': 'serv', 'setName': 'service', 'description': 'Get service records'},
-            'informational': {'path': 'Informational.xsd', 'setSpec': 'info', 'setName': 'informational', 'description': 'Get informational records'},
-            'software': {'path': 'Software.xsd', 'setSpec': 'soft', 'setName': 'software', 'description': 'Get software records'},
+            'all': {'path': 'res-md.xsd', 'setSpec': 'all', 'setName': 'all', 'description': 'Get all records'},
+            'organization': {'path': 'res-md.xsd', 'setSpec': 'org', 'setName': 'organization', 'description': 'Get organization records'},
+            'datacollection': {'path': 'res-md.xsd', 'setSpec': 'datacol', 'setName': 'datacollection', 'description': 'Get datacollection records'},
+            'repository': {'path': 'res-md.xsd', 'setSpec': 'repo', 'setName': 'repository', 'description': 'Get repository records'},
+            'projectarchive': {'path': 'res-md.xsd', 'setSpec': 'proj', 'setName': 'projectarchive', 'description': 'Get projectarchive records'},
+            'database': {'path': 'res-md.xsd', 'setSpec': 'database', 'setName': 'database', 'description': 'Get database records'},
+            'dataset': {'path': 'res-md.xsd', 'setSpec': 'dataset', 'setName': 'dataset', 'description': 'Get dataset records'},
+            'service': {'path': 'res-md.xsd', 'setSpec': 'serv', 'setName': 'service', 'description': 'Get service records'},
+            'informational': {'path': 'res-md.xsd', 'setSpec': 'info', 'setName': 'informational', 'description': 'Get informational records'},
+            'software': {'path': 'res-md.xsd', 'setSpec': 'soft', 'setName': 'software', 'description': 'Get software records'},
         }
 
         for template_name, info in templates.iteritems():
@@ -127,24 +127,24 @@ def load_sets():
 
 def load_xslt():
     # Add OAI Xslt
-    xsltFullName = 'full-oai_pmh'
-    xsltFullPath = 'nmrr-full-oai_pmh.xsl'
-    xsltDetailName = 'detail-oai_pmh'
-    sltDetailPath = 'nmrr-detail-oai_pmh.xsl'
+    xsltFullName = 'full_demo-oai_pmh'
+    xsltFullPath = 'nmrr-full_demo-oai_pmh.xsl'
+    xsltDetailName = 'detail_demo-oai_pmh'
+    sltDetailPath = 'nmrr-detail_demo-oai_pmh.xsl'
 
-    objFull = ResultXslt.objects(filename='nmrr-full-oai_pmh.xsl')
+    objFull = ResultXslt.objects(filename=xsltFullPath)
     if not objFull:
         file = open(os.path.join(SITE_ROOT, 'oai_pmh', 'resources', 'xsl', xsltFullPath),'r')
         fileContent = file.read()
         objFull = ResultXslt(name=xsltFullName, filename=xsltFullPath, content=fileContent).save()
-        Template.objects().update(set__ResultXsltList=str(objFull.id), upsert=True)
+        Template.objects().update(set__ResultXsltList=objFull, upsert=True)
 
-    objDetail = ResultXslt.objects(filename='nmrr-detail-oai_pmh.xsl')
+    objDetail = ResultXslt.objects(filename=sltDetailPath)
     if not objDetail:
         file = open(os.path.join(SITE_ROOT, 'oai_pmh', 'resources', 'xsl', sltDetailPath),'r')
         fileContent = file.read()
         objDetail = ResultXslt(name=xsltDetailName, filename=sltDetailPath, content=fileContent).save()
-        Template.objects().update(set__ResultXsltDetailed=str(objDetail.id), upsert=True)
+        Template.objects().update(set__ResultXsltDetailed=objDetail, upsert=True)
 
 def init_registries_status():
     """

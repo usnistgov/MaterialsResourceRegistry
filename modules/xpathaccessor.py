@@ -66,7 +66,6 @@ class XPathAccessor(object):
             if element is not None:
                 return element
 
-
     @staticmethod
     def element_has_xpath(element, xpath):
         return 'xpath' in element.options and element.options['xpath']['xml'] == xpath

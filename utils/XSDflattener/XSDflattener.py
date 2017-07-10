@@ -7,7 +7,6 @@
 # V1: 
 #    - works with include statement only (not import)
 #    - works with API URL in include schemaLocation attribute
-#	 - works with local URI
 #
 # Author: Guillaume SOUSA AMARAL
 #         guillaume.sousa@nist.gov
@@ -23,14 +22,16 @@ import lxml.etree as etree
 from io import BytesIO
 from abc import ABCMeta, abstractmethod
 import urllib2
+from urlparse import urlparse
 
 
 class XSDFlattener(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, xmlString):
+    def __init__(self, xmlString, download_enabled=True):
         self.xmlString = xmlString
         self.dependencies = []
+        self.download_enabled = download_enabled
 
     def get_flat(self):
         parser = etree.XMLParser(remove_blank_text=True, remove_comments=True, remove_pis=True)
@@ -83,52 +84,57 @@ class XSDFlattener(object):
         pass
 
 
-################################################################################
-#
-# XSDFlattenerURL
-#
-# future: flattener that could work using URL of distant server requiring authentication
-#
-################################################################################
 class XSDFlattenerURL(XSDFlattener):
-    def __init__(self, xmlString):
-        XSDFlattener.__init__(self, xmlString)
-        self.servers = {}
-
+    """
+    Download the content of the dependency
+    """
     def get_dependency_content(self, uri):
-        pass
+        content = ""
 
-    # 		r = requests.get(uri,auth=(self.user, self.password))
-    # 		return r.text
+        if self.download_enabled:
+            file = urllib2.urlopen(uri)
+            content = file.read()
 
-
-################################################################################
-#
-# XSDFlattenerLocal
-#
-# description: flattener that can flatten files on the local file system
-#
-################################################################################	
-class XSDFlattenerLocal(XSDFlattener):
-    def get_dependency_content(self, uri):
-        file = open(uri, 'r')
-        content = file.read()
         return content
 
 
-################################################################################
-#
-# XSDFlattenerFull
-#
-# future: flattener that could work using URL and local files
-#
-################################################################################
-class XSDFlattenerURL(XSDFlattener):
+class XSDFlattenerDatabaseOrURL(XSDFlattener):
+    """
+    Get the content of the dependency from the database or from the URL
+    """
+
     def get_dependency_content(self, uri):
+        content = self._get_dependency_content_database(uri)
+        if content == "":
+            content = self._get_dependency_content_url(uri)
+
+        return content
+
+    def _get_dependency_content_database(self, uri):
+        from mgi.models import Type, Template
         content = ""
         try:
-            file = urllib2.urlopen(uri)
-            content = file.read()
+            url = urlparse(uri)
+            _id = url.query.split("=")[1]
+            try:
+                _type = Type.objects.get(pk=str(_id))
+                content = _type.content
+            except:
+                template = Template.objects.get(pk=str(_id))
+                content = template.content
         except:
             pass
+
+        return content
+
+    def _get_dependency_content_url(self, uri):
+        content = ""
+
+        try:
+            if self.download_enabled:
+                _file = urllib2.urlopen(uri)
+                content = _file.read()
+        except:
+            pass
+
         return content

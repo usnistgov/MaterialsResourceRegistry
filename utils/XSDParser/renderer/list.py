@@ -17,7 +17,8 @@ class AbstractListRenderer(DefaultRenderer):
 
         templates = {
             'ul': loader.get_template(join(list_renderer_path, 'ul.html')),
-            'li': loader.get_template(join(list_renderer_path, 'li.html'))
+            'li': loader.get_template(join(list_renderer_path, 'li.html')),
+            'attributes': loader.get_template(join(list_renderer_path, 'attributes.html'))
         }
 
         super(AbstractListRenderer, self).__init__(xsd_data, templates)
@@ -194,15 +195,18 @@ class ListRenderer(AbstractListRenderer):
         """
         html_content = ''
 
+        attributes = []
+        simple = False
         for child in element.children:
             if child.tag == 'sequence':
                 html_content += self.render_sequence(child)
             elif child.tag == 'simple_content':
+                simple = True
                 html_content += self.render_simple_content(child)
             elif child.tag == 'complex_content':
                 html_content += self.render_complex_content(child)
             elif child.tag == 'attribute':
-                html_content += self.render_attribute(child)
+                attributes.append(self.render_attribute(child))
             elif child.tag == 'choice':
                 html_content += self.render_choice(child)
             elif child.tag == 'module':
@@ -210,6 +214,9 @@ class ListRenderer(AbstractListRenderer):
             else:
                 message = 'render_complex_type: ' + child.tag + ' not handled'
                 self.warnings.append(message)
+
+        if len(attributes) > 0:
+            html_content = self._render_list_attributes(attributes, html_content, simple)
 
         return html_content
 
@@ -250,6 +257,9 @@ class ListRenderer(AbstractListRenderer):
 
         buttons = self._render_buttons(add_button, del_button)
         element_name = element.options['name']
+
+        if 'label' in element.options and element.options['label'] != '':
+            element_name = element.options['label']
 
         for child_key in child_keys:
             sub_elements = []
@@ -552,18 +562,24 @@ class ListRenderer(AbstractListRenderer):
         """
         html_content = ''
 
+        attributes = []
+        simple = True
         for child in element.children:
             if child.tag == 'input':
                 html_content += self._render_input(child)
             elif child.tag == 'attribute':
-                html_content += self.render_attribute(child)
+                attributes.append(self.render_attribute(child))
             elif child.tag == 'simple_type':
                 html_content += self.render_simple_type(child)
             elif child.tag == 'complex_type':
+                simple = False
                 html_content += self.render_complex_type(child)
             else:
                 message = 'render_extension: ' + child.tag + ' not handled'
                 self.warnings.append(message)
+
+        if len(attributes) > 0:
+            html_content = self._render_list_attributes(attributes, html_content, simple)
 
         return html_content
 
@@ -605,7 +621,7 @@ class ListRenderer(AbstractListRenderer):
             'module_id': element.pk,
             'url': module_url,
             'xsd_xpath': module_options['xpath']['xsd'],
-            'xml_xpath': module_options['xpath']['xsd']
+            'xml_xpath': module_options['xpath']['xml']
         }
 
         # if the loaded doc has data, send them to the module for initialization
@@ -617,3 +633,14 @@ class ListRenderer(AbstractListRenderer):
 
         # renders the module
         return module_view(module_request).content.decode("utf-8")
+
+    def _render_list_attributes(self, attributes, html_content, simple_element):
+        if simple_element:
+            data = {
+                'attributes_html': attributes
+            }
+            html_content += self._load_template('attributes', data)
+        else:
+            html_content = "".join(attributes) + html_content
+
+        return html_content

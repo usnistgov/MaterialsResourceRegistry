@@ -242,6 +242,8 @@ def load_config():
         hasattr(settings, 'PARSER_AUTO_KEY_KEYREF') else False,
         'PARSER_IMPLICIT_EXTENSION_BASE': settings.PARSER_IMPLICIT_EXTENSION_BASE if
         hasattr(settings, 'PARSER_IMPLICIT_EXTENSION_BASE') else False,
+        'PARSER_DOWNLOAD_DEPENDENCIES': settings.PARSER_DOWNLOAD_DEPENDENCIES if
+        hasattr(settings, 'PARSER_DOWNLOAD_DEPENDENCIES') else False,
     }
 
 
@@ -551,7 +553,8 @@ def remove_element(request):
 
     # Removing the element from the data structure
     schema_element = element_list[0]
-    schema_element.update(pull__children=element_id)
+    schema_element_to_pull = SchemaElement.objects.get(pk=element_id)
+    schema_element.update(pull__children=schema_element_to_pull)
 
     schema_element.reload()
     update_branch_xpath(schema_element)

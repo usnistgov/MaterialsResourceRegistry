@@ -32,8 +32,8 @@ class ComposerTestSuite(RegressionTest):
     """
 
     def setUp(self):
-        # # call parent setUp
-        # super(ComposerTestSuite, self).setUp()
+        # call parent setUp
+        super(ComposerTestSuite, self).setUp()
         # create the request
         self.request = HttpRequest()
         # create the session
@@ -66,7 +66,7 @@ class ComposerTestSuite(RegressionTest):
             # read the file content
             type_content = type_file.read()
             # add the type in database
-            type_object = create_type(type_content, 'type_name', type_path)
+            type_object = create_type(type_content, type_file.name, type_path)
             # set the type
             self.request.POST['typeID'] = type_object.id
             self.request.POST['typeName'] = 'type_name'

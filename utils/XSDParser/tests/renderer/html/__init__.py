@@ -17,7 +17,7 @@ def create_mock_db_input(value='', placeholder='', title=''):
 
     input_element.value = value
     input_element.options = {
-        'title': title,
+        'tooltip': title,
         'placeholder': placeholder
     }
 

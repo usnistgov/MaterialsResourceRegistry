@@ -1,4 +1,4 @@
-from models import PeriodicTableModule, PeriodicTableMultipleModule, ExcelUploaderModule
+from models import PeriodicTableModule, PeriodicTableMultipleModule, ExcelUploaderModule, PeriodicTableMultipleModuleShort
 
 
 def periodic_table_view(request):
@@ -14,4 +14,4 @@ def upload_excel_view(request):
 
 
 def periodic_table_multiple_view_short(request):
-    return PeriodicTableMultipleModule().render(request)
+    return PeriodicTableMultipleModuleShort().render(request)

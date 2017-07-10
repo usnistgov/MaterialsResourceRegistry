@@ -1,9 +1,23 @@
+{% extends "nmrr/extra/small_intro.html" %}
+{% load staticfiles %}
 {% load render_extras %}
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'resources/css/oai_pmh_explore.css' %}"  media="screen" />
+{% endblock %}
 {% block content %}
+<div class="toolbar">
+	<div class="btn-group pull-right">
+    	<span class="btn" onclick="backToResults();" style="text-decoration:none">Back to Results</span>
+  	</div>
+	<br/><br/>
+</div>
 
 {% autoescape off %}
 {% render_as_template XMLHolder %}
 {% endautoescape %}
 
+{% endblock %}
 
+{% block extrajs %}
+<script src="{% static 'inc/controllers/js/explore.js' %}"></script>
 {% endblock %}

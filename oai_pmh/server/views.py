@@ -15,10 +15,8 @@ from django.http import HttpResponseNotFound, HttpResponseBadRequest
 from django.conf import settings
 from django.views.generic import TemplateView
 from mgi.models import XMLdata, OaiSettings, OaiMyMetadataFormat, OaiTemplMfXslt, Template, TemplateVersion, OaiMySet,\
-Status
-import os
+    Status
 from oai_pmh.server.exceptions import *
-import xmltodict
 from bson.objectid import ObjectId
 import lxml.etree as etree
 import re
@@ -28,8 +26,8 @@ from exporter.builtin.models import XSLTExporter
 from django.shortcuts import HttpResponse
 from StringIO import StringIO
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
-import mongoengine.errors as MONGO_ERRORS
-from rest_framework import status
+from utils.XSDflattener.XSDflattener import XSDFlattenerDatabaseOrURL
+
 
 class OAIProvider(TemplateView):
     content_type = 'text/xml'
@@ -776,19 +774,17 @@ class OAIProvider(TemplateView):
 #
 ################################################################################
 def get_xsd(request, schema):
-    #TODO Available if publication ok and no user template
-    #We retrieve the schema filename in the schema attribute
-    #Get the templateVersion ID
+    # TODO Available if publication ok and no user template
+    # We retrieve the schema filename in the schema attribute
+    # Get the templateVersion ID
     try:
         templatesVersionID = Template.objects(filename=schema).distinct(field="templateVersion")
         templateID = TemplateVersion.objects(pk__in=templatesVersionID, isDeleted=False).distinct(field="current")
-        templates = Template.objects.get(pk__in=templateID)
-        #Get the XML schema
-        contentEncoded = templates.content.encode('utf-8')
-        fileObj = StringIO(contentEncoded)
+        template = Template.objects.get(pk=templateID[0])
+        flattener = XSDFlattenerDatabaseOrURL(template.content.encode('utf-8'))
+        content_encoded = flattener.get_flat()
+        file_obj = StringIO(content_encoded)
 
-        return HttpResponse(fileObj, content_type='text/xml')
-    except MONGO_ERRORS.DoesNotExist, e:
-        return HttpResponseNotFound('Impossible to retrieve the schema with the given name.')
+        return HttpResponse(file_obj, content_type='text/xml')
     except Exception, e:
-        return HttpResponseBadRequest('An error occurred when trying to retrieve the schema.')
+        return HttpResponseBadRequest('Impossible to retrieve the schema with the given name.')

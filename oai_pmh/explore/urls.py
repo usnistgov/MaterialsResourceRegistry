@@ -18,6 +18,7 @@ urlpatterns = patterns(
     url(r'^get_results_by_instance_keyword', get_results_by_instance_keyword),
     url(r'^get_metadata_formats_detail', 'get_metadata_formats_detail'),
     url(r'^get_metadata_formats', 'get_metadata_formats'),
-    url(r'^detail_result_keyword$', 'explore_detail_result_keyword', name='explore-detail-result-keyword'),
+    url(r'^detail_result_keyword/(?P<result_id>\w+)', 'explore_detail_result_keyword',
+        name='oai-explore-detail-result-keyword'),
 )
 

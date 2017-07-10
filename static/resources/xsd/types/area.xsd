@@ -1,0 +1,36 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified"
+	elementFormDefault="qualified">
+	<xsd:complexType name="area">
+		<xsd:sequence>
+			<xsd:element name="value" type="xsd:float" maxOccurs="unbounded"/>
+			<xsd:element name="unit">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="square meter"/>
+						<xsd:enumeration value="square centimeter"/>
+						<xsd:enumeration value="square kilometer"/>
+						<xsd:enumeration value="square inche"/>
+						<xsd:enumeration value="square miles"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element maxOccurs="unbounded" minOccurs="0" name="uncertainty">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element minOccurs="0" name="type" type="xsd:string"/>
+						<xsd:element maxOccurs="unbounded" minOccurs="0" name="value"
+							type="xsd:double"/>
+						<xsd:element minOccurs="0" name="scale">
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:string">
+									<xsd:enumeration value="absolute"/>
+									<xsd:enumeration value="relative"/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

@@ -172,7 +172,7 @@ class RendererRenderSelectTestSuite(TestCase):
 
 class RenderInputTestSuite(TestCase):
     def setUp(self):
-        input_data = join('utils', 'XSDParser', 'tests', 'data', 'renderer', 'html', 'input')
+        input_data = join('utils', 'XSDParser', 'tests', 'data', 'renderer', 'default', 'input')
         self.input_data_handler = DataHandler(input_data)
 
         self.types_generator = VariableTypesGenerator()
@@ -185,7 +185,8 @@ class RenderInputTestSuite(TestCase):
         result_string = self.renderer._render_input(input_element)
 
         result_html = etree.fromstring(result_string)
-        expected_html = self.input_data_handler.get_html('placeholder')
+        # expected_html = self.input_data_handler.get_html('placeholder')
+        expected_html = self.input_data_handler.get_html('val_empty_pl_str_tt_empty')
 
         self.assertTrue(are_equals(result_html, expected_html))
 
@@ -212,7 +213,7 @@ class RenderInputTestSuite(TestCase):
         result_string = self.renderer._render_input(input_element)
 
         result_html = etree.fromstring(result_string)
-        expected_html = self.input_data_handler.get_html('title')
+        expected_html = self.input_data_handler.get_html('val_empty_pl_empty_tt_str')
 
         self.assertTrue(are_equals(result_html, expected_html))
 
@@ -239,7 +240,7 @@ class RenderInputTestSuite(TestCase):
         result_string = self.renderer._render_input(input_element)
 
         result_html = etree.fromstring(result_string)
-        expected_html = self.input_data_handler.get_html('input_str')
+        expected_html = self.input_data_handler.get_html('val_str_pl_empty_tt_empty')
 
         self.assertTrue(are_equals(result_html, expected_html))
 
@@ -250,7 +251,7 @@ class RenderInputTestSuite(TestCase):
         result_string = self.renderer._render_input(input_element)
 
         result_html = etree.fromstring(result_string)
-        expected_html = self.input_data_handler.get_html('input_none')
+        expected_html = self.input_data_handler.get_html('val_empty_pl_empty_tt_empty')
 
         self.assertTrue(are_equals(result_html, expected_html))
 

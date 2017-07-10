@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="ns" 
+    xmlns:n="ns"> 
+    <xs:complexType name="bType">
+        <xs:sequence>
+            <xs:element name="b_mult" maxOccurs="unbounded"/>
+            <xs:element name="b_zero" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

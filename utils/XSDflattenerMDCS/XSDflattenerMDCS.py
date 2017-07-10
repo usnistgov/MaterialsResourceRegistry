@@ -24,14 +24,10 @@ from mgi.models import Type, Template
 from urlparse import urlparse
 
 
-################################################################################
-#
-# XSDFlattenerMDCS
-#
-# description: flattener that works with MDCS model
-#
-################################################################################
 class XSDFlattenerMDCS(XSDFlattener):
+    """
+    Download the content of the dependency from MongoDB
+    """
     def get_dependency_content(self, uri):
         content = ""
         try:

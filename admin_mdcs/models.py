@@ -154,7 +154,7 @@ def api_staff_member_required():
             if request.user.is_staff:
                 return view_func(request, *args, **kwargs)
             else:
-                content = {'message':'Only administrators can use this feature.'}
+                content = {'message': 'Only administrators can use this feature.'}
                 return Response(content, status=status.HTTP_401_UNAUTHORIZED)
 
         return wrapper

@@ -77,7 +77,6 @@ def load_resources_view(request):
                     i = resources[key].index(resource)
                     del resources[key][i]
 
-
     # Build response content
     response = {
         'scripts': "",

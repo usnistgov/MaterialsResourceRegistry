@@ -24,10 +24,10 @@
 <div class="width">
 <div class="intro-content">
 
-<h2>{{CUSTOM_TITLE}} <sup><span class="alpha">Beta</span></sup></h2>
+<h2>{{CUSTOM_TITLE}} <!--sup><span class="alpha">Beta</span></sup--></h2>
 <p>{{CUSTOM_SUBTITLE}}</p>
 
-<p><a href="/explore/keyword" class="button button-slider"><i class="fa"></i>{{CUSTOM_EXPLORE}}</a>
+<p><a href="{% url 'expore-index-keyword' %}" class="button button-slider"><i class="fa"></i>{{CUSTOM_EXPLORE}}</a>
 <a href="/curate" class="button button-reversed button-slider"><i class="fa"></i>{{CUSTOM_CURATE}}</a></p>
 </div>
 
@@ -63,7 +63,7 @@
     <li><a class="selected" href="/">Home Page</a></li>
 
     <li><a href="/all-options">Services</a>
-    <ul><li><a href="/explore/keyword">{{CUSTOM_EXPLORE}}</a></li>
+    <ul><li><a href="{% url 'expore-index-keyword' %}">{{CUSTOM_EXPLORE}}</a></li>
     <li><a href="/curate">{{CUSTOM_CURATE}}</a></li></ul>
     </li>
 

@@ -35,7 +35,7 @@
     	</div>
    	</li>
     <li>
-    	<a href="/explore/keyword">Search by Keyword</a>
+    	<a href="{% url 'expore-index-keyword' %}">Search by Keyword</a>
     </li>
 	<li class="current_page_item">
         <div style="cursor:pointer">
@@ -79,6 +79,7 @@
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div id="search">
 		<div class="toolbar" style="display: block;">
 			<div class="alert alert-warning" id="banner_results_wait" style="display: none;">

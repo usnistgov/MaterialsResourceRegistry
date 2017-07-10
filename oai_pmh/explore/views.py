@@ -22,7 +22,7 @@ import os
 from mgi import settings
 from lxml import etree
 from io import BytesIO
-from collections import OrderedDict
+from urlparse import urlparse
 
 ################################################################################
 #
@@ -118,9 +118,9 @@ def get_metadata_formats_detail(request):
 # Description:   Page that allows to see detail result from a selected result
 #
 ################################################################################
-def explore_detail_result_keyword(request) :
+def explore_detail_result_keyword(request, result_id) :
     template = loader.get_template('oai_pmh/explore/explore_detail_results_keyword.html')
-    result_id = request.GET['id']
+    # result_id = request.GET['id']
     record = OaiRecord.objects.get(pk=result_id)
     # schemaId = xmlString['schema']
     if 'title' in request.GET:
@@ -146,16 +146,19 @@ def explore_detail_result_keyword(request) :
         #We use the default one
         newdom = transform(dom)
 
-    registry_name = OaiRegistry.objects.get(pk=record.registry).name
+    registry = OaiRegistry.objects.get(pk=record.registry)
+    registry_name = registry.name
     if len(registry_name) > 30:
-        registry_name = "{0}...".format(registry_name[:30])
+        registry_name = "{0}...".format(registry.name[:30])
 
     result = str(newdom)
+    url = urlparse(registry.url)
     context = RequestContext(request, {
         'XMLHolder': result,
         'title': title,
         'oai_pmh': True,
         'registry_name': registry_name,
+        'registry_url': "{0}://{1}".format(url.scheme, url.netloc),
         "template_name": record.metadataformat.template.title if record.metadataformat.template else '',
     })
 

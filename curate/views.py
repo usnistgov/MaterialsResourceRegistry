@@ -410,7 +410,8 @@ def start_curate(request):
                         template_id = TemplateVersion.objects().get(pk=templates[0].templateVersion).current
                         request.session['currentTemplateID'] = template_id
                     else:
-                        raise MDCSError("The selection of template by name can't be used if the MDCS contain more than one template with the same name.")
+                        raise MDCSError("The selection of template by name can't be used if the MDCS contain more than "
+                                        "one template with the same name.")
 
                     template = loader.get_template('curate/curate_full_start.html')
 
@@ -424,9 +425,9 @@ def start_curate(request):
                     ajaxCall = True
                     template = loader.get_template('curate/curate_start.html')
 
-                open_form = OpenForm(
-                    forms=FormData.objects(user=str(request.user.id), template=request.session['currentTemplateID'],
-                                           xml_data_id__exists=False))
+                open_form = OpenForm(forms=FormData.objects(user=str(request.user.id),
+                                                            template=request.session['currentTemplateID'],
+                                                            xml_data_id__exists=False))
                 new_form = NewForm()
                 upload_form = UploadForm()
 
@@ -546,23 +547,26 @@ def curate_edit_form(request):
                 XMLtree = etree.parse(BytesIO(xmlDocData.encode('utf-8')))
                 request.session['xmlDocTree'] = etree.tostring(XMLtree)
 
-                if form_data.schema_element_root is None:
-                    if form_data.template is not None:
-                        template_object = Template.objects.get(pk=form_data.template)
-                        xsd_doc_data = template_object.content
-                    else:
-                        raise MDCSError("No schema attached to this file")
+                if form_data.schema_element_root is not None:
+                    delete_branch_from_db(form_data.schema_element_root.pk)
+                    form_data.schema_element_root = None
 
-                    if form_data.xml_data is not None:
-                        xml_doc_data = form_data.xml_data
-                    else:
-                        xml_doc_data = None
+                if form_data.template is not None:
+                    template_object = Template.objects.get(pk=form_data.template)
+                    xsd_doc_data = template_object.content
+                else:
+                    raise MDCSError("No schema attached to this file")
 
-                    root_element_id = generate_form(request, xsd_doc_data, xml_doc_data, config=load_config())
-                    root_element = SchemaElement.objects.get(pk=root_element_id)
+                if form_data.xml_data is not None:
+                    xml_doc_data = form_data.xml_data
+                else:
+                    xml_doc_data = None
 
-                    form_data.update(set__schema_element_root=root_element)
-                    form_data.reload()
+                root_element_id = generate_form(request, xsd_doc_data, xml_doc_data, config=load_config())
+                root_element = SchemaElement.objects.get(pk=root_element_id)
+
+                form_data.update(set__schema_element_root=root_element)
+                form_data.reload()
 
                 request.session['form_id'] = str(form_data.schema_element_root.id)
 

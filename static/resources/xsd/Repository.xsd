@@ -370,7 +370,7 @@
      </xs:sequence>
    </xs:complexType>
 
-  <xs:complexType name="NamePID">
+  <xs:complexType xmlns:ns0="http://mdcs.ns" name="NamePID" ns0:_mod_mdcs_="/registry/name-pid">
      <xs:annotation>
        <xs:documentation>
          a name or title that can potentially have an associated identifier.

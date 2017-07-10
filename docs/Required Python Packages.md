@@ -1,0 +1,38 @@
+# Required Python Packages
+
+This document provides a list of all python packages that are required to make the MDCS run well. 
+To install a specific version of a package, the following command can be used: 
+
+pip install package_name==package_version
+
+
+```bash
+pip install Django==1.8.14 #(https://docs.djangoproject.com/en/1.8/)
+pip install mongoengine==0.10.6 #(http://mongoengine.org/)
+pip install djangorestframework==2.3.13 #(http://www.django-rest-framework.org/)
+pip install django-oauth-toolkit==0.8.0 #(https://django-oauth-toolkit.readthedocs.org/en/latest/)
+pip install django-rest-framework-mongoengine==1.3 #(https://pypi.python.org/pypi/django-rest-framework-mongoengine)
+pip install django-rest-swagger==0.1.14 #(http://django-rest-swagger.readthedocs.org/en/latest/)
+pip install xlrd==0.9.3 #(https://pypi.python.org/pypi/xlrd)
+pip install xmltodict==0.10.2 #(https://github.com/martinblech/xmltodict)
+pip install lxml==3.6 #(http://lxml.de/)
+pip install python-dateutil==2.2 #(https://pypi.python.org/pypi/python-dateutil)
+pip install requests==2.3.0 #(http://docs.python-requests.org/en/latest/)
+pip install sickle #(https://pypi.python.org/pypi/Sickle)
+pip install redis==2.10.5 #(https://pypi.python.org/pypi/redis)
+pip install celery==3.1.23 #(https://pypi.python.org/pypi/celery)
+pip install django-password-policies==0.4.1 #(https://pypi.python.org/pypi/django-password-policies)
+pip install psutil==4.3.0 #(https://github.com/giampaolo/psutil)
+```
+
+django-mongoengine needs to be downloaded manually
+```bash
+git clone https://github.com/MongoEngine/django-mongoengine.git
+cd django-mongoengine
+python setup.py install
+```
+
+postgreSQL can be used in production instead of SQLite. SQLite is used by default
+```bash
+pip install psycopg2 #(https://pypi.python.org/pypi/psycopg2)
+```

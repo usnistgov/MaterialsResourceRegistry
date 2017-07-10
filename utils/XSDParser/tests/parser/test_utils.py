@@ -352,10 +352,12 @@ class ParserHasModuleTestSuite(TestCase):
 
     def _save_module_to_db(self):
         # FIXME module is not saved in the right database
-        module = Module()
-        module.name = 'registered_module'
-        module.url = 'registered_module'
-        module.view = 'registered_module'
+        module = Module(
+            name="mock_module",
+            url="/mock/url",
+            view="mock.view",
+            multiple=False
+        )
 
         module.save()
 
@@ -473,6 +475,8 @@ class ParserGetXmlElementDataTestSuite(TestCase):
         xml_element = self.xml_element_data_handler.get_xml(join('complex_type', 'filled'))
 
         reload_data = get_xml_element_data(complex_type, xml_element)
+        reload_data = "<root>" + reload_data + "</root>"
+
         self.assertEqual(reload_data, etree.tostring(xml_element))
 
     def test_simple_type_xml_text(self):
@@ -546,7 +550,7 @@ class ParserGetElementTypeTestSuite(TestCase):
         element_root = xml_schema.xpath(element_root_xpath, namespaces=self.namespace)[0]
 
         element_type = get_element_type(element_root, xml_schema, self.namespace, 'xs', None)
-        self.assertEqual(element_type, (None, xml_schema, None))
+        self.assertEqual(element_type, (list(element_root)[1], xml_schema, None))
 
     def test_type_is_common_type(self):
         xml_schema = self.xml_element_data_handler.get_xsd('common_type')

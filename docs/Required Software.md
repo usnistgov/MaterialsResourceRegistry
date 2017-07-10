@@ -1,0 +1,11 @@
+# Required Software
+
+This document provides a list of all software that are required to run the MRR.
+
+Python 2.7.x
+
+MongoDB 3.x
+
+SQLite3 (prefer PostgreSQL 9.x in production)
+
+Redis server 3.x

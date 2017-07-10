@@ -6,7 +6,8 @@ import django
 if __name__ == "__main__":
 
     if str(sys.argv[0]).endswith('manage.py'):
-        if 'runserver' in sys.argv or 'migrate' in sys.argv or 'createsuperuser' in sys.argv or 'syncdb' in sys.argv:
+        if 'runserver' in sys.argv or 'migrate' in sys.argv or 'createsuperuser' in sys.argv or 'syncdb' in sys.argv \
+                or 'collectstatic' in sys.argv:
             if 'test' in sys.argv or '--test' in sys.argv:
                 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mgi.settings_test")
             else:
