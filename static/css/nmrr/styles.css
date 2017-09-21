@@ -8,7 +8,7 @@ body {
 	padding:0;
 	font-family: 'Source Sans Pro', 'sans-serif';
 	font-size: 1.0em;
-	color: #888;
+	color: #000;
 	font-weight: 300;
 }
 
@@ -553,7 +553,7 @@ article .article-info a {
 
 .sidebar {
 	margin-top: 10px;
-	color: #999;
+	color: #000;
 	font-size: 0.95em;
 }
 
@@ -638,7 +638,7 @@ article .article-info a {
 .sidebar li a {
 
 	 border-bottom-color: #ccc;
-	color: #999;
+	color: #000;
 }
 
 
@@ -787,7 +787,7 @@ footer .footer-bottom p {
 }
 
 footer .footer-bottom p, footer .footer-bottom p a {
-	color: #999;
+	color: #000;
 	border-bottom-color: #999;
 }
 
@@ -799,7 +799,7 @@ footer .footer-content li div.social-icons a {
 }
 
 footer .footer-content li div.social-icons a:hover {
-	color: #999;
+	color: #000;
 }
 
 

@@ -70,7 +70,7 @@
 <table id="icons_table">
 	<tr>
 		<td align="center" value="all" onclick="selectType('all', this);">
-			<img width="100" src="/static/img/allresources.png">
+			<i class="fa fa-globe fa-5x" aria-hidden="true" style="color: #557EB9"></i>
 			<div class="tick" align="right">
 			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>
@@ -78,7 +78,7 @@
 			All Resources
 		</td>
 		<td align="center" value="Resource.role.type==Organization" onclick="selectType('Resource.role.type==Organization', this);">
-			<img width="100" src="/static/img/organization.png">
+			<i class="fa fa-university fa-5x" aria-hidden="true" style="color: #2CAAE2;"></i>
 			<div class="tick" align="right">
 			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>
@@ -86,15 +86,17 @@
 			Organizations
 		</td>
 		<td align="center" value="Resource.role.type==Collection" onclick="selectType('Resource.role.type==Collection', this);">
-			<img width="100" src="/static/img/datacollection.png">
+			<i class="fa fa-table fa-4x" aria-hidden="true"
+				   style="color: #A1C057;position:relative;bottom:0px;right:-19px;"></i>
+			<i class="fa fa-table fa-4x" aria-hidden="true"
+			   style="color: black;position:absolute;right:50px;bottom:32px;"></i>
 			<div class="tick" align="right">
-			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+				 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>
-			<br>
-			Data Collections
+			<div style="position:relative;top:15px;">Data Collections</div>
 		</td>
-		<td align="center" value="Resource.role.type==Dataset" onclick="selectType('Resource.role.type==Dataset', this);">
-			<img width="100" src="/static/img/dataset.png">
+		<td align="center" value="Resource.role.type==Dataset: Database" onclick="selectType('Resource.role.type==Dataset: Database', this);">
+			<i class="fa fa-database fa-5x" aria-hidden="true" style="color: grey;"></i>
 			<div class="tick" align="right">
 			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>
@@ -102,23 +104,25 @@
 			Datasets
 		</td>
 		<td align="center" value="Resource.role.type==Service" onclick="selectType('Resource.role.type==Service', this);">
-			<img width="100" src="/static/img/service.png">
+			<i class="fa fa-cogs fa-5x" aria-hidden="true" style="color: #EBB057;"></i>
 			<div class="tick" align="right">
 			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>
 			<br>
-			Services
+			<div>Services</div>
 		</td>
 		<td align="center" value="Resource.role.type==Web Site" onclick="selectType('Resource.role.type==Web Site', this);">
-			<img width="100" src="/static/img/informational.png">
+			<i class="fa fa-info-circle fa-2x" aria-hidden="true"
+			   style="color: #257ABC;position:relative;top:19px;left:-2px;"></i>
+			<i class="fa fa-laptop fa-5x" aria-hidden="true"
+			   style="color: #257ABC;position:absolute;right:50px;"></i>
 			<div class="tick" align="right">
-			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
+				 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>
-			<br>
-			Informational Sites
+			<div style="position:relative;top:50px;">Informational Sites</div>
 		</td>
 		<td align="center" value="Resource.role.type==Software" onclick="selectType('Resource.role.type==Software', this);">
-			<img width="100" src="/static/img/software.jpg">
+			<i class="fa fa-tachometer fa-5x" aria-hidden="true" style="color: #79B320;"></i>
 			<div class="tick" align="right">
 			  	 <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i>
 			</div>

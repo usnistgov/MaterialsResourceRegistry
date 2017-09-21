@@ -7,7 +7,9 @@
 		<div class="white-bg">
 			<xsl:variable name="title"  select="//nr:Resource/nr:identity/nr:title"/>
 			{% if oai_pmh %}
-				<a class="title" target="_blank" onclick="window.location = '{{% url 'oai-explore-detail-result-keyword' id %}}'">
+                <xsl:text disable-output-escaping="yes">&lt;a class="title" href="</xsl:text>
+				<xsl:text disable-output-escaping="yes">{% url 'oai-explore-detail-result-keyword' id %}</xsl:text>
+				<xsl:text disable-output-escaping="yes">" &gt;</xsl:text>
 					<xsl:choose>
 						<xsl:when test="$title!=''">
 							<strong><xsl:value-of select="$title"/></strong>
@@ -16,21 +18,25 @@
 							<strong class="italic">Untitled</strong>
 						</xsl:otherwise>
 					</xsl:choose>
-				</a>
+				<xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 			{% else %}
 				{% if local_id %}
-				<a class="title" target="_blank" onclick="window.location = '{{% url 'expore-index-keyword' %}}?Resource.@localid={{{{local_id}}}}'">
-					<xsl:choose>
-						<xsl:when test="$title!=''">
-							<strong><xsl:value-of select="$title"/></strong>
-						</xsl:when>
-						<xsl:otherwise>
-							<strong class="italic">Untitled</strong>
-						</xsl:otherwise>
-					</xsl:choose>
-				</a>
+				<xsl:text disable-output-escaping="yes">&lt;a class="title" href="</xsl:text>
+				<xsl:text disable-output-escaping="yes">{% url 'expore-index-keyword' %}?Resource.@localid={{local_id}}</xsl:text>
+				<xsl:text disable-output-escaping="yes">" &gt;</xsl:text>
+                    <xsl:choose>
+                        <xsl:when test="$title!=''">
+                            <strong><xsl:value-of select="$title"/></strong>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <strong class="italic">Untitled</strong>
+                        </xsl:otherwise>
+                    </xsl:choose>
+				<xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 				{% else %}
-				<a class="title" target="_blank" onclick="window.location = '{{% url 'explore-detail-result-keyword' id %}}'">
+                <xsl:text disable-output-escaping="yes">&lt;a class="title" href="</xsl:text>
+				<xsl:text disable-output-escaping="yes">{% url 'explore-detail-result-keyword' id %}</xsl:text>
+				<xsl:text disable-output-escaping="yes">" &gt;</xsl:text>
 					<xsl:choose>
 						<xsl:when test="$title!=''">
 							<strong><xsl:value-of select="$title"/></strong>
@@ -39,7 +45,7 @@
 							<strong class="italic">Untitled</strong>
 						</xsl:otherwise>
 					</xsl:choose>
-				</a>
+				<xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 				{% endif %}
 			{% endif %}
 			<div class="black">
@@ -88,10 +94,11 @@
 			</div>
 			{% if oai_pmh %}
 			<div class="harvested">↳ Harvested from
-				<xsl:variable name="registry_url" select="'{{registry_url}}'"/>
-				<a target="_blank" onClick="parent.open('{$registry_url}')">
-					<text>{{registry_name}}</text>
-				</a>
+                <xsl:text disable-output-escaping="yes">&lt;a href="</xsl:text>
+				<xsl:text disable-output-escaping="yes">{{registry_url}}</xsl:text>
+				<xsl:text disable-output-escaping="yes">" &gt;</xsl:text>
+                    <text>{{registry_name}}</text>
+                <xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 			</div>
 			{% endif %}
 			<br/>

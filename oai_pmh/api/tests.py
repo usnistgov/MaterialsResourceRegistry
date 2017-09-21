@@ -243,6 +243,21 @@ class tests_OAI_PMH_API(OAI_PMH_Test):
         retrievedIdentify = req.data
         self.assert_OaiIdentify_Settings(retrievedIdentify)
 
+    def test_sickleObjectIdentify_sayerror(self):
+        from oai_pmh.api.messages import APIMessage
+        self.dump_oai_settings()
+        self.setHarvest(True)
+        url = "http://gitlab.nist.gov/curator/oai"  # bad url
+        resp = sickleObjectIdentify(url)
+        self.assertEquals(resp.status_code,
+                          status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertIn('error occurred', resp.data['message'])
+        self.assertIn(': ', resp.data['message'])
+
+        # test that extra content was appended to the message (after a colon)
+        self.assertGreater(
+            len(resp.data['message'][resp.data['message'].index(': '):].strip()), 0)
+
     def test_sickleObjectIdentify_unavailable(self):
         self.dump_oai_settings()
         self.setHarvest(False)

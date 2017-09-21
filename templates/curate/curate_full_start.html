@@ -32,10 +32,13 @@
 {% block title %}
 <h3>
 {% if template_name == 'organization' %}
-<img width="100" src="/static/img/organization.png">
+<i class="fa fa-university fa-2x" aria-hidden="true" style="color: #2CAAE2;"></i>
 Add New Organization
 {% elif template_name == 'datacollection' %}
-<img width="100" src="/static/img/datacollection.png">
+<i class="fa fa-table fa-2x" aria-hidden="true"
+   style="color: black;position:relative;bottom:0px;right:-9px;z-index: 1;"></i>
+<i class="fa fa-table fa-2x" aria-hidden="true"
+   style="color: #A1C057;position:relative;right:30px;bottom:13px;"></i>
 Add New Data Collection
 {% elif template_name == 'repository' %}
 <img width="100" src="/static/img/datacollection.png">
@@ -44,19 +47,22 @@ Add New Repository
 <img width="100" src="/static/img/datacollection.png">
 Add New Project Archive
 {% elif template_name == 'database' %}
-<img width="100" src="/static/img/datacollection.png">
+<i class="fa fa-database fa-2x" aria-hidden="true" style="color: grey;"></i>
 Add New Database
 {% elif template_name == 'dataset' %}
-<img width="100" src="/static/img/dataset.png">
+<i class="fa fa-database fa-2x" aria-hidden="true" style="color: grey;"></i>
 Add New Dataset
 {% elif template_name == 'service' %}
-<img width="100" src="/static/img/service.png">
+<i class="fa fa-cogs fa-2x" aria-hidden="true" style="color: #EBB057;"></i>
 Add New Service
 {% elif template_name == 'informational' %}
-<img width="100" src="/static/img/informational.png">
+<i class="fa fa-info-circle fa" aria-hidden="true"
+   style="color: #257ABC;position:relative;top:-14px;left:24px;"></i>
+<i class="fa fa-laptop fa-2x" aria-hidden="true"
+   style="color: #257ABC;position:relative;right:20px;"></i>
 Add New Informational Site
 {% elif template_name == 'software' %}
-<img width="100" src="/static/img/software.jpg">
+<i class="fa fa-tachometer fa-2x" aria-hidden="true" style="color: #79B320;"></i>
 Add New Software
 {% endif %}
 </h3>

@@ -23,6 +23,7 @@ from urlparse import urlparse
 import hashlib
 from itertools import groupby
 from utils.XSDRefinements import Tree
+from collections import OrderedDict
 
 ################################################################################
 #
@@ -198,6 +199,8 @@ def refinements_to_mongo(refinements):
                 key = query
                 values = ({'$in': mongo_queries[query]})
                 mongo_in[key] = values
+                # Case of the element has attributes
+                mongo_in[key + ".#text"] = values
 
             mongo_or.append({'$or': [{x: mongo_in[x]} for x in mongo_in]})
 
@@ -314,6 +317,10 @@ def _get_list_ids_for_refinement(dictionary, refinement):
                                 ids.append(_id)
                         elif elt == value:
                             ids.append(_id)
+                # If the item has attributes
+                elif isinstance(item, OrderedDict):
+                    if "#text" in item and item['#text'] == value:
+                        ids.append(_id)
                 elif item == value:
                     ids.append(_id)
             except (IndexError, Exception):

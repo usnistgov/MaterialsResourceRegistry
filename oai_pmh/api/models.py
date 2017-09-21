@@ -40,7 +40,6 @@ import mongoengine.errors as MONGO_ERRORS
 from oai_pmh.api.exceptions import OAIAPIException, OAIAPILabelledException, OAIAPISerializeLabelledException
 from oai_pmh.api.messages import APIMessage
 
-
 ################################################################################
 #
 # Function Name: objectIdentifyByURL(request)
@@ -97,8 +96,8 @@ def sickleObjectIdentify(url):
               "raw": identify.raw}
         serializer = IdentifyObjectSerializer(rtn)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    except Exception:
-        content = APIMessage.getMessageLabelled('An error occurred when attempting to identify resource')
+    except Exception, e:
+        content = APIMessage.getMessageLabelled('An error occurred when attempting to identify data provider via %s?verb=Identify: %s' % (url, e.message))
         return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -871,12 +871,12 @@ class OaiRecord(Document):
             Returns the object with the given id
         """
         # create a connection
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URI, document_class=OrderedDict)
         # connect to the db 'mgi'
         db = client[MGI_DB]
         # get the xmldata collection
         xmldata = db['oai_record']
-        data =  xmldata.find_one({'_id': ObjectId(self.id)}, as_class = OrderedDict)
+        data = xmldata.find_one({'_id': ObjectId(self.id)})
         return data['metadata']
 
     def save(self, metadata=None, force_insert=False, validate=True, clean=True,

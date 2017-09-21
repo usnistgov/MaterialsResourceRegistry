@@ -7,7 +7,9 @@
 		<div class="white-bg">
 			<xsl:variable name="title"  select="//nr:Resource/nr:identity/nr:title"/>
 			{% if local_id %}
-			<a class="title" target="_blank" onclick="window.location = '{{% url 'expore-index-keyword' %}}?Resource.@localid={{{{local_id}}}}'">
+			<xsl:text disable-output-escaping="yes">&lt;a class="title" href="</xsl:text>
+			<xsl:text disable-output-escaping="yes">{% url 'expore-index-keyword' %}?Resource.@localid={{local_id}}</xsl:text>
+			<xsl:text disable-output-escaping="yes">" &gt;</xsl:text>
 				<xsl:choose>
 					<xsl:when test="$title!=''">
 						<strong><xsl:value-of select="$title"/></strong>
@@ -16,9 +18,11 @@
 						<strong class="italic">Untitled</strong>
 					</xsl:otherwise>
 				</xsl:choose>
-			</a>
+			<xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 			{% else %}
-			<a class="title" target="_blank" onclick="window.location = '{{% url 'explore-detail-result-keyword' id %}}'">
+			<xsl:text disable-output-escaping="yes">&lt;a class="title" href="</xsl:text>
+			<xsl:text disable-output-escaping="yes">{% url 'explore-detail-result-keyword' id %}</xsl:text>
+			<xsl:text disable-output-escaping="yes">" &gt;</xsl:text>
 				<xsl:choose>
 					<xsl:when test="$title!=''">
 						<strong><xsl:value-of select="$title"/></strong>
@@ -27,7 +31,7 @@
 						<strong class="italic">Untitled</strong>
 					</xsl:otherwise>
 				</xsl:choose>
-			</a>
+			<xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 			{% endif %}
 			<div class="black">
 				<xsl:variable name="creators" select="//nr:Resource/nr:providers/nr:creator" />

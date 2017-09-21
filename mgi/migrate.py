@@ -209,6 +209,27 @@ class Migration:
                     if 'iduser' not in blob.metadata:
                         files_col.update({'_id':ObjectId(blob._id)}, {"$set": payload}, upsert=False)
 
+    def _update_hash(self, collection_name, content_field_name):
+        from utils.XSDhash.XSDhash import get_hash
+
+        # find all objects
+        cursor = collection_name.find()
+        # Browse collection
+        for result in cursor:
+            # get the result id
+            result_id = result['_id']
+            # Test if the content_field_name exists and has a value
+            if content_field_name in result and result[content_field_name] is not None:
+                json_content = result[content_field_name]
+                # create a payload to update the result
+                payload = {'hash': get_hash(json_content)}
+                collection_name.update({'_id': ObjectId(result_id)}, {"$set": payload},
+                                       upsert=False)
+            else:
+                self._error(
+                    'Trying to update the hash of ' + result_id + ' but the content cannot be '
+                                                                  'found')
+
     def migrate(self, mongo_admin_user, mongo_admin_password, mongo_path, warnings=True, backup=True):
         """
         APPLIES CHANGES FROM 1.3 TO 1.4
@@ -218,7 +239,7 @@ class Migration:
         print '*** START MIGRATION ***'
 
         msg = 'You are about to run the NMRR Migration Tool. ' \
-              'This will update the database from version 1.3 to work for version 1.4. ' \
+              'This will update the database for version Release Candidate. ' \
               'Changes will be applied to the database such as additions/deletions/modifications ' \
               'of fields/collections/records.'
 
@@ -244,107 +265,7 @@ class Migration:
         try:
             if not self._warn_user('The changes on the database are about to be applied.'):
                 self._error()
-
-            # GET COLLECTIONS NEEDED FOR MIGRATION
-            meta_schema_col = db['meta_schema']
-            template_col = db['template']
-            type_col = db['type']
-            form_data_col = db['form_data']
-            xml_data_col = db['xmldata']
-            result_xslt_col = db['result_xslt']
-
-            # METASCHEMA COLLECTION REMOVED:
-            # NEED TO UPDATE THE CONTENT OF TEMPLATES/TYPES
-            print "Updating templates/types with meta_schema collection..."
-
-            # find all meta_schema of the collection
-            cursor = meta_schema_col.find()
-
-            # Browse meta_schema collection
-            for result in cursor:
-                # get the template/type id
-                schema_id = result['schemaId']
-                # get the content stored in meta_schema
-                api_content = result['api_content']
-                # create a payload to update the template/type
-                payload = {'content': api_content}
-
-                # get the template/type to update
-                to_update = template_col.find_one({'_id': ObjectId(schema_id)})
-                template_col.update({'_id': ObjectId(schema_id)}, {"$set": payload}, upsert=False)
-                if to_update is None:
-                    to_update = type_col.find_one({'_id': ObjectId(schema_id)})
-                    if to_update is None:
-                        # restore dump
-                        self._restore_dump(backup_dir_path=backup_dir_path,
-                                           mongo_admin_user=mongo_admin_user,
-                                           mongo_admin_password=mongo_admin_password,
-                                           mongo_path=mongo_path)
-                        self._error('Trying to update the content of ' + schema_id + ' but it cannot be found')
-                    else:
-                        type_col.update({'_id': ObjectId(schema_id)}, {"$set": payload}, upsert=False)
-
-            # XMLDATA CHANGES:
-            print "Updating xml_data..."
-            # find all meta_schema of the collection
-            cursor = xml_data_col.find()
-            # Browse xml_data collection
-            for result in cursor:
-                print "Adding status to all records (Active by default)..."
-                #Get the status value inside the schema
-                content = result['content']
-                status = content.get('Resource', dict()).get('@status', None)
-                if not status:
-                    status = 'active'
-                xml_data_col.update({'_id': result['_id']}, {"$set": {"status": status}}, upsert=False)
-                print "Adding oai_datestamp to records..."
-                # xml data has a publication date
-                if 'publicationdate' in result:
-                    publication_date = result['publicationdate']
-                    # set oai_datestamp to publication date
-                    payload = {'oai_datestamp': publication_date}
-                    if 'lastmodificationdate' not in result:
-                        payload.update({'lastmodificationdate': publication_date})
-                    xml_data_col.update({'_id': result['_id']}, {"$set": payload}, upsert=False)
-                else:
-                    if 'lastmodificationdate' not in result:
-                        # set last modification date to datetime.MIN
-                        generation_time = result['_id'].generation_time
-                        payload = {'lastmodificationdate': generation_time}
-                        xml_data_col.update({'_id': result['_id']}, {"$set": payload}, upsert=False)
-
-            # FORM DATA UNIQUE NAMES
-            self._resolve_duplicate_names(form_data_col)
-
-            # FORMDATA CHANGES:
-            print "Adding isNewVersionOfRecord to all form data (False by default)..."
-            form_data_col.update({}, {"$set": {"isNewVersionOfRecord": False}}, upsert=False, multi=True)
-
-            #XSLT OAI-PMH
-            print "Remove old full-oai_pmh result XSLT..."
-            result_xslt_col.remove({'filename': 'nmrr-full-oai_pmh.xsl'})
-            print "Remove old detail-oai_pmh result XSLT..."
-            result_xslt_col.remove({'filename': 'nmrr-detail-oai_pmh.xsl'})
-
-            
-
-            #NEW REGISTRY TEMPLATES BY DEFAULT
-            #################################
-            
-            # CLEAN THE DATABASE
-            print "*** CLEAN THE DATABASE ***"
-            # remove elements from Form_data (not used in 1.4)
-            print "Removing elements from form_data collection..."
-            form_data_col.update({}, {"$unset": {"elements": 1}}, multi=True)
-            # drop form_element collection (not used in 1.4)
-            print "Dropping form_element collection..."
-            db.drop_collection('form_element')
-            # drop xml_element collection (not used in 1.4)
-            print "Dropping xml_element collection..."
-            db.drop_collection('x_m_l_element')
-            # drop meta_schema collection (not used in 1.4)
-            print "Dropping meta_schema collection..."
-            db.drop_collection('meta_schema')
+            self.migrate_beta_to_rc(db)
         except Exception, e:
             self._restore_dump(backup_dir_path=backup_dir_path,
                                mongo_admin_user=mongo_admin_user,
@@ -356,6 +277,139 @@ class Migration:
         print "You can now restart the server. " \
               "Do not delete any of the backup files before making sure everything is working fine."
         print "*** MIGRATION COMPLETE ***"
+
+    def migrate_1_3_to_1_4(self, db, backup_dir_path, mongo_admin_user, mongo_admin_password,
+                           mongo_path, warnings=True,
+                           backup=True):
+        """APPLIES CHANGES FROM 1.3 TO 1.4
+
+        :param db:
+        :param mongo_admin_user:
+        :param mongo_admin_password:
+        :param mongo_path:
+        :param warnings:
+        :param backup:
+        :return:
+        """
+        print "STARTING MIGRATION FROM 1.3 to 1.4"
+        # GET COLLECTIONS NEEDED FOR MIGRATION
+        meta_schema_col = db['meta_schema']
+        template_col = db['template']
+        type_col = db['type']
+        form_data_col = db['form_data']
+        xml_data_col = db['xmldata']
+        result_xslt_col = db['result_xslt']
+
+        # METASCHEMA COLLECTION REMOVED:
+        # NEED TO UPDATE THE CONTENT OF TEMPLATES/TYPES
+        print "Updating templates/types with meta_schema collection..."
+
+        # find all meta_schema of the collection
+        cursor = meta_schema_col.find()
+
+        # Browse meta_schema collection
+        for result in cursor:
+            # get the template/type id
+            schema_id = result['schemaId']
+            # get the content stored in meta_schema
+            api_content = result['api_content']
+            # create a payload to update the template/type
+            payload = {'content': api_content}
+
+            # get the template/type to update
+            to_update = template_col.find_one({'_id': ObjectId(schema_id)})
+            template_col.update({'_id': ObjectId(schema_id)}, {"$set": payload}, upsert=False)
+            if to_update is None:
+                to_update = type_col.find_one({'_id': ObjectId(schema_id)})
+                if to_update is None:
+                    # restore dump
+                    self._restore_dump(backup_dir_path=backup_dir_path,
+                                       mongo_admin_user=mongo_admin_user,
+                                       mongo_admin_password=mongo_admin_password,
+                                       mongo_path=mongo_path)
+                    self._error(
+                        'Trying to update the content of ' + schema_id + ' but it cannot be found')
+                else:
+                    type_col.update({'_id': ObjectId(schema_id)}, {"$set": payload}, upsert=False)
+
+        # XMLDATA CHANGES:
+        print "Updating xml_data..."
+        # find all meta_schema of the collection
+        cursor = xml_data_col.find()
+        # Browse xml_data collection
+        for result in cursor:
+            print "Adding status to all records (Active by default)..."
+            # Get the status value inside the schema
+            content = result['content']
+            status = content.get('Resource', dict()).get('@status', None)
+            if not status:
+                status = 'active'
+            xml_data_col.update({'_id': result['_id']}, {"$set": {"status": status}}, upsert=False)
+            print "Adding oai_datestamp to records..."
+            # xml data has a publication date
+            if 'publicationdate' in result:
+                publication_date = result['publicationdate']
+                # set oai_datestamp to publication date
+                payload = {'oai_datestamp': publication_date}
+                if 'lastmodificationdate' not in result:
+                    payload.update({'lastmodificationdate': publication_date})
+                xml_data_col.update({'_id': result['_id']}, {"$set": payload}, upsert=False)
+            else:
+                if 'lastmodificationdate' not in result:
+                    # set last modification date to datetime.MIN
+                    generation_time = result['_id'].generation_time
+                    payload = {'lastmodificationdate': generation_time}
+                    xml_data_col.update({'_id': result['_id']}, {"$set": payload}, upsert=False)
+
+        # FORM DATA UNIQUE NAMES
+        self._resolve_duplicate_names(form_data_col)
+
+        # FORMDATA CHANGES:
+        print "Adding isNewVersionOfRecord to all form data (False by default)..."
+        form_data_col.update({}, {"$set": {"isNewVersionOfRecord": False}}, upsert=False, multi=True)
+
+        # XSLT OAI-PMH
+        print "Remove old full-oai_pmh result XSLT..."
+        result_xslt_col.remove({'filename': 'nmrr-full-oai_pmh.xsl'})
+        print "Remove old detail-oai_pmh result XSLT..."
+        result_xslt_col.remove({'filename': 'nmrr-detail-oai_pmh.xsl'})
+
+        # NEW REGISTRY TEMPLATES BY DEFAULT
+        #################################
+
+        # CLEAN THE DATABASE
+        print "*** CLEAN THE DATABASE ***"
+        # remove elements from Form_data (not used in 1.4)
+        print "Removing elements from form_data collection..."
+        form_data_col.update({}, {"$unset": {"elements": 1}}, multi=True)
+        # drop form_element collection (not used in 1.4)
+        print "Dropping form_element collection..."
+        db.drop_collection('form_element')
+        # drop xml_element collection (not used in 1.4)
+        print "Dropping xml_element collection..."
+        db.drop_collection('x_m_l_element')
+        # drop meta_schema collection (not used in 1.4)
+        print "Dropping meta_schema collection..."
+        db.drop_collection('meta_schema')
+
+    def migrate_beta_to_rc(self, db):
+        """APPLIES CHANGES FOR RELEASE_CANDIDATE
+
+        :param db:
+        :return:
+        """
+        print "STARTING MIGRATION FOR RELEASE CANDIDATE"
+        # GET COLLECTIONS NEEDED FOR MIGRATION
+        template_col = db['template']
+        oai_metadata_format_col = db['oai_metadata_format']
+
+        # NEED TO UPDATE THE CONTENT OF TEMPLATES/OAI_METADATA_FORMAT
+        # Update hashes. The previous generated hashes was dependent of the python's version.
+        print "Updating templates's hash..."
+        self._update_hash(template_col, "content")
+
+        print "Updating OaiMetadataFormat's hash..."
+        self._update_hash(oai_metadata_format_col, "xmlSchema")
 
 
 def _get_mongo_connection_info():
@@ -424,4 +478,6 @@ def main(argv):
                       mongo_path=mongo_path)
 
 if __name__ == "__main__":
+    # Add project directory in path to be able to import functions from the project.
+    sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__))))
     main(sys.argv[1:])
